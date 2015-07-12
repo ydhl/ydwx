@@ -1,0 +1,43 @@
+需要的扩展
+====
+php-xml
+php-mcrypt
+
+需要配置自动运行脚本
+===========
+crontab -e
+0 */2 * * * php /var/www/html/ydwx/refresh.php
+crontab -l
+
+分别为没2个小时刷新微信token
+
+微信配置
+========
+1. 填写token认证地址 /ydwx/index.php
+2. 绑定js安全域名
+3. 配置提醒模板和赠送模板并把相关的id配置到config.php中REMINDER_TPL_ID，AWARD_TPL_ID
+4. 配置支付的正常路径app和测试路径testapp
+5. 配置oauth授权回调域名
+
+
+配置config.php
+配置ydwx/libs/wx.php
+
+上传是注意config/ydwx/libs/wx.php不要被覆盖
+
+文件说明
+=======
+index.php       微信的回调入口
+auth.php        微信内浏览器的认证入口
+pay-notify.php  微信支付的回调入口
+refresh.php     自动刷新脚本
+webauth.php     浏览器上微信登陆入口
+
+hook说明
+==========
+所有微信的事件将以hook的方式进行回调，所有hook文件都必须位于ydwxhooks中，hook的调用方法
+YDHook::add_hook(WXHooks::XXXX, function($args){
+    //your code write here
+});
+
+提供的hook及每个hook传入的参数见ydhooks.php
