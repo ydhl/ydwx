@@ -9,48 +9,7 @@
 
 *ydwx的目的是把微信的交互细节帮你搞定，你只需要填写相关申请到的key然后注册你关心的事件hook就可以了*
 
-## 其他
-
-1. 调用微信的接口需要提供access_token, 但该token只有2小时的有效期，过期后需要重新刷新
-    你可以采用自己服务器上的cron设置一下，没两小时刷新处理：
-    0 */2 * * * php path-to/ydwx/refresh.php
-    你也可以采用ydtimer这种网络定时器，让他来定时调用refresh.php, 你只需在它哪里设置ydwx/refresh.php在你服务器上的网络地址便可
-2. 由于涉及到xml处理，你的服务器上php需要安装这些扩展
-    1. php-xml
-    2. php-mcrypt
-    
-## 配置微信
-
-1. [[开发模式配置]]
-2. [[JS接口配置]]
-4. [[支付配置]]
-5. [[获取用户信息配置]]
-6. [[网站微信登录配置]]
-7. more
-
-
-## 文件说明
-
-- index.php       微信的回调入口
-- auth.php        微信内浏览器的认证入口，包含服务号和企业号，服务号和企业号的登录有区别，详情见相关的hooks
-- pay-notify.php  微信支付的回调入口，在js支付，扫码支付时都会回调这里，详情请看相关的hook说明
-- refresh.php     自动刷新脚本，自动刷新access_token 和jsticket api
-- webauth.php     浏览器上微信登陆入口
-
-## hook说明
-
-所有微信的事件将以hook的方式进行回调，所有hook文件都必须位于ydwxhooks中，hook的注册方法
-YDHook::add_hook(WXHooks::XXXX, function($args){
-    //your code write here
-});
-
-### hook函数参数
-
-hook传入的参数可能是数组，字符串或是WXMsg，里面封装了所有的微信往返消息结构，它是个大杂烩，具体的hook要如何取，取什么看hook的说明
-你值需要根据说明的key调用$msg->get(WXMsg::XXX)便可
-
-
-WXHooks列表
+## 进一步了解 https://github.com/ydhl/ydwx/wiki
 
 ## 0.1 版本特性
 
