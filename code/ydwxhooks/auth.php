@@ -1,46 +1,23 @@
 <?php
-use app\sp\Consumer_Model;
-use app\sp\User_Model;
-chdir(dirname(dirname(__FILE__)));
-include_once './ydwx/libs/wx.php';
-include_once "./init.php";
-
+// 这是你写hook的地方，根据你系统的情况包含相关基础库代码，比如数据库等
 
 YDHook::add_hook(WXHooks::AUTH_CANCEL, function(){
-    header("Location: /signin");die;
+    //用户取消登录了做什么，如header("Location: /signin");die;
 });
 
 YDHook::add_hook(WXHooks::AUTH_FAIL, function($info){
-    header("Location: /signin?error=".$info['errmsg']);die;
+    //用户登录是把了做什么，如header("Location: /signin?error=".$info['errmsg']);die;
 });
 
-YDHook::add_hook(WXHooks::AUTH_SUCCESS, function(array $info){
-    $wxuser = getWebUserInfo($info['access_token'], $info['openid']);
-    if( !$wxuser ){
-        header("Location: /signin?error=微信登录失败");die;
-    }
-    $consumer = end(Consumer_Model::find_by_attrs(array("openid"=>$info['openid'])));
-    if ( ! $consumer){
-        $consumer = new Consumer_Model();
-        $consumer->set("openid",    $info['openid'])
-            ->set("nickname",       $wxuser['nickname'])
-            ->set("sex",            $wxuser['sex'])
-            ->set("avatar",         $wxuser['headimgurl'])
-            ->set("country",        $wxuser['country'])
-            ->set("province",       $wxuser['province'])
-            ->set("city",           $wxuser['city'])
-            ->set("created_on",     date("Y-m-d H:i:s"))
-            ->save();
-        $_SESSION['consumerid'] = $consumer->get_key();
-        header("Location: /wxsignin/success");die;
-    }
-    
-    $user = end(User_Model::find_by_attrs(array("consumer_id"=>$consumer->get_key())));
-    if( ! $user){
-        $_SESSION['consumerid'] = $consumer->get_key();
-        header("Location: /wxsignin/success");die;
-    }
-    $_SESSION['user']=$user;
-    
-    header("Location: /dashboard");die;
+YDHook::add_hook(WXHooks::AUTH_INAPP_SUCCESS, function(array $info){
+    //微信app内登录成功做什么，如判断该微信用户是否在系统中存在，不存在建立用户数据，存在标记为登录状态，并
+    //导航到登录后看到的页面
+});
+YDHook::add_hook(WXHooks::AUTH_WEB_SUCCESS, function(array $info){
+    //网站上微信扫描登录成功做什么，如判断该微信用户是否在系统中存在，不存在建立用户数据，存在标记为登录状态，并
+    //导航到登录后看到的页面
+});
+YDHook::add_hook(WXHooks::AUTH_CROP_SUCCESS, function(array $info){
+    //微信企业号app登录成功做什么，如判断该微信用户是否在系统中存在，不存在建立用户数据，存在标记为登录状态，并
+    //导航到登录后看到的页面
 });

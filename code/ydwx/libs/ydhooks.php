@@ -118,10 +118,23 @@ class WXHooks{
     const AUTH_CANCEL  = "auth_cancel";
     const AUTH_FAIL    = "auth_fail";
     /**
-     * 参数 array
+     * 微信app内 web应用登录成功
+     * 参数 array 为用户的信息
      * @var unknown
      */
-    const AUTH_SUCCESS = "auth_success";
+    const AUTH_INAPP_SUCCESS    = "AUTH_INAPP_SUCCESS";
+    /**
+     * web应用登录成功
+     * 参数 array 为用户的信息
+     * @var unknown
+     */
+    const AUTH_WEB_SUCCESS      = "AUTH_WEB_SUCCESS";
+    /**
+     * 微信app内 企业web应用登录成功
+     * 参数 array 为用户的信息 array(UserId=>"该用户在企业号后台的账号","OpenId"=>"非企业成员时返回openid", DeviceId=>"手机设备号") 注意大小写
+     * @var unknown
+     */
+    const AUTH_CROP_SUCCESS     = "AUTH_CROP_SUCCESS";
     
     /**
      * 预支付出现异常

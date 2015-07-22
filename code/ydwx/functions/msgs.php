@@ -16,17 +16,50 @@ function qySendTextMsg($accessToken,  $content, $safe=false, $toUser="@all", $to
         $msgs['toparty']     = is_array($toParty) ? join("|", $toParty) : $toParty;
     }
     if($toTag){
-        $msgs['totag']       = is_array($toTag) ? join("|", $toTag) : $toTag;;
+        $msgs['totag']       = is_array($toTag) ? join("|", $toTag) : $toTag;
     }
     $msgs['msgtype']         = "text";
-    $msgs['agentid']         = WEIXIN_COMPANY_AGENT_ID;
-    $msgs['text']['content'] = $content;
-    $msgs['saft']            = $safe ? 1 : 0;
+    $msgs['agentid']         = WEIXIN_CROP_AGENT_ID;
+    $msgs['text']['content'] = urlencode($content);
+    $msgs['safe']            = $safe ? 1 : 0;
+
+    
+    $http = new YDHttp();
+    $info = $http->post(WEIXIN_QY_BASE_URL."message/send?access_token={$accessToken}",
+    urldecode(json_encode($msgs)));
+    $info = json_decode($info, true);
+    return !@$info['errcode'];
+}
+
+/**
+ * 企业号发送消息
+ *
+ * @param $messageArray array(array("title","description","url","picurl"))
+ * @see http://qydev.weixin.qq.com/wiki/index.php?title=%E6%B6%88%E6%81%AF%E7%B1%BB%E5%9E%8B%E5%8F%8A%E6%95%B0%E6%8D%AE%E6%A0%BC%E5%BC%8F
+ */
+function qySendNewsMsg($accessToken,  $messageArray, $safe=false, $toUser="@all", $toParty=null, $toTag=null){
+
+    if( WEIXIN_ACCOUNT_TYPE != WEIXIN_ACCOUNT_CROP)return array();
+    $msgs = array();
+    if($toUser){
+        $msgs['touser']      = is_array($toUser) ? join("|", $toUser) : $toUser;
+    }
+    if($toParty){
+        $msgs['toparty']     = is_array($toParty) ? join("|", $toParty) : $toParty;
+    }
+    if($toTag){
+        $msgs['totag']       = is_array($toTag) ? join("|", $toTag) : $toTag;
+    }
+    $msgs['msgtype']         = "news";
+    $msgs['agentid']         = WEIXIN_CROP_AGENT_ID;
+    $msgs['news']['articles']= $messageArray;
+    $msgs['safe']            = $safe ? 1 : 0;
+
 
     $http = new YDHttp();
     $info = $http->post(WEIXIN_QY_BASE_URL."message/send?access_token={$accessToken}",
-    json_encode($msgs));
-    insert("logs", array("content"=>$info.json_encode($msgs)));
+    yd_json_encode($msgs));
+    
     $info = json_decode($info, true);
     return !@$info['errcode'];
 }

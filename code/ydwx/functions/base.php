@@ -10,3 +10,10 @@ function yd_url_encode($array){
     }
     return $temp;
 }
+function ydwx_error($message="", $code=null){
+    return array('success'=> false, "data"=>null,"msg"=>$message);
+}
+
+function ydwx_success($data=null){
+    return array('success'=> true, "data"=>$data,"msg"=>null);
+}
