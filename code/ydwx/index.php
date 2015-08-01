@@ -62,7 +62,6 @@ $msg_sign  = $_GET["msg_signature"];
 $timeStamp = $_GET["timestamp"];
 $nonce     = $_GET["nonce"];
 
-// insert("logs", array("content"=>"here"));
 
 $msg = '';
 $errCode = $pc->decryptMsg($msg_sign, $timeStamp, $nonce, $from_xml, $msg);
@@ -73,11 +72,9 @@ if ($errCode != 0) {
 
 //微信事件指派
 $wxmsg  = WXMsg::build($msg);
-// insert("logs", array("content"=>get_class($wxmsg).$msg));
 if($wxmsg->Get(WXMsg::Event)){
     $hookname = strtoupper($wxmsg->Get(WXMsg::MsgType)."_".$wxmsg->Get(WXMsg::Event));
 }else{
     $hookname = strtoupper($wxmsg->Get(WXMsg::MsgType));
 }
-insert("logs", array("content"=>"hook: WXHooks::$hookname constant ".constant("WXHooks::$hookname")));
 YDHook::do_hook(constant("WXHooks::$hookname"), $wxmsg);

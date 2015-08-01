@@ -74,7 +74,7 @@ define("WEIXIN_ACCOUNT_TYPE",       WEIXIN_ACCOUNT_CROP);//公众号类型
 define("WEIXIN_IS_AUTHED",          true);
 
 
-define("WEIXIN_NOTIFY_URL",         "your weixin pay notify url");//填写ydwx/pay-notify.php在你网站上的地址
+define("WEIXIN_NOTIFY_URL",         "ydwx/pay-notify.php的地址");//填写ydwx/pay-notify.php在你网站上的地址
 
 /***
  * ----------------

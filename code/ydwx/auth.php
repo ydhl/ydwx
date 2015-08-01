@@ -40,9 +40,9 @@ if (WEIXIN_ACCOUNT_TYPE != WEIXIN_ACCOUNT_CROP){
     
     YDHook::do_hook(WXHooks::AUTH_INAPP_SUCCESS, getUserInfo($info['access_token'],     $info['openid']));
 }else{
-    $access_token = Option_Model::get_option("access_token");
+    $access_token = YDHook::do_hook(WXHooks::GET_ACCESS_TOKEN);
     if($access_token){
-        YDHook::do_hook(WXHooks::AUTH_CROP_SUCCESS,  getCropUserInfo($access_token->get("value"), $_GET['code']));
+        YDHook::do_hook(WXHooks::AUTH_CROP_SUCCESS,  getCropUserInfo($access_token, $_GET['code']));
     }else{
         YDHook::do_hook(WXHooks::AUTH_FAIL,   array());
     }

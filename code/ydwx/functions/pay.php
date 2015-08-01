@@ -49,25 +49,46 @@ function preparePay($openid, $trade_no, $price, $attach, $pay_desc){
 }
 
 /**
+ * 二维码扫码支付（模式一）
+ * 把返回的内容生成二维码后，用户扫码进入支付流程
+ * 
+ * @param unknown $product_id
+ */
+function payQrcode($product_id){
+    $nonceStr   = uniqid();
+    $time_stamp = time();
+    
+    $str = "appid=".WEIXIN_APP_ID
+    ."&mch_id=".WEIXIN_MCH_ID
+    ."&nonce_str=".$nonceStr."&product_id=".$product_id
+    ."&time_stamp=".$time_stamp;
+    $signStr = strtoupper(md5($str."&key=".WEIXIN_MCH_KEY));
+    
+    return "weixin://wxpay/bizpayurl?sign={$sign}&appid="
+            .WEIXIN_APP_ID."&mch_id=".WEIXIN_MCH_ID
+    ."&product_id={$product_id}&time_stamp={$time_stamp}&nonce_str={$nonceStr}";
+}
+
+/**
  * 二维码扫码支付（模式二）
- * 调起微信服务后台生成预支付交易单，
+ * 调起微信服务后台生成预支付交易单,把返回的内容生成二维码后，扫码便进行支付。
+ * 注意该返回的内容有2小时失效
  * 
  * @param unknown $openid
  * @param unknown $trade_no
- * @param unknown $price
+ * @param unknown $price 注意单位是分，并且不能有小数点
  * @param unknown $attach
  * @param unknown $pay_desc
  * 
  * @return array("success"=>"true|false",msg=>"错误描述", data="成功后的code_url")
  */
-function qrcodePreparePay($product_id, $trade_no, $price, $attach, $pay_desc){
+function scanToPay($product_id, $trade_no, $price, $attach, $pay_desc){
     $nonceStr = uniqid();
-    
     $str = "appid=".WEIXIN_APP_ID."&attach=".$attach
     ."&body=".$pay_desc."&mch_id=".WEIXIN_MCH_ID
     ."&nonce_str=".$nonceStr."&notify_url=".WEIXIN_NOTIFY_URL
-    ."&openid=".$openid."&out_trade_no=".$trade_no
-    ."&spbill_create_ip=".$_SERVER['REMOTE_ADDR']."&total_fee=".$price."&trade_type=JSAPI";
+    ."&out_trade_no=".$trade_no
+    ."&product_id={$product_id}&spbill_create_ip=".$_SERVER['SERVER_ADDR']."&total_fee=".$price."&trade_type=NATIVE";
     $signStr = strtoupper(md5($str."&key=".WEIXIN_MCH_KEY));
     
     $args = "<xml>
@@ -111,7 +132,7 @@ function qrcodePreparePay($product_id, $trade_no, $price, $attach, $pay_desc){
  * 
  * @param unknown $jsapi_ticket
  * @param unknown $curr_page_uri
- * @param unknown $ydwx_prepay_uri
+ * @param unknown $ydwx_prepay_uri ydwx/pay.php的完整url
  * @return string
  */
 function jsPayApi($jsapi_ticket, $curr_page_uri, $ydwx_prepay_uri){

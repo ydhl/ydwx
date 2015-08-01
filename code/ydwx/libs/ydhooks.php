@@ -5,6 +5,13 @@
  */
 class WXHooks{
     /**
+     * 记录log
+     * @var unknown
+     */
+    const YDWX_LOG = "YDWX_LOG";
+    const GET_ACCESS_TOKEN = "GET_ACCESS_TOKEN";
+    const GET_JSAPI_TICKET = "GET_JSAPI_TICKET";
+    /**
      * access token 刷新hook，参数是array(access_token=>"",expire_in=>"")
      * @var unknown
      */
@@ -151,6 +158,29 @@ class WXHooks{
      * @var unknown
      */
     const PREPARE_PAY_SUCCESS   = "PREPARE_PAY_SUCCESS";
+    
+    /**
+     * 微信支付通知成功，参数为WXMsg
+     * 返回的参数https://pay.weixin.qq.com/wiki/doc/api/native.php?chapter=9_7
+     * @var unknown
+     */
+    const PAY_NOTIFY_SUCCESS    = "PAY_NOTIFY_SUCCESS";
+    /**
+     * 微信支付通知失败
+     * @var unknown
+     */
+    const PAY_NOTIFY_ERROR      = "PAY_NOTIFY_ERROR";
+    
+    /**
+     * 微信扫码支付通知成功
+     * @var unknown
+     */
+    const QRCODE_PAY_NOTIFY_SUCCESS    = "QRCODE_PAY_NOTIFY_SUCCESS";
+    /**
+     * 微信扫码支付通知失败
+     * @var unknown
+     */
+    const QRCODE_PAY_NOTIFY_ERROR      = "QRCODE_PAY_NOTIFY_ERROR";
 }
 
 /**
@@ -197,7 +227,7 @@ final class YDHook {
         foreach(glob($dir."/*") as $file){
             if (is_dir($file)) {
                 self::include_hooks($file);
-            }else{
+            }else if(is_file($file)){
                 require_once $file;
             }
         }

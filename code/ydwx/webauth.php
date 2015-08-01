@@ -32,4 +32,4 @@ if( !@$info['openid']){
 }
 $info['state'] = $_GET['state'];
 
-YDHook::do_hook(WXHooks::AUTH_SUCCESS, $info);
+YDHook::do_hook(WXHooks::AUTH_WEB_SUCCESS, getWebUserInfo($info['access_token'], $info['openid']));
