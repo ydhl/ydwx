@@ -4,7 +4,7 @@
  * @author leeboo
  *
  */
-class Menu{
+class YDWXMenu{
     const TYPE_CLICK = "click";
     const TYPE_VIEW  = "view";
     const TYPE_SCANCODE_PUSH = "scancode_push";
@@ -21,7 +21,7 @@ class Menu{
     public $sub_button = array();
     
     public static function build(array $msg){
-        $obj = new Menu();
+        $obj = new YDWXMenu();
        
         $obj->name = $msg['name'];
         $obj->type = $msg['type'];
@@ -31,7 +31,7 @@ class Menu{
         $obj->sub_button = array();
         
         foreach ($msg['sub_button'] as $subbtn){
-            $obj->sub_button[] = Menu::build($subbtn);
+            $obj->sub_button[] = YDWXMenu::build($subbtn);
         }
         return $obj;
     }
@@ -51,11 +51,71 @@ class Menu{
     }
 }
 
+/**
+ * ydwx 接口参数积累
+ * 
+ * @author leeboo
+ *
+ */
+abstract class YDWXArg{
+    public $sign;
+    public function __toString(){
+        return $this->toString();
+    }
+    /**
+     * 根据设置的属性及微信接口参数要求验证、构建数据，有问题抛出YDWXException
+     * 这是在toString，toJSONString，toXMLString之前会调用的一部
+     */
+    public abstract function valid();
+    public function toString(){
+        $this->valid();
+        $args = array_filter($this->sortArg());
+        return http_build_query($args);
+    }
+    public function toJSONString(){
+        $this->valid();
+        $args = array_filter($this->sortArg());
+        return yd_json_encode($args);
+    }
+    public function toArray(){
+        $this->valid();
+        return array_filter($this->sortArg());
+    }
+    public function toXMLString(){
+        $this->valid();
+        $args = array_filter($this->sortArg());
+        
+        $xml = "<xml>";
+        foreach ($args as $name=>$value){
+            //TODO value是数组的情况
+            $xml .= "<{$name}>$value</{$name}>";
+        }
+        return $xml."</xml>";
+    }
+    /**
+     * 返回按字典排序后的属性数组
+     */
+    public final function sortArg(){
+        $args = get_object_vars($this);
+        sort($args);
+        return $args;
+    }
+}
+
+class YDWXException extends \Exception{}
 
 /**
  * 微信消息封装基类,便于知道每种消息有什么内容
  */
-class WXMsg{
+class YDWXMsg{
+    /**
+     * 真值表示有错误
+     * @var unknown
+     */
+    public $errcode;
+    public $errmsg;
+    public $rawData;
+    
     const ToUserName    = "ToUserName";
     const FromUserName  = "FromUserName";
     const CreateTime    = "CreateTime";
@@ -137,16 +197,32 @@ class WXMsg{
     const PrePayPrepayId  = "prepay_id";
     const PrePayCodeUrl = "code_url";
 
-    public $msg;
-    public $rawData;
     
-    public static function build($msg){
-        $xml = simplexml_load_string($msg, 'SimpleXMLElement', LIBXML_NOCDATA);
-        $obj = new WXMsg();
+    public function __construct($msg=null){
         $obj->rawData = $msg;
-        $obj->msg     = $xml;
-        
-        return $obj;
+        $this->build($msg);
+    }
+    /**
+     * @return 返回bool值，表示微信的业务处理成功
+     */
+    public function isSuccess(){
+        return  ! $this->errcode;
+    }
+    /**
+     * 解析消息,默认以json字符串进行解析；错误返回格式：{"errcode":,"errmsg":""}
+     * 
+     * @param string $msg
+     */
+    public function build($msg){
+        $info = json_decode($msg, true);
+        if($info){
+            foreach ($info as $name => $value){
+                $this->$name = $value;
+            }
+        }else{
+            $this->errcode = -1;
+            $this->errmsg  = "响应字符串格式不对";
+        }
     }
     
     public function get($name){
@@ -171,10 +247,4 @@ class WXMsg{
         return (string)$this->msg->$name;
     }
     
-    public function isPrepaySuccess(){
-        return strcasecmp($this->get(WXMsg::PrePayReturnCode), "success")==0;
-    }
-    public function isPrepayResultSuccess(){
-        return strcasecmp($this->get(WXMsg::PrePayResultCode), "success")==0;
-    }
 }

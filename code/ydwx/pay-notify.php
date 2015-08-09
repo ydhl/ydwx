@@ -5,24 +5,39 @@
  * 1. 模式1，扫码支付回调，这是通知的内容是支付成功与否,会传入transaction_id out_trade_no
  * 2. 模式2，这是通知的内容是用户是否成功扫码了，会传入product_id,openid
  */
-include_once dirname(__FILE__).'/libs/wx.php';
+chdir(dirname(__FILE__));//把工作目录切换到文件所在目录
+include_once dirname(__FILE__).'/__config__.php';
 
 $data = @$GLOBALS["HTTP_RAW_POST_DATA"];
 
-$msg =  WXMsg::build($data);
-
-if($msg->get(WXMsg::ProductId)){//case 2
-//     scanToPay($product_id, $trade_no, $price, $attach, $pay_desc)
-}else{
-    if($msg->isPrepaySuccess()){
-        if($msg->isPrepayResultSuccess()){
-            YDHook::do_hook(WXHooks::PAY_NOTIFY_SUCCESS, $msg);
-            ob_clean();
-            echo "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";die;
-        }else{
-            YDHook::do_hook(WXHooks::PAY_NOTIFY_ERROR, $msg->get(WXMsg::PrePayErrCodeDes));
+$msg = new YDWXPayNotifyMsg($data);
+if($msg->isSuccess()){
+    if($msg->product_id){
+        $result = new YDWXPayNotifyResult();
+        
+        try{
+            $arg = YDWXHook::do_hook(YDWXHook::QRCODE_PAY_NOTIFY_SUCCESS, $msg);
+            $msg = ydwx_pay_unifiedorder($arg);
+            $result_code = "SUCCESS";
+            $err_code_des = "OK";
+            $result->prepay_id = $msg->prepay_id;
+        }catch(YDWXException $e){
+            $result_code = "FAIL";
+            $err_code_des = $e->getMessage();
         }
+        
+        $result->result_code = $result_code;
+        $result->err_code_des = $err_code_des;
+        $str = $result->toString();
+        $result->sign = strtoupper(md5($str."&key=".WEIXIN_MCH_KEY));
+        echo $result->toXMLString();
     }else{
-        YDHook::do_hook(WXHooks::PAY_NOTIFY_ERROR, $msg->get(WXMsg::PrePayReturnMsg));
+        if(YDWXHook::do_hook(YDWXHook::PAY_NOTIFY_SUCCESS, $msg)){
+            ob_clean();
+            echo "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
+        }
     }
+    die;
+}else{
+    YDWXHook::do_hook(YDWXHook::PAY_NOTIFY_ERROR, $msg);
 }

@@ -21,7 +21,7 @@ class YDHttp{
 	public $http_info;
 
 	/* Set the useragnet. */
-	public $useragent = 'jiaoliuping.com';
+	public $useragent = 'ydwx';
 
 	static $boundary = "";
 

@@ -12,7 +12,7 @@
  * 
  * @return string js
  */
-function showShareJSHandle($jsapi_ticket, $curr_page_uri,$share_title,$share_desc,$share_image, $link_target){
+function ydwx_sharehandle_script($jsapi_ticket, $curr_page_uri,$share_title,$share_desc,$share_image, $link_target){
     ob_start();
 ?>
     
@@ -54,4 +54,21 @@ function showShareJSHandle($jsapi_ticket, $curr_page_uri,$share_title,$share_des
     </script>
 <?php 
     return ob_get_clean();
+}
+
+function ydwx_weboath_script($qrcode_container_id, $state, $style="black", $href){
+?>
+<script src="http://res.wx.qq.com/connect/zh_CN/htmledition/js/wxLogin.js"></script>
+<script type="text/javascript">
+ var obj = new WxLogin({
+      id:"<?php echo $qrcode_container_id?>", 
+      appid: "<?php WEIXIN_WEB_APP_ID?>", 
+      scope: "snsapi_login", 
+      redirect_uri: "<?php echo YDWX_SITE_URL."ydwx/webauth.php"?>",
+      state: "<?php echo $state?>",
+      style: "<?php echo $style?>",
+      href: "<?php echo $href?>"
+    });
+ </script>
+<?php 
 }

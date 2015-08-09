@@ -6,19 +6,19 @@ include_once './libs/wx.php';
 
 $array = array();
 
-$menu1  = new Menu();
+$menu1  = new YDWXMenu();
 $menu1->name = "我的标签";
-$menu1->type = Menu::TYPE_VIEW;
+$menu1->type = YDWXMenu::TYPE_VIEW;
 $menu1->url  = SITE_URI."app/myqrcodes.php";
 
-$menu2  = new Menu();
+$menu2  = new YDWXMenu();
 $menu2->name = "购买标签";
-$menu2->type = Menu::TYPE_VIEW;
+$menu2->type = YDWXMenu::TYPE_VIEW;
 $menu2->url  = SITE_URI."app/pay.php";
 
-$menu3  = new Menu();
+$menu3  = new YDWXMenu();
 $menu3->name = "扫描标签";
-$menu3->type = Menu::TYPE_SCANCODE_PUSH;
+$menu3->type = YDWXMenu::TYPE_SCANCODE_PUSH;
 $menu3->key  = "scan_qrcode";
 
 $access_token = lookup("value", "options", "name='access_token'");

@@ -2,20 +2,37 @@
 
 /**
  * 微信hook定义
+ *
+ * 该文件为系统提供hook机制
+ * @author leeboo
+ * @since 2009-9-1
  */
-class WXHooks{
+
+final class YDWXHook {
     /**
-     * 记录log
+     * 记录log, 参数为string
      * @var unknown
      */
     const YDWX_LOG = "YDWX_LOG";
+    /**
+     * 无参数，返回access token
+     * @var unknown
+     */
     const GET_ACCESS_TOKEN = "GET_ACCESS_TOKEN";
+    /**
+     * 无参数，返回jsapi ticket
+     * @var unknown
+     */
     const GET_JSAPI_TICKET = "GET_JSAPI_TICKET";
     /**
-     * access token 刷新hook，参数是array(access_token=>"",expire_in=>"")
+     * 参数AccessTokenRefresh
      * @var unknown
      */
     const ACCESS_TOKEN_REFRESH = "ACCESS_TOKEN_REFRESH";
+    /**
+     * 参数 JsapiTicketRefresh
+     * @var unknown
+     */
     const JSAPI_TICKET_REFRESH = "JSAPI_TICKET_REFRESH";
     
     /**
@@ -84,7 +101,7 @@ class WXHooks{
      * @var unknown
      */
     const TEXT    = "text";
-
+    
     /**
      * 图片消息，参数是WXMsg
      * @var unknown
@@ -94,7 +111,7 @@ class WXHooks{
      * 语音消息，参数是WXMsg
      * @var unknown
      */
-    const VOICE    = "voice";    
+    const VOICE    = "voice";
     
     /**
      * 视频消息，参数是WXMsg
@@ -119,14 +136,14 @@ class WXHooks{
     const LINK = "link";
     
     /**
-     * 用户取消授权
+     * 用户取消授权, hook 无参数
      * @var unknown
      */
     const AUTH_CANCEL  = "auth_cancel";
     const AUTH_FAIL    = "auth_fail";
     /**
      * 微信app内 web应用登录成功
-     * 参数 array 为用户的信息
+     * 参数 YDWXOAuthUser
      * @var unknown
      */
     const AUTH_INAPP_SUCCESS    = "AUTH_INAPP_SUCCESS";
@@ -138,7 +155,7 @@ class WXHooks{
     const AUTH_WEB_SUCCESS      = "AUTH_WEB_SUCCESS";
     /**
      * 微信app内 企业web应用登录成功
-     * 参数 array 为用户的信息 array(UserId=>"该用户在企业号后台的账号","OpenId"=>"非企业成员时返回openid", DeviceId=>"手机设备号") 注意大小写
+     * 参数 YDWXOAuthCropUser array 为用户的信息 array(UserId=>"该用户在企业号后台的账号","OpenId"=>"非企业成员时返回openid", DeviceId=>"手机设备号") 注意大小写
      * @var unknown
      */
     const AUTH_CROP_SUCCESS     = "AUTH_CROP_SUCCESS";
@@ -160,36 +177,28 @@ class WXHooks{
     const PREPARE_PAY_SUCCESS   = "PREPARE_PAY_SUCCESS";
     
     /**
-     * 微信支付通知成功，参数为WXMsg
-     * 返回的参数https://pay.weixin.qq.com/wiki/doc/api/native.php?chapter=9_7
+     * 微信支付通知
+     * hook YDWXPayNotifyMsg 
+     * https://pay.weixin.qq.com/wiki/doc/api/native.php?chapter=9_7
+     * 处理hook的函数需要返回bool值，true表示通知已经处理了，微信不用在通知了
      * @var unknown
      */
     const PAY_NOTIFY_SUCCESS    = "PAY_NOTIFY_SUCCESS";
     /**
      * 微信支付通知失败
+     * 返回的参数YDWXPayNotifyMsg 
      * @var unknown
      */
     const PAY_NOTIFY_ERROR      = "PAY_NOTIFY_ERROR";
     
     /**
      * 微信扫码支付通知成功
+     * hook参数YDWXQrcodeScanNotifyMsg, hook 函数根据接收的数据生成支付订单
+     * 返回YDWXPayUnifiedOrderArg, 如果出现错误抛出异常
      * @var unknown
      */
     const QRCODE_PAY_NOTIFY_SUCCESS    = "QRCODE_PAY_NOTIFY_SUCCESS";
-    /**
-     * 微信扫码支付通知失败
-     * @var unknown
-     */
-    const QRCODE_PAY_NOTIFY_ERROR      = "QRCODE_PAY_NOTIFY_ERROR";
-}
-
-/**
- * 该文件为系统提供hook机制
- * @author liizii
- * @since 2009-9-1
- */
-
-final class YDHook {
+    
     private static $listeners = array ();
     /**
      * 增加hook

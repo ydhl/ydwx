@@ -6,7 +6,7 @@
  * @param unknown $accessToken
  * @return array(Menu)
  */
-function getMenus($accessToken){
+function ydwx_menu_get($accessToken){
     $http = new YDHttp();
     $menus = json_decode($http->get(WEIXIN_BASE_URL."menu/get?access_token=".$accessToken), true);
 
@@ -23,10 +23,10 @@ function getMenus($accessToken){
  * 创建菜单
  * 
  * @param unknown $accessToken
- * @param unknown $menus Menu数组
+ * @param unknown $menus YDWXMenu数组
  * @return boolean
  */
-function createMenus($accessToken, $menus){
+function ydwx_menu_create($accessToken, $menus){
 //     if (WEIXIN_ACCOUNT_TYPE) TODO 认证号或者服务号才有订单
     $http = new YDHttp();
     
@@ -46,7 +46,7 @@ function createMenus($accessToken, $menus){
  * @param unknown $accessToken
  * @return boolean
  */
-function removeMenus($accessToken){
+function ydwx_menu_delete($accessToken){
     $http = new YDHttp();
     $info = json_decode($http->get(WEIXIN_BASE_URL."menu/delete?access_token=".$accessToken), true);
     var_dump($info);

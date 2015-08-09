@@ -3,58 +3,65 @@
 /**
  * 该方法是H5 jsAPI调起支付的第一步, 该函数调用成功后便通过jsApiPay这个js接口调起微信支付
  * 
- * @param unknown $openid
- * @param unknown $trade_no
- * @param unknown $price
- * @param unknown $attach
- * @param unknown $payDesc
- * @return array("success"=>"true|false",msg=>"错误描述", data="成功后的prepare_id")
+ * @param YDWXPayUnifiedOrderArg arg
+ * @return YDWXPayUnifiedOrderMsg
  */
-function preparePay($openid, $trade_no, $price, $attach, $pay_desc){
-    $nonceStr = uniqid();
-
-    $str = "appid=".WEIXIN_APP_ID."&attach=".$attach
-            ."&body=".$pay_desc."&mch_id=".WEIXIN_MCH_ID
-            ."&nonce_str=".$nonceStr."&notify_url=".WEIXIN_NOTIFY_URL
-            ."&openid=".$openid."&out_trade_no=".$trade_no
-            ."&spbill_create_ip=".$_SERVER['REMOTE_ADDR']."&total_fee=".$price."&trade_type=JSAPI";
+function ydwx_pay_unifiedorder(YDWXPayUnifiedOrderArg $arg){
+    $arg->trade_type = "JSAPI";
+    $str = $arg->toString();
+//     $str = "appid=".WEIXIN_APP_ID."&attach=".$attach
+//             ."&body=".$pay_desc."&mch_id=".WEIXIN_MCH_ID
+//             ."&nonce_str=".$nonceStr."&notify_url=".WEIXIN_NOTIFY_URL
+//             ."&openid=".$openid."&out_trade_no=".$trade_no
+//             ."&spbill_create_ip=".$_SERVER['REMOTE_ADDR']."&total_fee=".$price."&trade_type=JSAPI";
     $signStr = strtoupper(md5($str."&key=".WEIXIN_MCH_KEY));
     
-    $args = "<xml>
-    <appid>".WEIXIN_APP_ID."</appid>
-    <attach>{$attach}</attach>
-    <body>{$pay_desc}</body>
-    <mch_id>".WEIXIN_MCH_ID."</mch_id>
-    <nonce_str>".$nonceStr."</nonce_str>
-    <notify_url>".WEIXIN_NOTIFY_URL."</notify_url>
-    <openid>{$openid}</openid>
-    <out_trade_no>{$trade_no}</out_trade_no>
-    <spbill_create_ip>".$_SERVER['REMOTE_ADDR']."</spbill_create_ip>
-    <total_fee>{$price}</total_fee>
-    <trade_type>JSAPI</trade_type>
-    <sign>{$signStr}</sign>
-    </xml>";
+    $arg->sign = $signStr;
+//     $args = "<xml>
+//     <appid>".WEIXIN_APP_ID."</appid>
+//     <attach>{$attach}</attach>
+//     <body>{$pay_desc}</body>
+//     <mch_id>".WEIXIN_MCH_ID."</mch_id>
+//     <nonce_str>".$nonceStr."</nonce_str>
+//     <notify_url>".WEIXIN_NOTIFY_URL."</notify_url>
+//     <openid>{$openid}</openid>
+//     <out_trade_no>{$trade_no}</out_trade_no>
+//     <spbill_create_ip>".$_SERVER['REMOTE_ADDR']."</spbill_create_ip>
+//     <total_fee>{$price}</total_fee>
+//     <trade_type>JSAPI</trade_type>
+//     <sign>{$signStr}</sign>
+//     </xml>";
+    $args = $arg->toXMLString();
     
     $http = new YDHttp();
     $info = $http->post("https://api.mch.weixin.qq.com/pay/unifiedorder", $args);
-    $msg =  WXMsg::build($info);
     
-    if($msg->isPrepaySuccess()){
-        if($msg->isPrepayResultSuccess()){
-            return ydwx_success($msg->get(WXMsg::PrePayPrepayId));
-        }
-        return ydwx_error($msg->get(WXMsg::PrePayErrCodeDes));
+    $msg  = new YDWXPayUnifiedOrderMsg($info);
+    if($msg->isSuccess()){
+        throw new YDWXException($msg->errmsg);
     }
-    return ydwx_error($msg->get(WXMsg::PrePayReturnMsg));
+    return $msg;
+    
+//     $msg =  YDWXMsg::build($info);
+    
+//     if($msg->isPrepaySuccess()){
+//         if($msg->isPrepayResultSuccess()){
+//             return ydwx_success($msg->get(YDWXMsg::PrePayPrepayId));
+//         }
+//         return ydwx_error($msg->get(YDWXMsg::PrePayErrCodeDes));
+//     }
+//     return ydwx_error($msg->get(YDWXMsg::PrePayReturnMsg));
 }
 
 /**
- * 二维码扫码支付（模式一）
+ * 扫码支付二维码内容（模式一）
  * 把返回的内容生成二维码后，用户扫码进入支付流程
  * 
- * @param unknown $product_id
+ * 建议采用http://ydimage.yidianhulian.com/qrcode?str=二维码内容来生产二维码
+ * 
+ * @param unknown $product_id 你系统的产品id
  */
-function payQrcode($product_id){
+function ydwx_pay_qrcode($product_id){
     $nonceStr   = uniqid();
     $time_stamp = time();
     
@@ -70,53 +77,49 @@ function payQrcode($product_id){
 }
 
 /**
- * 二维码扫码支付（模式二）
- * 调起微信服务后台生成预支付交易单,把返回的内容生成二维码后，扫码便进行支付。
+ * 扫码支付二维码内容（模式二）
+ * 先调起微信服务后台生成预支付交易单, 该函数把返回的内容生成二维码后，用户扫码便直接支付。
  * 注意该返回的内容有2小时失效
  * 
- * @param unknown $openid
- * @param unknown $trade_no
- * @param unknown $price 注意单位是分，并且不能有小数点
- * @param unknown $attach
- * @param unknown $pay_desc
+ * @param YDWXPayUnifiedOrderArg $arg
  * 
- * @return array("success"=>"true|false",msg=>"错误描述", data="成功后的code_url")
+ * @return string 二维码内容
  */
-function scanToPay($product_id, $trade_no, $price, $attach, $pay_desc){
-    $nonceStr = uniqid();
-    $str = "appid=".WEIXIN_APP_ID."&attach=".$attach
-    ."&body=".$pay_desc."&mch_id=".WEIXIN_MCH_ID
-    ."&nonce_str=".$nonceStr."&notify_url=".WEIXIN_NOTIFY_URL
-    ."&out_trade_no=".$trade_no
-    ."&product_id={$product_id}&spbill_create_ip=".$_SERVER['SERVER_ADDR']."&total_fee=".$price."&trade_type=NATIVE";
-    $signStr = strtoupper(md5($str."&key=".WEIXIN_MCH_KEY));
-    
-    $args = "<xml>
-    <appid>".WEIXIN_APP_ID."</appid>
-        <attach>{$attach}</attach>
-        <body>{$pay_desc}</body>
-        <mch_id>".WEIXIN_MCH_ID."</mch_id>
-        <nonce_str>".$nonceStr."</nonce_str>
-        <notify_url>".WEIXIN_NOTIFY_URL."</notify_url>
-        <out_trade_no>{$trade_no}</out_trade_no>
-        <spbill_create_ip>".$_SERVER['SERVER_ADDR']."</spbill_create_ip>
-        <product_id>{$product_id}</product_id>
-        <total_fee>{$price}</total_fee>
-        <trade_type>NATIVE</trade_type>
-        <sign>{$signStr}</sign>
-        </xml>";
+function ydwx_scan_to_pay(YDWXPayUnifiedOrderArg $arg){
+    $arg->trade_type = "NATIVE";
+//     $nonceStr = uniqid();
+//     $str = "appid=".WEIXIN_APP_ID."&attach=".$attach
+//     ."&body=".$pay_desc."&mch_id=".WEIXIN_MCH_ID
+//     ."&nonce_str=".$nonceStr."&notify_url=".WEIXIN_NOTIFY_URL
+//     ."&out_trade_no=".$trade_no
+//     ."&product_id={$product_id}&spbill_create_ip=".$_SERVER['SERVER_ADDR']."&total_fee=".$price."&trade_type=NATIVE";
+    $str = $arg->toString();
+    $arg->sign = strtoupper(md5($str."&key=".WEIXIN_MCH_KEY));
+//     $args = "<xml>
+//     <appid>".WEIXIN_APP_ID."</appid>
+//         <attach>{$attach}</attach>
+//         <body>{$pay_desc}</body>
+//         <mch_id>".WEIXIN_MCH_ID."</mch_id>
+//         <nonce_str>".$nonceStr."</nonce_str>
+//         <notify_url>".WEIXIN_NOTIFY_URL."</notify_url>
+//         <out_trade_no>{$trade_no}</out_trade_no>
+//         <spbill_create_ip>".$_SERVER['SERVER_ADDR']."</spbill_create_ip>
+//         <product_id>{$product_id}</product_id>
+//         <total_fee>{$price}</total_fee>
+//         <trade_type>NATIVE</trade_type>
+//         <sign>{$signStr}</sign>
+//         </xml>";
+
+    $args = $arg->toXMLString();
     
     $http = new YDHttp();
     $info = $http->post("https://api.mch.weixin.qq.com/pay/unifiedorder", $args);
-    $msg =  WXMsg::build($info);
+    $msg  =  new YDWXPayUnifiedOrderMsg($info);
     
-    if($msg->isPrepaySuccess()){
-        if($msg->isPrepayResultSuccess()){
-            return ydwx_success($msg->get(WXMsg::CodeUrl));
-        }
-        return ydwx_error($msg->get(WXMsg::PrePayErrCodeDes));
+    if( ! $msg->isSuccess()){
+        throw new YDWXException($msg->errmsg);
     }
-    return ydwx_error($msg->get(WXMsg::PrePayReturnMsg));
+    return $msg->code_url;
 }
 
 /**
@@ -132,10 +135,9 @@ function scanToPay($product_id, $trade_no, $price, $attach, $pay_desc){
  * 
  * @param unknown $jsapi_ticket
  * @param unknown $curr_page_uri
- * @param unknown $ydwx_prepay_uri ydwx/pay.php的完整url
  * @return string
  */
-function jsPayApi($jsapi_ticket, $curr_page_uri, $ydwx_prepay_uri){
+function ydwx_jspay_script($jsapi_ticket, $curr_page_uri){
     ob_start();
 ?>
 <script type="text/javascript">
@@ -159,7 +161,7 @@ wx.error(function(res){
 });
 
 function jsPayApi(openid, trace_no, totalPrice, attach, pay_desc, success, fail, cancel){
-    $.post("<?php echo $ydwx_prepay_uri?>", {
+    $.post("<?php echo YDWX_SITE_URL."pay.php"?>", {
         price:totalPrice, trace_no:trace_no, action:"prepay", "attach":attach, "payDesc":pay_desc, "timestamp":"<?php echo $time?>", "noncestr":"<?php echo $nonceStr?>"
         }, function(data){
             if( ! data.success){

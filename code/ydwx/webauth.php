@@ -1,24 +1,28 @@
 <?php
 /**
  * 网站进行微信OAuth登陆
+ * 该页面可通过Redirect方式进行访问，或者直接在需要的地方include_once
  */
-include_once dirname(__FILE__).'/libs/wx.php';
+chdir(dirname(__FILE__));//把工作目录切换到文件所在目录
 
+include_once dirname(__FILE__).'/__config__.php';
+
+// state为交互时双方都会带着的get参数，用于做一些逻辑判断，如果没指定，则默认一个
 if( ! $state){
     $state = "fromydwx";
 } 
 
-$redirect = SITE_URI.'ydwx/webauth.php';
+$redirect = YDWX_SITE_URL.'ydwx/webauth.php';
 
 if( ! @$_GET['code'] &&  ! @$_GET['state']){
     ob_clean();
     header("Location: https://open.weixin.qq.com/connect/qrconnect?appid="
-        .WEIXIN_WEB_APP_ID."&redirect_uri={$redirect}&response_type=code&scope=snsapi_base&state={$state}#wechat_redirect");
+        .WEIXIN_WEB_APP_ID."&redirect_uri={$redirect}&response_type=code&scope=snsapi_login&state={$state}#wechat_redirect");
     die;
 }
 
 if( ! @$_GET['code'] && @$_GET['state']){
-    YDHook::do_hook(WXHooks::AUTH_CANCEL);
+    YDWXHook::do_hook(YDWXHook::AUTH_CANCEL);
     die;
 }
 
@@ -27,9 +31,8 @@ $info = json_decode($http->get("https://api.weixin.qq.com/sns/oauth2/access_toke
         .WEIXIN_WEB_APP_ID."&secret=".WEIXIN_WEB_APP_SECRET."&code=".$_GET['code']."&grant_type=authorization_code"), true);
 
 if( !@$info['openid']){
-    YDHook::do_hook(WXHooks::AUTH_FAIL, $info);
+    YDWXHook::do_hook(YDWXHook::AUTH_FAIL, YDWXAuthFail::errMsg($info['errmsg'], $info['errcode']));
     die;
 }
-$info['state'] = $_GET['state'];
 
-YDHook::do_hook(WXHooks::AUTH_WEB_SUCCESS, getWebUserInfo($info['access_token'], $info['openid']));
+YDWXHook::do_hook(YDWXHook::AUTH_WEB_SUCCESS, ydwx_sns_userinfo($info['access_token'], $info['openid'], $_GET['state']));

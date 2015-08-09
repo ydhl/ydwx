@@ -3,7 +3,7 @@
  * 公众号微信内Web OAuth登陆，有两种情况
  * 一是公众号（订阅号、服务号）；一种是企业号
  * 该页面可通过Redirect方式进行访问，或者直接在需要的地方include_once
- * 该认证流程会得到用户的完整信息
+ * 该认证流程对于未关注用户不会得到完整用户信息,是静默授权的，用户无感知
  */
 
 chdir(dirname(__FILE__));//把工作目录切换到文件所在目录
@@ -24,13 +24,7 @@ $secret = WEIXIN_ACCOUNT_TYPE == WEIXIN_ACCOUNT_CROP ? WEIXIN_CROP_SECRET : WEIX
 if( ! @$_GET['code'] &&  ! @$_GET['state']){
     ob_clean();
     header("Location: https://open.weixin.qq.com/connect/oauth2/authorize?appid="
-        .$appid."&redirect_uri={$redirect}&response_type=code&scope=snsapi_userinfo&state={$state}#wechat_redirect");
-    die;
-}
-
-//用户取消授权后返回本页面
-if( ! @$_GET['code'] && @$_GET['state']){
-    YDWXHook::do_hook(YDWXHook::AUTH_CANCEL);
+        .$appid."&redirect_uri={$redirect}&response_type=code&scope=snsapi_base&state={$state}#wechat_redirect");
     die;
 }
 
@@ -45,7 +39,15 @@ if (WEIXIN_ACCOUNT_TYPE != WEIXIN_ACCOUNT_CROP){
         die;
     }
     
-    YDWXHook::do_hook(YDWXHook::AUTH_INAPP_SUCCESS, ydwx_sns_userinfo($info['access_token'],     $info['openid'], $_GET['state']));
+    $access_token = YDWXHook::do_hook(YDWXHook::GET_ACCESS_TOKEN);
+    if($access_token){
+        YDWXHook::do_hook(YDWXHook::AUTH_INAPP_SUCCESS, ydwx_user_info($access_token,     $info['openid'], $_GET['state']));
+    }else{
+        $user = new YDWXOAuthUser();
+        $user->openid = $info['openid'];
+        $user->state  = $_GET['state'];
+        YDWXHook::do_hook(YDWXHook::AUTH_INAPP_SUCCESS, $user);
+    }
 }else{
     //企业号返回的是code，可直接获取用户的信息
     $access_token = YDWXHook::do_hook(YDWXHook::GET_ACCESS_TOKEN);

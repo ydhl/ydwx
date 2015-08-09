@@ -1,13 +1,13 @@
 <?php
 /**
- * 微信对接入口：
+ * 微信对接入口，需要在微信后台开发者模式下配置：
  * 1. 微信Token验证。GET提交
  * 2. 微信事件通知，POST提交
  */
-include_once './libs/wx.php';
+include_once '__config__.php';
 
 
-//Token 验证
+//Token 验证，微信验证主体身份
 if( ! $GLOBALS["HTTP_RAW_POST_DATA"]){
     if(WEIXIN_ACCOUNT_TYPE==WEIXIN_ACCOUNT_CROP){//企业号的url验证
         $signature  = $_GET["msg_signature"];
@@ -71,10 +71,10 @@ if ($errCode != 0) {
 
 
 //微信事件指派
-$wxmsg  = WXMsg::build($msg);
-if($wxmsg->Get(WXMsg::Event)){
-    $hookname = strtoupper($wxmsg->Get(WXMsg::MsgType)."_".$wxmsg->Get(WXMsg::Event));
+$wxmsg  = YDWXMsg::build($msg);
+if($wxmsg->Get(YDWXMsg::Event)){
+    $hookname = strtoupper($wxmsg->Get(YDWXMsg::MsgType)."_".$wxmsg->Get(YDWXMsg::Event));
 }else{
-    $hookname = strtoupper($wxmsg->Get(WXMsg::MsgType));
+    $hookname = strtoupper($wxmsg->Get(YDWXMsg::MsgType));
 }
-YDHook::do_hook(constant("WXHooks::$hookname"), $wxmsg);
+YDWXHook::do_hook(constant("YDWXHook::$hookname"), $wxmsg);
