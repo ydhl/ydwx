@@ -12,7 +12,9 @@
  * 
  * @return string js
  */
-function ydwx_sharehandle_script($jsapi_ticket, $curr_page_uri,$share_title,$share_desc,$share_image, $link_target){
+function ydwx_sharehandle_script($share_title,$share_desc,$share_image, $link_target){
+    $jsapi_ticket = YDWXHook::do_hook(YDWXHook::GET_JSAPI_TICKET);
+    $curr_page_uri= YDWX_SITE_URL.ltrim($_SERVER['REQUEST_URI'], "/");
     ob_start();
 ?>
     

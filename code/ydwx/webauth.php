@@ -31,7 +31,7 @@ $info = json_decode($http->get("https://api.weixin.qq.com/sns/oauth2/access_toke
         .WEIXIN_WEB_APP_ID."&secret=".WEIXIN_WEB_APP_SECRET."&code=".$_GET['code']."&grant_type=authorization_code"), true);
 
 if( !@$info['openid']){
-    YDWXHook::do_hook(YDWXHook::AUTH_FAIL, YDWXAuthFail::errMsg($info['errmsg'], $info['errcode']));
+    YDWXHook::do_hook(YDWXHook::AUTH_FAIL, YDWXAuthFailResponse::errMsg($info['errmsg'], $info['errcode']));
     die;
 }
 

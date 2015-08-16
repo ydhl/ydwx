@@ -1,67 +1,39 @@
 <?php
-
 /**
- * 该方法是H5 jsAPI调起支付的第一步, 该函数调用成功后便通过jsApiPay这个js接口调起微信支付
+ * 微信统一下单接口,根据构造YDWXPayUnifiedOrderRequest的方式不同返回不同
+ * 通过 new YDWXPayUnifiedOrderRequest(true)；返回的YDWXPayUnifiedOrderResponse中会有code_url（二维码内容）
+ * 其他情况没用
+ *
+ * 建议采用http://ydimage.yidianhulian.com/qrcode?str=二维码内容来生产二维码
  * 
- * @param YDWXPayUnifiedOrderArg arg
- * @return YDWXPayUnifiedOrderMsg
+ * @param YDWXPayUnifiedOrderRequest arg
+ * @return YDWXPayUnifiedOrderResponse
  */
-function ydwx_pay_unifiedorder(YDWXPayUnifiedOrderArg $arg){
-    $arg->trade_type = "JSAPI";
-    $str = $arg->toString();
-//     $str = "appid=".WEIXIN_APP_ID."&attach=".$attach
-//             ."&body=".$pay_desc."&mch_id=".WEIXIN_MCH_ID
-//             ."&nonce_str=".$nonceStr."&notify_url=".WEIXIN_NOTIFY_URL
-//             ."&openid=".$openid."&out_trade_no=".$trade_no
-//             ."&spbill_create_ip=".$_SERVER['REMOTE_ADDR']."&total_fee=".$price."&trade_type=JSAPI";
-    $signStr = strtoupper(md5($str."&key=".WEIXIN_MCH_KEY));
-    
-    $arg->sign = $signStr;
-//     $args = "<xml>
-//     <appid>".WEIXIN_APP_ID."</appid>
-//     <attach>{$attach}</attach>
-//     <body>{$pay_desc}</body>
-//     <mch_id>".WEIXIN_MCH_ID."</mch_id>
-//     <nonce_str>".$nonceStr."</nonce_str>
-//     <notify_url>".WEIXIN_NOTIFY_URL."</notify_url>
-//     <openid>{$openid}</openid>
-//     <out_trade_no>{$trade_no}</out_trade_no>
-//     <spbill_create_ip>".$_SERVER['REMOTE_ADDR']."</spbill_create_ip>
-//     <total_fee>{$price}</total_fee>
-//     <trade_type>JSAPI</trade_type>
-//     <sign>{$signStr}</sign>
-//     </xml>";
+function ydwx_pay_unifiedorder(YDWXPayUnifiedOrderRequest $arg){
+    $arg->sign();
     $args = $arg->toXMLString();
     
     $http = new YDHttp();
     $info = $http->post("https://api.mch.weixin.qq.com/pay/unifiedorder", $args);
     
-    $msg  = new YDWXPayUnifiedOrderMsg($info);
+    $msg  = new YDWXPayUnifiedOrderResponse($info);
     if($msg->isSuccess()){
         throw new YDWXException($msg->errmsg);
     }
     return $msg;
-    
-//     $msg =  YDWXMsg::build($info);
-    
-//     if($msg->isPrepaySuccess()){
-//         if($msg->isPrepayResultSuccess()){
-//             return ydwx_success($msg->get(YDWXMsg::PrePayPrepayId));
-//         }
-//         return ydwx_error($msg->get(YDWXMsg::PrePayErrCodeDes));
-//     }
-//     return ydwx_error($msg->get(YDWXMsg::PrePayReturnMsg));
 }
+
 
 /**
  * 扫码支付二维码内容（模式一）
- * 把返回的内容生成二维码后，用户扫码进入支付流程
+ * 把返回的内容生成二维码后，用户扫码后回回调pay-notify.php
+ *  
  * 
  * 建议采用http://ydimage.yidianhulian.com/qrcode?str=二维码内容来生产二维码
  * 
  * @param unknown $product_id 你系统的产品id
  */
-function ydwx_pay_qrcode($product_id){
+function ydwx_pay_product_qrcode($product_id){
     $nonceStr   = uniqid();
     $time_stamp = time();
     
@@ -71,55 +43,9 @@ function ydwx_pay_qrcode($product_id){
     ."&time_stamp=".$time_stamp;
     $signStr = strtoupper(md5($str."&key=".WEIXIN_MCH_KEY));
     
-    return "weixin://wxpay/bizpayurl?sign={$sign}&appid="
+    return "weixin://wxpay/bizpayurl?sign={$signStr}&appid="
             .WEIXIN_APP_ID."&mch_id=".WEIXIN_MCH_ID
     ."&product_id={$product_id}&time_stamp={$time_stamp}&nonce_str={$nonceStr}";
-}
-
-/**
- * 扫码支付二维码内容（模式二）
- * 先调起微信服务后台生成预支付交易单, 该函数把返回的内容生成二维码后，用户扫码便直接支付。
- * 注意该返回的内容有2小时失效
- * 
- * @param YDWXPayUnifiedOrderArg $arg
- * 
- * @return string 二维码内容
- */
-function ydwx_scan_to_pay(YDWXPayUnifiedOrderArg $arg){
-    $arg->trade_type = "NATIVE";
-//     $nonceStr = uniqid();
-//     $str = "appid=".WEIXIN_APP_ID."&attach=".$attach
-//     ."&body=".$pay_desc."&mch_id=".WEIXIN_MCH_ID
-//     ."&nonce_str=".$nonceStr."&notify_url=".WEIXIN_NOTIFY_URL
-//     ."&out_trade_no=".$trade_no
-//     ."&product_id={$product_id}&spbill_create_ip=".$_SERVER['SERVER_ADDR']."&total_fee=".$price."&trade_type=NATIVE";
-    $str = $arg->toString();
-    $arg->sign = strtoupper(md5($str."&key=".WEIXIN_MCH_KEY));
-//     $args = "<xml>
-//     <appid>".WEIXIN_APP_ID."</appid>
-//         <attach>{$attach}</attach>
-//         <body>{$pay_desc}</body>
-//         <mch_id>".WEIXIN_MCH_ID."</mch_id>
-//         <nonce_str>".$nonceStr."</nonce_str>
-//         <notify_url>".WEIXIN_NOTIFY_URL."</notify_url>
-//         <out_trade_no>{$trade_no}</out_trade_no>
-//         <spbill_create_ip>".$_SERVER['SERVER_ADDR']."</spbill_create_ip>
-//         <product_id>{$product_id}</product_id>
-//         <total_fee>{$price}</total_fee>
-//         <trade_type>NATIVE</trade_type>
-//         <sign>{$signStr}</sign>
-//         </xml>";
-
-    $args = $arg->toXMLString();
-    
-    $http = new YDHttp();
-    $info = $http->post("https://api.mch.weixin.qq.com/pay/unifiedorder", $args);
-    $msg  =  new YDWXPayUnifiedOrderMsg($info);
-    
-    if( ! $msg->isSuccess()){
-        throw new YDWXException($msg->errmsg);
-    }
-    return $msg->code_url;
 }
 
 /**

@@ -10,13 +10,14 @@ include_once dirname(__FILE__).'/__config__.php';
 
 $data = @$GLOBALS["HTTP_RAW_POST_DATA"];
 
-$msg = new YDWXPayNotifyMsg($data);
+$msg = new YDWXPayNotifyResponse($data);
 if($msg->isSuccess()){
     if($msg->product_id){
-        $result = new YDWXPayNotifyResult();
+        $result = new YDWXPayNotifyRequest();
         
         try{
             $arg = YDWXHook::do_hook(YDWXHook::QRCODE_PAY_NOTIFY_SUCCESS, $msg);
+            $arg->openid        = $msg->openid;
             $msg = ydwx_pay_unifiedorder($arg);
             $result_code = "SUCCESS";
             $err_code_des = "OK";
@@ -28,8 +29,7 @@ if($msg->isSuccess()){
         
         $result->result_code = $result_code;
         $result->err_code_des = $err_code_des;
-        $str = $result->toString();
-        $result->sign = strtoupper(md5($str."&key=".WEIXIN_MCH_KEY));
+        $result->sign();
         echo $result->toXMLString();
     }else{
         if(YDWXHook::do_hook(YDWXHook::PAY_NOTIFY_SUCCESS, $msg)){

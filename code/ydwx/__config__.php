@@ -85,8 +85,9 @@ define("WEIXIN_BASE_URL2",          "http://api.weixin.qq.com/cgi-bin/");
  */
 define("WEIXIN_QY_BASE_URL",        "https://qyapi.weixin.qq.com/cgi-bin/");
 
-
+require_once $cwd.'/libs/ydwxhook.php';
 YDWXHook::include_files($cwd."/libs");
+YDWXHook::include_files($cwd."/models");
 YDWXHook::include_files($cwd."/functions");//包含功能函数库
 YDWXHook::include_files(YDWX_HOOK_DIR);//hooks目录
 ?>

@@ -16,7 +16,7 @@ function ydwx_media_upload($accessToken, $type, $media){
     $http = new YDHttp();
     $info = $http->post(WEIXIN_BASE_URL."media/upload?access_token={$accessToken}&type=$type", 
             array("media"=>"@".$media) ,true);
-    $msg  = new YDWXMsg($info); 
+    $msg  = new YDWXResponse($info); 
     if($msg->isSuccess()){
         return $msg->media_id; 
     }

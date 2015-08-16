@@ -9,6 +9,16 @@ YDWXHook::add_hook(YDWXHook::ACCESS_TOKEN_REFRESH, function($info){
 YDWXHook::add_hook(YDWXHook::JSAPI_TICKET_REFRESH, function($info){
     //token 刷新后的回调，你需要在自己的系统中进行更新
 });
+    
+    // access token 刷新
+YDWXHook::add_hook ( YDWXHook::GET_ACCESS_TOKEN, function ($info) {
+    // token 刷新后的回调，你需要在自己的系统中进行更新
+} );
+
+YDWXHook::add_hook ( YDWXHook::GET_JSAPI_TICKET, function ($info) {
+    // token 刷新后的回调，你需要在自己的系统中进行更新
+} );
+
 
 YDWXHook::add_hook ( YDWXHook::EVENT_SUBSCRIBE, function ($info) {
     //  用户订阅后的回调

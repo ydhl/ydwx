@@ -1,6 +1,6 @@
 <?php
 /**
- * 菜单模型
+ * 菜单模型，封装通过API创建的
  * @author leeboo
  *
  */
@@ -39,7 +39,7 @@ class YDWXMenu{
     public function toArray(){
         $array = array();
         if ($this->type) $array['type'] = $this->type;
-        if ($this->name) $array['name'] = urlencode($this->name);
+        if ($this->name) $array['name'] = $this->name;
         if ($this->key)  $array['key'] = $this->key;
         if ($this->url)  $array['url'] = $this->url;
         if ($this->sub_button) {
@@ -52,12 +52,136 @@ class YDWXMenu{
 }
 
 /**
- * ydwx 接口参数积累
+ * 微信后台创建的菜单内容
+ * @author leeboo
+ *
+ */
+class YDWXSelfMenu extends YDWXMenu{
+   /**
+    * 跳转网页
+    * @var unknown
+    */
+    const TYPE_VIEW  = "view";
+    /**
+     * 返回文本
+     * @var unknown
+     */
+    const TYPE_TEXT  = "text";
+    /**
+     * 返回图片
+     * @var unknown
+     */
+    const TYPE_IMG   = "img";
+    /**
+     * 返回图片
+     * @var unknown
+     */
+    const TYPE_PHOTO = "photo";
+    /**
+     * 返回视频
+     * @var unknown
+     */
+    const TYPE_VIDEO = "video";
+    /**
+     * 返回音频
+     * @var unknown
+     */
+    const TYPE_VOICE = "voice";
+    /**
+     * 图文消息数组，每项是YDWXSelfMenuNewsInfo对象
+     * 
+     * @var unknown
+     */
+    public $news_info = array();
+    public static function build(array $msg){
+        $obj = new YDWXSelfMenu();
+         
+        $obj->name = $msg['name'];
+        $obj->type = @$msg['type'];
+        $obj->key  = @$msg['value'];
+        $obj->url  = @$msg['url'];
+    
+        $obj->sub_button = array();
+    
+        foreach (@$msg['sub_button']['list'] as $subbtn){
+            $obj->sub_button[] = YDWXMenu::build($subbtn);
+        }
+        foreach (@$msg['news_info']['list'] as $news){
+            $obj->news_info[] = new YDWXSelfMenuNewsInfo($news);
+        }
+        return $obj;
+    }
+    
+    public function toArray(){
+        $array = array();
+        if ($this->type) $array['type'] = $this->type;
+        if ($this->name) $array['name'] = $this->name;
+        if ($this->key)  $array['key'] = $this->key;
+        if ($this->url)  $array['url'] = $this->url;
+        if ($this->sub_button) {
+            foreach ($this->sub_button as $button){
+                $array['sub_button']['list'][] = $button->toArray();
+            }
+        }
+        if ($this->news_info) {
+            foreach ($this->news_info as $button){
+                $array['news_info']['list'][] = $button->toArray();
+            }
+        }
+        return $array;
+    }
+}
+
+class YDWXSelfMenuNewsInfo{
+    /**
+     * 作者
+     */
+    public $author;
+    /**
+     * 正文的URL
+     */
+    public $content_url;
+    /**
+     * 封面图片的URL
+     * @var unknown
+     */
+    public $cover_url;
+    /**
+     * 摘要
+     * @var unknown
+     */
+    public $digest;
+    /**
+     * 是否显示封面，0为不显示，1为显示
+     * @var unknown
+     */
+    public $show_cover;
+    /**
+     * 原文的URL，若置空则无查看原文入口
+     */
+    public $source_url;
+    /**
+     * 图文消息的标题
+     * @var unknown
+     */
+    public $title;
+    public function __construct($arr){
+        foreach ($arr as $n=>$v){
+            $this->$n = $v;
+        }
+    }
+    public function toArray(){
+        return get_object_vars($this);
+    }
+}
+
+/**
+ * ydwx 接口参数基类
  * 
  * @author leeboo
  *
  */
-abstract class YDWXArg{
+abstract class YDWXRequest{
     public $sign;
     public function __toString(){
         return $this->toString();
@@ -75,7 +199,7 @@ abstract class YDWXArg{
     public function toJSONString(){
         $this->valid();
         $args = array_filter($this->sortArg());
-        return yd_json_encode($args);
+        return ydwx_json_encode($args);
     }
     public function toArray(){
         $this->valid();
@@ -87,18 +211,52 @@ abstract class YDWXArg{
         
         $xml = "<xml>";
         foreach ($args as $name=>$value){
-            //TODO value是数组的情况
-            $xml .= "<{$name}>$value</{$name}>";
+            if(is_array($value)){
+                $xml .= "<{$name}>".$this->arrayToXml($value)."</{$name}>";
+            }else{
+                $xml .= "<{$name}><![CDATA[{$value}]]></{$name}>";
+            }
         }
         return $xml."</xml>";
+    }
+    private function arrayToXml($array){
+        $xml = "";
+        foreach($array as $key => $value){
+            if( ! is_numeric($key)){
+                $xml .= "<{$key}>";
+            }
+            if( is_array($value)){
+                $xml .= $this->arrayToXml($value);
+            }else{
+                $xml .= "<![CDATA[$value]]>"; 
+            }
+            if( ! is_numeric($key)){
+                $xml .= "</{$key}>";
+            }
+        }
+        return $xml;
+    }
+    /**
+     * 构建自己的数据结构，默认实现是把所有的非null属性组成数组返回
+     * @return multitype:
+     */
+    protected function formatArgs(){
+        return get_object_vars($this);
     }
     /**
      * 返回按字典排序后的属性数组
      */
     public final function sortArg(){
-        $args = get_object_vars($this);
-        sort($args);
+        $args = $this->formatArgs();
+        asort($args);
         return $args;
+    }
+    /**
+     * 根据微信的要求进行签名并设置sign属性
+     */
+    public function sign(){
+        $str = $this->toString();
+        $this->sign = strtoupper(md5($str."&key=".WEIXIN_MCH_KEY));
     }
 }
 
@@ -107,7 +265,7 @@ class YDWXException extends \Exception{}
 /**
  * 微信消息封装基类,便于知道每种消息有什么内容
  */
-class YDWXMsg{
+class YDWXResponse{
     /**
      * 真值表示有错误
      * @var unknown
@@ -116,91 +274,12 @@ class YDWXMsg{
     public $errmsg;
     public $rawData;
     
-    const ToUserName    = "ToUserName";
-    const FromUserName  = "FromUserName";
-    const CreateTime    = "CreateTime";
-    /**
-     * 消息类型,见MSG_TYPE_*
-     * @var unknown
-     */
-    const MsgType   = "MsgType";
-
-    const Content   = "Content";
-    const MsgId     = "MsgId";
-    const MediaId   = "MediaId";
-    const PicUrl    = "PicUrl";
-    
-    /**
-     * 语音格式，如amr，speex等
-     * @var unknown
-     */
-    const Voice_Format       = "Format";
-    const Video_ThumbMediaId = "ThumbMediaId";
-    const Location_X = "Location_X";
-    const Location_Y = "Location_Y";
-    const Location_Scale = "Scale";
-    const Location_Label = "Label";
-    const Location_Poiname = "Poiname";
-    const Title = "Title";
-    const Description = "Description";
-    const Url = "Url";
-    
-    const Event = "Event";
-    const EventKey = "EventKey";
-    /**
-     * 有值表示通过二维码关注后微信会将带场景值关注事件推送给开发者
-     * @var unknown
-     */
-    const Ticket    = "Ticket";
-    const Latitude  = "Latitude";
-    const Longitude = "Longitude";
-    /**
-     * 地理位置精度
-     * @var unknown
-     */
-    const Precision = "Precision";
-
-    
-    const MSG_TYPE_EVENT = "event";
-    const EVENT_CLICK = "CLICK";
-    
-    const ScanType = "ScanType";
-    const ScanResult = "ScanResult";
-    
-    const SendPicCount = "Count";
-    const SendPicMd5Sum = "PicMd5Sum";
-    
-    const MASSSendJobFinish_Status = "Status";
-    const MASSSendJobFinish_TotalCount ="TotalCount";
-    const MASSSendJobFinish_FilterCount ="FilterCount";
-    const MASSSendJobFinish_SentCount ="SentCount";
-    const MASSSendJobFinish_ErrorCount ="ErrorCount";
-    
-    
-    const AuthAccess_token  = "access_token";
-    const AuthExpires_in    = "expires_in";
-    const AuthRefresh_token = "refresh_token";
-    const AuthOpenid = "openid";
-    const AuthScope = "scope";
-    
-    const PrePayAppId = "appid";
-    const PrePayMCHId  = "mch_id";
-    const PrePayDeviceInfo= "device_info";
-    const PrePayNonceStr = "nonce_str";
-    const PrePaySign = "sign";
-    const PrePayResultCode = "result_code";
-    const PrePayReturnCode = "return_code";
-    const PrePayReturnMsg = "return_msg";
-    const PrePayErrCode = "err_code";
-    const PrePayErrCodeDes = "err_code_des";
-    const PrePayTradeType = "trade_type";
-    const PrePayPrepayId  = "prepay_id";
-    const PrePayCodeUrl = "code_url";
-
     
     public function __construct($msg=null){
         $obj->rawData = $msg;
-        $this->build($msg);
+        if($msg){
+            $this->build($msg);
+        }
     }
     /**
      * @return 返回bool值，表示微信的业务处理成功
@@ -224,27 +303,4 @@ class YDWXMsg{
             $this->errmsg  = "响应字符串格式不对";
         }
     }
-    
-    public function get($name){
-        if(in_array(strtotime($name), 
-                array(self::ScanType, self::ScanType))){
-            return (string)$this->msg->ScanCodeInfo->$name;
-        }
-        if(strtotime($name) == self::SendPicCount){
-            return (string)$this->msg->SendPicsInfo->$name;
-        }
-        if(strtotime($name) == self::SendPicMd5Sum){
-            $array = array();
-            foreach ($this->msg->SendPicsInfo->PicList as $info){
-                $array[] = (string)$info->item->PicMd5Sum;
-            }
-            return $array;
-        }
-        if(in_array(strtotime($name),
-                array(self::Location_X, self::Location_Y, self::Location_Scale, self::Location_Label, self::Location_Poiname))){
-            return (string)$this->msg->SendLocationInfo->$name;
-        }
-        return (string)$this->msg->$name;
-    }
-    
 }

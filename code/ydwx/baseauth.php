@@ -3,7 +3,7 @@
  * 公众号微信内Web OAuth登陆，有两种情况
  * 一是公众号（订阅号、服务号）；一种是企业号
  * 该页面可通过Redirect方式进行访问，或者直接在需要的地方include_once
- * 该认证流程对于未关注用户不会得到完整用户信息,是静默授权的，用户无感知
+ * 该认证流程对于未关注用户不会得到完整用户信息,是静默授权的，用户无感知，非关注用户只能获得openid
  */
 
 chdir(dirname(__FILE__));//把工作目录切换到文件所在目录
@@ -35,7 +35,7 @@ if (WEIXIN_ACCOUNT_TYPE != WEIXIN_ACCOUNT_CROP){
             .$appid."&secret=".$secret."&code=".$_GET['code']."&grant_type=authorization_code"), true);
     
     if( !@$info['openid']){
-        YDWXHook::do_hook(YDWXHook::AUTH_FAIL, YDWXAuthFail::errMsg($info['errmsg'], $info['errcode']));
+        YDWXHook::do_hook(YDWXHook::AUTH_FAIL, YDWXAuthFailResponse::errMsg($info['errmsg'], $info['errcode']));
         die;
     }
     
@@ -43,7 +43,7 @@ if (WEIXIN_ACCOUNT_TYPE != WEIXIN_ACCOUNT_CROP){
     if($access_token){
         YDWXHook::do_hook(YDWXHook::AUTH_INAPP_SUCCESS, ydwx_user_info($access_token,     $info['openid'], $_GET['state']));
     }else{
-        $user = new YDWXOAuthUser();
+        $user = new YDWXSubscribeUser();
         $user->openid = $info['openid'];
         $user->state  = $_GET['state'];
         YDWXHook::do_hook(YDWXHook::AUTH_INAPP_SUCCESS, $user);
@@ -54,6 +54,6 @@ if (WEIXIN_ACCOUNT_TYPE != WEIXIN_ACCOUNT_CROP){
     if($access_token){
         YDWXHook::do_hook(YDWXHook::AUTH_CROP_SUCCESS,  ydwx_crop_user_info($access_token, $_GET['code'], $_GET['state']));
     }else{
-        YDWXHook::do_hook(YDWXHook::AUTH_FAIL,   YDWXAuthFail::errMsg("未取得access token"));
+        YDWXHook::do_hook(YDWXHook::AUTH_FAIL,   YDWXAuthFailResponse::errMsg("未取得access token"));
     }
 }

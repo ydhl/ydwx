@@ -41,7 +41,7 @@ if (WEIXIN_ACCOUNT_TYPE != WEIXIN_ACCOUNT_CROP){
             .$appid."&secret=".$secret."&code=".$_GET['code']."&grant_type=authorization_code"), true);
     
     if( !@$info['openid']){
-        YDWXHook::do_hook(YDWXHook::AUTH_FAIL, YDWXAuthFail::errMsg($info['errmsg'], $info['errcode']));
+        YDWXHook::do_hook(YDWXHook::AUTH_FAIL, YDWXAuthFailResponse::errMsg($info['errmsg'], $info['errcode']));
         die;
     }
     
@@ -52,6 +52,6 @@ if (WEIXIN_ACCOUNT_TYPE != WEIXIN_ACCOUNT_CROP){
     if($access_token){
         YDWXHook::do_hook(YDWXHook::AUTH_CROP_SUCCESS,  ydwx_crop_user_info($access_token, $_GET['code'], $_GET['state']));
     }else{
-        YDWXHook::do_hook(YDWXHook::AUTH_FAIL,   YDWXAuthFail::errMsg("未取得access token"));
+        YDWXHook::do_hook(YDWXHook::AUTH_FAIL,   YDWXAuthFailResponse::errMsg("未取得access token"));
     }
 }

@@ -23,7 +23,7 @@ function ydwx_crop_user_info($accessToken, $code, $state){
  * @param unknown $accessToken oauth流程得到的token或者是ydwx/refresh.php定时刷新下来的access token
  * @param unknown $openid
  * 
- * @return YDWXOAuthUser
+ * @return YDWXSubscribeUser
  */
 function ydwx_user_info($accessToken, $openid, $state){
     if( ! WEIXIN_IS_AUTHED){
@@ -31,7 +31,7 @@ function ydwx_user_info($accessToken, $openid, $state){
     }
     $http = new YDHttp();
     $userinfo = $http->get(WEIXIN_BASE_URL."user/info?access_token={$accessToken}&openid=$openid&lang=zh_CN");
-    $user = new YDWXOAuthUser($userinfo);
+    $user = new YDWXSubscribeUser($userinfo);
     $user->state = $state;
     return $user;
 }
@@ -41,12 +41,12 @@ function ydwx_user_info($accessToken, $openid, $state){
  * @param unknown $accessToken 注意，这里的access token是oauth认证第二步微信返回的
  * @param unknown $openid
  *
- * @return YDWXOAuthSnsUser
+ * @return YDWXOAuthUser
  */
 function ydwx_sns_userinfo($accessToken, $openid, $state){
     $http = new YDHttp();
     $user = $http->get(WEIXIN_WEB_BASE_URL."userinfo?access_token={$accessToken}&openid=$openid&lang=zh_CN");
-    $user = new YDWXOAuthSnsUser($user);
+    $user = new YDWXOAuthUser($user);
     $user->state = $state;
     return $user;
 }

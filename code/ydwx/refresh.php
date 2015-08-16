@@ -15,7 +15,7 @@ if(WEIXIN_ACCOUNT_TYPE == WEIXIN_ACCOUNT_CROP){//企业号
 }else{//其它微信号
     $msg = $http->get(WEIXIN_BASE_URL."token?grant_type=client_credential&appid=".WEIXIN_APP_ID."&secret=".WEIXIN_APP_SECRET);
 }
-$accessToken = new YDWXAccessTokenRefresh($msg);
+$accessToken = new YDWXAccessTokenResponse($msg);
 if($accessToken->isSuccess()) YDWXHook::do_hook(YDWXHook::ACCESS_TOKEN_REFRESH, $accessToken);
 
 if(WEIXIN_ACCOUNT_TYPE == WEIXIN_ACCOUNT_CROP){//企业号
@@ -24,6 +24,6 @@ if(WEIXIN_ACCOUNT_TYPE == WEIXIN_ACCOUNT_CROP){//企业号
     $msg = $http->get(WEIXIN_BASE_URL."ticket/getticket?type=jsapi&access_token=".$accessToken->access_token);
     
 }
-$ticket = new YDWXJsapiTicketRefresh($msg);
+$ticket = new YDWXJsapiTicketResponse($msg);
 if($ticket->isSuccess()) YDWXHook::do_hook(YDWXHook::JSAPI_TICKET_REFRESH, $info);
 die("success");

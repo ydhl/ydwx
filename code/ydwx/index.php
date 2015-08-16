@@ -71,10 +71,5 @@ if ($errCode != 0) {
 
 
 //微信事件指派
-$wxmsg  = YDWXMsg::build($msg);
-if($wxmsg->Get(YDWXMsg::Event)){
-    $hookname = strtoupper($wxmsg->Get(YDWXMsg::MsgType)."_".$wxmsg->Get(YDWXMsg::Event));
-}else{
-    $hookname = strtoupper($wxmsg->Get(YDWXMsg::MsgType));
-}
-YDWXHook::do_hook(constant("YDWXHook::$hookname"), $wxmsg);
+$wxevent  = YDWXEvent::CreateEventMsg($msg);
+YDWXHook::do_hook($wxevent->HookName(), $wxevent);
