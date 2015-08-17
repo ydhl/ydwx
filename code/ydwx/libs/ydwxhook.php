@@ -206,10 +206,16 @@ final class YDWXHook {
     const EVENT_LOCATION_SELECT    = "event_location_select";
     
     /**
-     * 群发推送结果 Status,TotalCount,FilterCount,SentCount,ErrorCount
+     * 群发推送结果 YDWXEventMASSSENDJOBFINISH
      * @var unknown
      */
     const EVENT_MASSSENDJOBFINISH  = "event_masssendjobfinish";
+    
+    /**
+     * 在模版消息发送任务完成后通知 YDWXEventTEMPLATESENDJOBFINISH
+     * @var unknown
+     */
+    const EVENT_TEMPLATESENDJOBFINISH  = "event_templatesendjobfinish";
     
     private static $listeners = array ();
     /**

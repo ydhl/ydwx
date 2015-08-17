@@ -27,7 +27,7 @@ function ydwx_sharehandle_script($share_title,$share_desc,$share_image, $link_ta
         ?>
         wx.config({
             debug: false,
-            appId: '<?php echo WEIXIN_APP_ID?>', // 必填，公众号的唯一标识
+            appId: '<?php echo YDWX_WEIXIN_APP_ID?>', // 必填，公众号的唯一标识
             timestamp:'<?php echo $time?>' , // 必填，生成签名的时间戳
             nonceStr: '<?php echo $nonceStr?>', // 必填，生成签名的随机串
             signature: '<?php echo $signStr?>',// 必填，签名，见附录1
@@ -64,7 +64,7 @@ function ydwx_weboath_script($qrcode_container_id, $state, $style="black", $href
 <script type="text/javascript">
  var obj = new WxLogin({
       id:"<?php echo $qrcode_container_id?>", 
-      appid: "<?php WEIXIN_WEB_APP_ID?>", 
+      appid: "<?php YDWX_WEIXIN_WEB_APP_ID?>", 
       scope: "snsapi_login", 
       redirect_uri: "<?php echo YDWX_SITE_URL."ydwx/webauth.php"?>",
       state: "<?php echo $state?>",

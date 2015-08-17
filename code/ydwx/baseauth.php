@@ -17,8 +17,8 @@ if( ! @$_GET['state'] ){
 
 $redirect = YDWX_SITE_URL.'ydwx/auth.php';
 
-$appid  = WEIXIN_ACCOUNT_TYPE == WEIXIN_ACCOUNT_CROP ? WEIXIN_CROP_ID : WEIXIN_APP_ID;
-$secret = WEIXIN_ACCOUNT_TYPE == WEIXIN_ACCOUNT_CROP ? WEIXIN_CROP_SECRET : WEIXIN_APP_SECRET;
+$appid  = YDWX_WEIXIN_ACCOUNT_TYPE == YDWX_WEIXIN_ACCOUNT_TYPE_CROP ? YDWX_WEIXIN_CROP_ID : YDWX_WEIXIN_APP_ID;
+$secret = YDWX_WEIXIN_ACCOUNT_TYPE == YDWX_WEIXIN_ACCOUNT_TYPE_CROP ? YDWX_WEIXIN_CROP_SECRET : YDWX_WEIXIN_APP_SECRET;
 
 //第一步，引导用户到微信页面授权
 if( ! @$_GET['code'] &&  ! @$_GET['state']){
@@ -29,7 +29,7 @@ if( ! @$_GET['code'] &&  ! @$_GET['state']){
 }
 
 //第二步，用户授权后返回，获取授权用户信息
-if (WEIXIN_ACCOUNT_TYPE != WEIXIN_ACCOUNT_CROP){
+if (YDWX_WEIXIN_ACCOUNT_TYPE != YDWX_WEIXIN_ACCOUNT_TYPE_CROP){
     $http = new YDHttp();
     $info = json_decode($http->get("https://api.weixin.qq.com/sns/oauth2/access_token?appid="
             .$appid."&secret=".$secret."&code=".$_GET['code']."&grant_type=authorization_code"), true);

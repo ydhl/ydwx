@@ -344,3 +344,116 @@ class YDWXEventLocation_select extends YDWXEvent{
      */
     public $Poiname;
 }
+
+/**
+ * 群发事件推送群发结果
+ * 
+ * 由于群发任务提交后，群发任务可能在一定时间后才完成，因此，群发接口调用时，仅会给出群发任务是否提交成功的提示，若群发任务提交成功，则在群发任务结束时，会向开发者在公众平台填写的开发者URL（callback URL）推送事件。
+ * 需要注意，由于群发任务彻底完成需要较长时间，将会在群发任务即将完成的时候，就推送群发结果，此时的推送人数数据将会与实际情形存在一定误差
+ * @author leeboo
+ *
+ */
+class YDWXEventMASSSENDJOBFINISH extends YDWXEvent{
+    const STATUS_SUCCESS = "send success";
+    const STATUS_FAIL    = "send fail";
+    /**
+     * 涉嫌广告
+     */
+    const ERR_10001      = "err(10001)";
+    /**
+     * 涉嫌政治
+     */
+    const ERR_20001      = "err(20001)";
+    /**
+     * 涉嫌色情
+     */
+    const ERR_20002      = "err(20002)";
+    /**
+     * 涉嫌社会
+     */
+    const ERR_20004      = "err(20004)";
+    /**
+     * 涉嫌违法犯罪
+     */
+    const ERR_20006      = "err(20006)";
+    /**
+     * 涉嫌欺诈
+     */
+    const ERR_20008      = "err(20008)";
+    /**
+     * 涉嫌版权
+     */
+    const ERR_20013      = "err(20013)";
+    /**
+     * 涉嫌其他
+     */
+    const ERR_21000      = "err(21000)";
+    /**
+     * 涉嫌互推(互相宣传)
+     */
+    const ERR_22000      = "err(22000)";
+    
+    /**
+     * 群发的消息ID
+     * @var unknown
+     */
+    public $MsgID;
+    /**
+     * 群发的结果，为“send success”或“send fail”或“err(num)”。
+     * 但send success时，也有可能因用户拒收公众号的消息、系统错误等原因造成少量用户接收失败。
+     * err(num)是审核失败的具体原因，可能的情况如下：
+     * err(10001), //涉嫌广告 err(20001), //涉嫌政治 err(20004),  //涉嫌社会 
+     * err(20002), //涉嫌色情 err(20006), //涉嫌违法犯罪 err(20008), //涉嫌欺诈 
+     * err(20013), //涉嫌版权 err(22000), //涉嫌互推(互相宣传) err(21000), //涉嫌其他
+     * @var unknown
+     */
+    public $Status;
+    /**
+     * group_id下粉丝数；或者openid_list中的粉丝数
+     * @var unknown
+     */
+    public $TotalCount;
+    /**
+     * 过滤（过滤是指特定地区、性别的过滤、用户设置拒收的过滤，用户接收已超4条的过滤）后，
+     * 准备发送的粉丝数，原则上，FilterCount = SentCount + ErrorCount
+     * @var unknown
+     */
+    public $FilterCount;
+    /**
+     * 发送成功的粉丝数
+     * @var unknown
+     */
+    public $SendCount;
+    /**
+     * 发送失败的粉丝数
+     * @var unknown
+     */
+    public $ErrorCount;
+}
+class YDWXEventTEMPLATESENDJOBFINISH extends YDWXEvent{
+    /**
+     * 发送成功
+     * @var unknown
+     */
+    const STATUS_SUCCESS = "success";
+    /**
+     * 用户拒绝
+     * @var unknown
+     */
+    const STATUS_USER_BLOCK = "failed:user block";
+    /**
+     * 发送失败
+     * @var unknown
+     */
+    const STATUS_SYSTEM_FAILED = "failed: system failed";
+    /**
+     * 群发的消息ID
+     * @var unknown
+     */
+    public $MsgID;
+    /**
+     * 发送结果
+     * 
+     */
+    public $Status;
+} 

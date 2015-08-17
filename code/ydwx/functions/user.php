@@ -7,12 +7,12 @@
  * @return YDWXOAuthCropUser
  */
 function ydwx_crop_user_info($accessToken, $code, $state){
-    if( ! WEIXIN_ACCOUNT_TYPE != WEIXIN_ACCOUNT_CROP){
+    if( ! YDWX_WEIXIN_ACCOUNT_TYPE != YDWX_WEIXIN_ACCOUNT_TYPE_CROP){
         throw new YDWXException("该方法只有企业号才能调用");
     }
     
     $http = new YDHttp();
-    $user = $http->get(WEIXIN_QY_BASE_URL."user/getuserinfo?access_token={$accessToken}&code=$code&lang=zh_CN");
+    $user = $http->get(YDWX_WEIXIN_QY_BASE_URL."user/getuserinfo?access_token={$accessToken}&code=$code&lang=zh_CN");
     $user = new YDWXOAuthCropUser($user);
     $user->state = $state;
     return $user;
@@ -26,11 +26,11 @@ function ydwx_crop_user_info($accessToken, $code, $state){
  * @return YDWXSubscribeUser
  */
 function ydwx_user_info($accessToken, $openid, $state){
-    if( ! WEIXIN_IS_AUTHED){
+    if( ! YDWX_WEIXIN_IS_AUTHED){
         throw new YDWXException("公众号未认证，无法获取用户信息");
     }
     $http = new YDHttp();
-    $userinfo = $http->get(WEIXIN_BASE_URL."user/info?access_token={$accessToken}&openid=$openid&lang=zh_CN");
+    $userinfo = $http->get(YDWX_WEIXIN_BASE_URL."user/info?access_token={$accessToken}&openid=$openid&lang=zh_CN");
     $user = new YDWXSubscribeUser($userinfo);
     $user->state = $state;
     return $user;
@@ -45,7 +45,7 @@ function ydwx_user_info($accessToken, $openid, $state){
  */
 function ydwx_sns_userinfo($accessToken, $openid, $state){
     $http = new YDHttp();
-    $user = $http->get(WEIXIN_WEB_BASE_URL."userinfo?access_token={$accessToken}&openid=$openid&lang=zh_CN");
+    $user = $http->get(YDWX_WEIXIN_WEB_BASE_URL."userinfo?access_token={$accessToken}&openid=$openid&lang=zh_CN");
     $user = new YDWXOAuthUser($user);
     $user->state = $state;
     return $user;

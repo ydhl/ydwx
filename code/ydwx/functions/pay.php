@@ -37,14 +37,14 @@ function ydwx_pay_product_qrcode($product_id){
     $nonceStr   = uniqid();
     $time_stamp = time();
     
-    $str = "appid=".WEIXIN_APP_ID
-    ."&mch_id=".WEIXIN_MCH_ID
+    $str = "appid=".YDWX_WEIXIN_APP_ID
+    ."&mch_id=".YDWX_WEIXIN_MCH_ID
     ."&nonce_str=".$nonceStr."&product_id=".$product_id
     ."&time_stamp=".$time_stamp;
-    $signStr = strtoupper(md5($str."&key=".WEIXIN_MCH_KEY));
+    $signStr = strtoupper(md5($str."&key=".YDWX_WEIXIN_MCH_KEY));
     
     return "weixin://wxpay/bizpayurl?sign={$signStr}&appid="
-            .WEIXIN_APP_ID."&mch_id=".WEIXIN_MCH_ID
+            .YDWX_WEIXIN_APP_ID."&mch_id=".YDWX_WEIXIN_MCH_ID
     ."&product_id={$product_id}&time_stamp={$time_stamp}&nonce_str={$nonceStr}";
 }
 
@@ -75,7 +75,7 @@ function ydwx_jspay_script($jsapi_ticket, $curr_page_uri){
 
 wx.config({
     debug: false,
-    appId: '<?php echo WEIXIN_APP_ID?>',
+    appId: '<?php echo YDWX_WEIXIN_APP_ID?>',
     timestamp:'<?php echo $time?>' ,
     nonceStr: '<?php echo $nonceStr?>',
     signature: '<?php echo $signStr?>',

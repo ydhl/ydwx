@@ -12,9 +12,9 @@ $arg->attach        = $_POST['attach'];
 $arg->body          = $_POST['pay_desc'];
 try{
     $msg = ydwx_pay_unifiedorder($arg);
-    $str = "appId=".WEIXIN_APP_ID."&nonceStr=".$_POST['noncestr']
+    $str = "appId=".YDWX_WEIXIN_APP_ID."&nonceStr=".$_POST['noncestr']
         ."&package=prepay_id=".$msg->prepay_id."&signType=MD5&timeStamp=".$_POST['timestamp'];
-    $sign = strtoupper(md5($str."&key=".WEIXIN_MCH_KEY));
+    $sign = strtoupper(md5($str."&key=".YDWX_WEIXIN_MCH_KEY));
     
     echo json_encode(ydwx_success(array(
             "prepay_id" => $msg->prepay_id,

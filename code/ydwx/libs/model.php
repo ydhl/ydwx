@@ -256,7 +256,7 @@ abstract class YDWXRequest{
      */
     public function sign(){
         $str = $this->toString();
-        $this->sign = strtoupper(md5($str."&key=".WEIXIN_MCH_KEY));
+        $this->sign = strtoupper(md5($str."&key=".YDWX_WEIXIN_MCH_KEY));
     }
 }
 

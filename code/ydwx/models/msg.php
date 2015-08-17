@@ -4,7 +4,7 @@
  * @author leeboo
  * @see http://mp.weixin.qq.com/wiki/17/304c1885ea66dbedf7dc170d84999a9d.html#.E5.8F.91.E9.80.81.E6.A8.A1.E6.9D.BF.E6.B6.88.E6.81.AF
  */
-class YDWXTemplateSendResponse extends YDWXResponse{
+class YDWXTemplateResponse extends YDWXResponse{
     public $msgid;
 }
 /**
@@ -12,7 +12,7 @@ class YDWXTemplateSendResponse extends YDWXResponse{
  * @author leeboo
  * @see http://mp.weixin.qq.com/wiki/15/5380a4e6f02f2ffdc7981a8ed7a40753.html#.E6.A0.B9.E6.8D.AEOpenID.E5.88.97.E8.A1.A8.E7.BE.A4.E5.8F.91.E3.80.90.E8.AE.A2.E9.98.85.E5.8F.B7.E4.B8.8D.E5.8F.AF.E7.94.A8.EF.BC.8C.E6.9C.8D.E5.8A.A1.E5.8F.B7.E8.AE.A4.E8.AF.81.E5.90.8E.E5.8F.AF.E7.94.A8.E3.80.91
  */
-class YDWXMassSendResponse extends YDWXResponse{
+class YDWXMassResponse extends YDWXResponse{
     /**
      * 消息发送任务的ID
      * @var unknown
@@ -209,11 +209,11 @@ interface YDWXMsgBuilder{
     public static function buildMPNewsMsg(YDWXMpNewsMsg $var);
 }
 /**
- * 公众号根据openid群发消息
+ * 群发消息请求参数
  * @author leeboo
  * @see http://mp.weixin.qq.com/wiki/15/5380a4e6f02f2ffdc7981a8ed7a40753.html#.E6.A0.B9.E6.8D.AEOpenID.E5.88.97.E8.A1.A8.E7.BE.A4.E5.8F.91.E3.80.90.E8.AE.A2.E9.98.85.E5.8F.B7.E4.B8.8D.E5.8F.AF.E7.94.A8.EF.BC.8C.E6.9C.8D.E5.8A.A1.E5.8F.B7.E8.AE.A4.E8.AF.81.E5.90.8E.E5.8F.AF.E7.94.A8.E3.80.91
  */
-class YDWXMassByOpenIdRequest extends YDWXRequest implements YDWXMsgBuilder{
+class YDWXMassRequest extends YDWXRequest implements YDWXMsgBuilder{
     /**
      * -公众号根据openid 列表发送时是接受者openid，最少两个；
      * -公众号根据分组发送时是分组id
@@ -247,49 +247,49 @@ class YDWXMassByOpenIdRequest extends YDWXRequest implements YDWXMsgBuilder{
     }
 
     public static function buildTextMsg($text){
-        $msg = new YDWXMassByOpenIdRequest();
+        $msg = new YDWXMassRequest();
         $msg->msgtype  = "text";
         $msg->text    = array("content" => $text);
         return $msg;
     }
 
     public static function buildImageMsg($media_id){
-        $msg = new YDWXMassByOpenIdRequest();
+        $msg = new YDWXMassRequest();
         $msg->msgtype  = "image";
         $msg->image    = array("media_id" => $media_id);
         return $msg;
     }
 
     public static function buildVoiceMsg($media_id){
-        $msg = new YDWXMassByOpenIdRequest();
+        $msg = new YDWXMassRequest();
         $msg->msgtype  = "voice";
         $msg->voice    = array("media_id" => $media_id);
         return $msg;
     }
 
     public static function buildVideoMsg(YDWXVideoMsg $arg){
-        $msg = new YDWXMassByOpenIdRequest();
+        $msg = new YDWXMassRequest();
         $msg->msgtype  = "video";
         $msg->video    = $arg->toArray();
         return $msg;
     }
 
     public static function buildMusicMsg(YDWXMusicMsg $arg){
-        $msg = new YDWXMassByOpenIdRequest();
+        $msg = new YDWXMassRequest();
         $msg->msgtype  = "music";
         $msg->music    = $arg->toArray();
         return $msg;
     }
 
     public static function buildWXCardMsg($card_id){
-        $msg = new YDWXMassByOpenIdRequest();
+        $msg = new YDWXMassRequest();
         $msg->msgtype  = "wxcard";
         $msg->wxcard   = array("card_id" => $media_id);
         return $msg;
     }
 
     public static function buildMPNewsMsgByID($media_id){
-        $msg = new YDWXMassByOpenIdRequest();
+        $msg = new YDWXMassRequest();
         $msg->msgtype  = "mpnews";
         $msg->mpnews    = array("media_id" => $media_id);
         return $msg;
@@ -307,11 +307,23 @@ class YDWXMassByOpenIdRequest extends YDWXRequest implements YDWXMsgBuilder{
     }
 }
 /**
+ * 群发消息阅览请求参数
+ * @author leeboo
+ *
+ */
+class YDWXMassPreviewRequest extends YDWXMassRequest{
+    /**
+     * 自定微信号进行阅览，如果设置该值，则忽略to参数
+     * @var unknown
+     */
+    public $towxname;
+}
+/**
  * 根据分组群发消息
  * @author leeboo
  * @see http://mp.weixin.qq.com/wiki/15/5380a4e6f02f2ffdc7981a8ed7a40753.html#.E6.A0.B9.E6.8D.AE.E5.88.86.E7.BB.84.E8.BF.9B.E8.A1.8C.E7.BE.A4.E5.8F.91.E3.80.90.E8.AE.A2.E9.98.85.E5.8F.B7.E4.B8.8E.E6.9C.8D.E5.8A.A1.E5.8F.B7.E8.AE.A4.E8.AF.81.E5.90.8E.E5.9D.87.E5.8F.AF.E7.94.A8.E3.80.91
  */
-class YDWXMassByGroupRequest extends YDWXMassByOpenIdRequest{
+class YDWXMassByGroupRequest extends YDWXMassRequest{
     /**
      * 是否发送给所有人
      * @var array
@@ -336,7 +348,7 @@ class YDWXMassByGroupRequest extends YDWXMassByOpenIdRequest{
         return $args;
     }
     public static function buildVideoMsg(YDWXVideoMsg $arg){
-        $msg = new YDWXMassByOpenIdRequest();
+        $msg = new YDWXMassByGroupRequest();
         $msg->msgtype  = "mpvideo";
         $msg->video    = $arg->toArray();
         return $msg;
@@ -478,7 +490,7 @@ class YDWXAnswerMsg extends YDWXRequest implements YDWXMsgBuilder{
  * @author leeboo
  * @see http://qydev.weixin.qq.com/wiki/index.php?title=%E6%B6%88%E6%81%AF%E7%B1%BB%E5%9E%8B%E5%8F%8A%E6%95%B0%E6%8D%AE%E6%A0%BC%E5%BC%8F
  */
-class YDWXQyMsgRequest extends YDWXMassByOpenIdRequest implements YDWXMsgBuilder{
+class YDWXQyMsgRequest extends YDWXMassRequest implements YDWXMsgBuilder{
     /**
      * 部门ID列表，多个接收者用‘|’分隔，最多支持100个。当touser为@all时忽略本参数
      * @var unknown

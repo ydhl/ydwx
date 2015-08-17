@@ -9,12 +9,12 @@
  * @return string MEDIA_ID
  */
 function ydwx_media_upload($accessToken, $type, $media){
-    if( ! WEIXIN_IS_AUTHED){
+    if( ! YDWX_WEIXIN_IS_AUTHED){
         throw new YDWXException("上传文件需要认证账号");
     }
     
     $http = new YDHttp();
-    $info = $http->post(WEIXIN_BASE_URL."media/upload?access_token={$accessToken}&type=$type", 
+    $info = $http->post(YDWX_WEIXIN_BASE_URL."media/upload?access_token={$accessToken}&type=$type", 
             array("media"=>"@".$media) ,true);
     $msg  = new YDWXResponse($info); 
     if($msg->isSuccess()){
@@ -33,7 +33,7 @@ function ydwx_media_upload($accessToken, $type, $media){
  */
 function ydwx_media_get($accessToken, $mediaid, $isVideo=false){
     $http    = new YDHttp();
-    $content = $http->get( ($isVideo ? WEIXIN_BASE_URL2 : WEIXIN_BASE_URL)."media/get?access_token={$accessToken}&media_id={$mediaid}");
+    $content = $http->get( ($isVideo ? YDWX_YDWX_WEIXIN_BASE_URL2 : YDWX_WEIXIN_BASE_URL)."media/get?access_token={$accessToken}&media_id={$mediaid}");
     $info    = json_decode($content, true);
     if( array_key_exists("errcode", $info))return false;
     return $content;

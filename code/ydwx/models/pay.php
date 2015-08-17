@@ -197,8 +197,8 @@ class YDWXPayNotifyRequest extends YDWXRequest{
     private $mch_id;
 
     public function valid(){
-        $this->appid = WEIXIN_APP_ID;
-        $this->mch_id = WEIXIN_MCH_ID;
+        $this->appid = YDWX_WEIXIN_APP_ID;
+        $this->mch_id = YDWX_WEIXIN_MCH_ID;
     }
 }
 
@@ -309,8 +309,8 @@ class YDWXPayUnifiedOrderRequest extends YDWXRequest{
      * @param string $return_code_url 是否返回扫描支付二维码内容, 如果为true，则必须指定product_id；负责必须指定openid
      */
     public function __construct($return_code_url=false){
-        $this->appid        = WEIXIN_APP_ID;
-        $this->mch_id       = WEIXIN_MCH_ID;
+        $this->appid        = YDWX_WEIXIN_APP_ID;
+        $this->mch_id       = YDWX_WEIXIN_MCH_ID;
         $this->nonce_str    = uniqid();
         $this->notify_url  = YDWX_SITE_URL."pay-notify.php";
         if($return_code_url){

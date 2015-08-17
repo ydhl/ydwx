@@ -17,7 +17,7 @@ $redirect = YDWX_SITE_URL.'ydwx/webauth.php';
 if( ! @$_GET['code'] &&  ! @$_GET['state']){
     ob_clean();
     header("Location: https://open.weixin.qq.com/connect/qrconnect?appid="
-        .WEIXIN_WEB_APP_ID."&redirect_uri={$redirect}&response_type=code&scope=snsapi_login&state={$state}#wechat_redirect");
+        .YDWX_WEIXIN_WEB_APP_ID."&redirect_uri={$redirect}&response_type=code&scope=snsapi_login&state={$state}#wechat_redirect");
     die;
 }
 
@@ -28,7 +28,7 @@ if( ! @$_GET['code'] && @$_GET['state']){
 
 $http = new YDHttp();
 $info = json_decode($http->get("https://api.weixin.qq.com/sns/oauth2/access_token?appid="
-        .WEIXIN_WEB_APP_ID."&secret=".WEIXIN_WEB_APP_SECRET."&code=".$_GET['code']."&grant_type=authorization_code"), true);
+        .YDWX_WEIXIN_WEB_APP_ID."&secret=".YDWX_WEIXIN_WEB_APP_SECRET."&code=".$_GET['code']."&grant_type=authorization_code"), true);
 
 if( !@$info['openid']){
     YDWXHook::do_hook(YDWXHook::AUTH_FAIL, YDWXAuthFailResponse::errMsg($info['errmsg'], $info['errcode']));

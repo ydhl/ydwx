@@ -9,7 +9,7 @@
  */
 function ydwx_menu_get($accessToken){
     $http = new YDHttp();
-    $menus = json_decode($http->get(WEIXIN_BASE_URL."menu/get?access_token=".$accessToken), true);
+    $menus = json_decode($http->get(YDWX_WEIXIN_BASE_URL."menu/get?access_token=".$accessToken), true);
 
     $array = array();
     if( ! @$menus['menu']['button'])return array();
@@ -29,7 +29,7 @@ function ydwx_menu_get($accessToken){
  * @see http://mp.weixin.qq.com/wiki/13/43de8269be54a0a6f64413e4dfa94f39.html
  */
 function ydwx_menu_create($accessToken, $menus){
-    if (WEIXIN_ACCOUNT_TYPE == WEIXIN_ACCOUNT_SUBSCRIBE && !WEIXIN_IS_AUTHED){
+    if (YDWX_WEIXIN_ACCOUNT_TYPE == YDWX_WEIXIN_ACCOUNT_TYPE_SUBSCRIBE && !YDWX_WEIXIN_IS_AUTHED){
         throw new YDWXException("不支持创建菜单");
     }
     $http = new YDHttp();
@@ -39,7 +39,7 @@ function ydwx_menu_create($accessToken, $menus){
         $save_menus['button'][] = $menu->toArray();
     }
 
-    $info = json_decode($http->post(WEIXIN_BASE_URL."menu/create?access_token=".$accessToken, 
+    $info = json_decode($http->post(YDWX_WEIXIN_BASE_URL."menu/create?access_token=".$accessToken, 
             urldecode(json_encode($save_menus))), true);
 
     return ! $info['errcode'];
@@ -53,7 +53,7 @@ function ydwx_menu_create($accessToken, $menus){
  */
 function ydwx_menu_delete($accessToken){
     $http = new YDHttp();
-    $info = json_decode($http->get(WEIXIN_BASE_URL."menu/delete?access_token=".$accessToken), true);
+    $info = json_decode($http->get(YDWX_WEIXIN_BASE_URL."menu/delete?access_token=".$accessToken), true);
     var_dump($info);
     return ! $info['errcode'];
     
@@ -61,7 +61,7 @@ function ydwx_menu_delete($accessToken){
 
 function ydwx_get_current_selfmenu_info($accessToken){
     $http = new YDHttp();
-    $menus = json_decode($http->get(WEIXIN_BASE_URL."get_current_selfmenu_info?access_token=".$accessToken), true);
+    $menus = json_decode($http->get(YDWX_WEIXIN_BASE_URL."get_current_selfmenu_info?access_token=".$accessToken), true);
     
     $array = array();
     if( ! @$menus['selfmenu_info']['button'])return array();
