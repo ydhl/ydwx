@@ -79,7 +79,7 @@ final class YDWXHook {
     
     /**
      * 微信支付通知
-     * hook参数 YDWXPayNotifyResponse 
+     * hook参数 YDWXPaiedNotifyResponse 
      * https://pay.weixin.qq.com/wiki/doc/api/native.php?chapter=9_7
      * 处理hook的函数需要返回bool值，true表示通知已经处理了，微信不用在通知了
      * @var unknown
@@ -87,14 +87,14 @@ final class YDWXHook {
     const PAY_NOTIFY_SUCCESS    = "PAY_NOTIFY_SUCCESS";
     /**
      * 微信支付通知失败
-     * 返回的参数YDWXPayNotifyResponse 
+     * 返回的参数YDWXPaiedNotifyResponse 
      * @var unknown
      */
     const PAY_NOTIFY_ERROR      = "PAY_NOTIFY_ERROR";
     
     /**
      * 微信扫码支付通知成功
-     * hook参数YDWXPayNotifyResponse, hook 函数根据接收的数据在自己的系统中生成订单.
+     * hook参数YDWXPaiedNotifyResponse, hook 函数根据接收的数据在自己的系统中生成订单.
      * 参数中有被扫描产品的product id,并构建YDWXPayUnifiedOrderRequest并返回
      * 如果出现错误抛出异常，
      * @var unknown

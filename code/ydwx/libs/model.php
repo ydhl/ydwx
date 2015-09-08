@@ -188,7 +188,7 @@ abstract class YDWXRequest{
     }
     /**
      * 根据设置的属性及微信接口参数要求验证、构建数据，有问题抛出YDWXException
-     * 这是在toString，toJSONString，toXMLString之前会调用的一部
+     * 这是在toString，toJSONString，toXMLString之前会调用的一步
      */
     public abstract function valid();
     public function toString(){

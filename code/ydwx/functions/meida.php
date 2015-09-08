@@ -24,6 +24,57 @@ function ydwx_media_upload($accessToken, $type, $media){
 }
 
 /**
+ * 新增永久图文素材
+ * 
+ * @param unknown $accessToken
+ * @param array $articles YDWXMpNewsMsg 组成的数组
+ * @return mediaid
+ * @throws YDWXException
+ */
+function ydwx_material_add_news($accessToken, array $articles){
+    if( ! YDWX_WEIXIN_IS_AUTHED){
+        throw new YDWXException("上传文件需要认证账号");
+    }
+    $array = array();
+    foreach ($articles as $article){
+        $array[] = $article->toJSONString();
+    }
+    $http = new YDHttp();
+    $info = $http->post(YDWX_WEIXIN_BASE_URL."material/add_news?access_token={$accessToken}",
+    ydwx_json_encode($array));
+    $msg  = new YDWXResponse($info);
+    if($msg->isSuccess()){
+        return $msg->media_id;
+    }
+    throw new YDWXException($msg->errmsg);
+}
+
+/**
+ * 上传图片得到URL，
+ * 上传图文消息内的图片获取URL 
+ * 请注意，本接口所上传的图片不占用公众号的素材库中图片数量的5000个的限制。
+ * 图片仅支持jpg/png格式，大小必须在1MB以下。
+ * @param unknown $accessToken
+ * @param string $media 绝对路径
+ * @return url
+ * @throws YDWXException
+ */
+function ydwx_media_uploadimg($accessToken, $media){
+    if( ! YDWX_WEIXIN_IS_AUTHED){
+        throw new YDWXException("上传文件需要认证账号");
+    }
+    
+    $http = new YDHttp();
+    $info = $http->post(YDWX_WEIXIN_BASE_URL."media/uploadimg?access_token={$accessToken}", 
+            array("media"=>"@".$media) ,true);
+    $msg  = new YDWXResponse($info); 
+    if($msg->isSuccess()){
+        return $msg->url; 
+    }
+    throw new YDWXException($msg->errmsg);
+}
+
+/**
  * 下载临时文件
  * 
  * @param unknown $accessToken

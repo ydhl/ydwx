@@ -34,7 +34,7 @@ class YDHttp{
 		return $this->http($url,'GET');
 	}
 
-	function post($url, $params = array(), $multi = false) {
+	public function post($url, $params = array(), $multi = false) {
 		$query = "";
 		if( is_array($params)){
 			if($multi)
@@ -67,7 +67,7 @@ class YDHttp{
 
 		foreach ($params as $parameter => $value)
 		{
-			if( in_array($parameter,array("pic","image")) && $value{0} == '@' )
+			if($value{0} == '@' )
 			{
 				$url = ltrim( $value , '@' );
 				$content = file_get_contents( $url );
@@ -116,7 +116,7 @@ class YDHttp{
 	 *
 	 * @return API results
 	 */
-	function http($url, $method, $postfields = NULL, $multi = false) {
+	protected function http($url, $method, $postfields = NULL, $multi = false) {
 		$this->http_info = array();
 		$ci = curl_init();
 		/* Curl settings */
@@ -158,4 +158,22 @@ class YDHttp{
 		return trim($response);
 	}
 
+}
+class YDHttps extends YDHttp{
+    /**
+     * Make an HTTP request
+     *
+     * @return API results
+     */
+    protected function http($url, $method, $postfields = NULL, $multi = false) {
+        curl_setopt($ci, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ci, CURLOPT_SSL_VERIFYHOST, false);
+        
+        curl_setopt($ci,CURLOPT_SSLCERTTYPE,'PEM');
+        curl_setopt($ci,CURLOPT_SSLCERT,YDWX_WEIXIN_APICLIENT_CERT);
+        curl_setopt($ci,CURLOPT_SSLKEYTYPE,'PEM');
+        curl_setopt($ci,CURLOPT_SSLKEY, YDWX_WEIXIN_APICLIENT_KEY);
+    
+        return parent::http($url, $method, $postfields, $multi);
+    }
 }

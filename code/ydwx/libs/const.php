@@ -227,8 +227,10 @@ DEFINE("YDWX_INDUSTRY_PRESS",    40);
 DEFINE("YDWX_INDUSTRY_OTHER",    41);
 
 define("YDWX_WEIXIN_BASE_URL",           "https://api.weixin.qq.com/cgi-bin/");
+define("YDWX_WEIXIN_BASE_URL2",           "https://api.weixin.qq.com/");
 define("YDWX_WEIXIN_WEB_BASE_URL",       "https://api.weixin.qq.com/sns/");
-define("YDWX_YDWX_WEIXIN_BASE_URL2",      "http://api.weixin.qq.com/cgi-bin/");
+define("YDWX_YDWX_WEIXIN_BASE_URL2",     "http://api.weixin.qq.com/cgi-bin/");
 define("YDWX_WEIXIN_QY_BASE_URL",        "https://qyapi.weixin.qq.com/cgi-bin/");
+define("YDWX_WEIXIN_PAY_URL",            "https://api.mch.weixin.qq.com/");
 
 ?>

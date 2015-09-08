@@ -26,6 +26,10 @@ define("YDWX_WEIXIN_TOKEN",              "");
 //微信支付商户定义
 define("YDWX_WEIXIN_MCH_ID",             "");
 define("YDWX_WEIXIN_MCH_KEY",            "");
+//证书pem格式（apiclient_cert.pem）路径，建议放在非web访问路径中
+define("YDWX_WEIXIN_APICLIENT_CERT",     "");
+//证书密钥pem格式（apiclient_key.pem），建议放在非web访问路径中
+define("YDWX_WEIXIN_APICLIENT_KEY",      "");
 
 //微信网站定义
 define("YDWX_WEIXIN_WEB_APP_ID",         "");

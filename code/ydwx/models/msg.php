@@ -247,21 +247,27 @@ class YDWXMassRequest extends YDWXRequest implements YDWXMsgBuilder{
     }
 
     public static function buildTextMsg($text){
-        $msg = new YDWXMassRequest();
+        $cls = get_called_class();
+        $msg = $cls();
         $msg->msgtype  = "text";
         $msg->text    = array("content" => $text);
         return $msg;
     }
-
+    
     public static function buildImageMsg($media_id){
-        $msg = new YDWXMassRequest();
+        $cls = get_called_class();
+        /**
+         * @var YDWXMassRequest
+         */
+        $msg = new $cls();
         $msg->msgtype  = "image";
         $msg->image    = array("media_id" => $media_id);
         return $msg;
     }
 
     public static function buildVoiceMsg($media_id){
-        $msg = new YDWXMassRequest();
+        $cls = get_called_class();
+        $msg = new $cls();
         $msg->msgtype  = "voice";
         $msg->voice    = array("media_id" => $media_id);
         return $msg;
@@ -306,6 +312,71 @@ class YDWXMassRequest extends YDWXRequest implements YDWXMsgBuilder{
         return $args;
     }
 }
+class YDWXMassCustomRequest extends YDWXMassRequest{
+    public $kf_account;
+    public static function buildNewsMsg(YDWXNewsMsg $var){
+        $msg = new YDWXMassCustomRequest();
+        $msg->msgtype   = "news";
+        $num = min(func_num_args(), 10);
+        for($i=0; $i< $num; $i++){
+            $arg = func_get_arg($i);
+            $msg->news['articles'][]      = $arg->toArray();
+        }
+        return $msg;
+    }
+    
+    public static function buildMPNewsMsg(YDWXMpNewsMsg $var){
+        throw new YDWXException("客服消息不支持MPNews");
+    }
+    
+    public static function buildFileMsg($media_id){
+        throw new YDWXException("客服消息不支持发文件");
+    }
+    
+    public static function buildVideoMsg(YDWXVideoMsg $arg){
+        $msg = new YDWXMassRequest();
+        $msg->msgtype  = "video";
+        $msg->video    = $arg->toArray();
+        return $msg;
+    }
+    
+    public static function buildMusicMsg(YDWXMusicMsg $arg){
+        $msg = new YDWXMassRequest();
+        $msg->msgtype  = "music";
+        $_ = array();
+        $_['title']         = $arg->title;
+        $_['description']   = $arg->description;
+        $_['musicurl']      = $arg->music_url;
+        $_['hqmusicurl']    = $arg->hq_music_url;
+        $_['thumb_media_id']= $arg->thumb_media_id;
+        $msg->music    = $_;
+        return $msg;
+    }
+    
+    public static function buildWXCardMsg($card_id){
+        $msg = new YDWXMassRequest();
+        $msg->msgtype  = "wxcard";
+        $msg->wxcard   = array("card_id" => $media_id);
+        return $msg;
+    }
+    
+    public static function buildMPNewsMsgByID($media_id){
+        throw new YDWXException("客服消息不支持MPNews");
+    }
+    
+    public function valid(){
+        if( $this->to ) throw new YDWXException("客服消息缺少接受者");
+    }
+    protected function formatArgs(){
+        $args = parent::formatArgs();
+        $args['touser'] = $args['to'];
+        if($this->kf_account){
+            $args['customservice']['kf_account'] = $this->kf_account;
+        }
+        unset($args['to']);
+        return $args;
+    }
+}
 /**
  * 群发消息阅览请求参数
  * @author leeboo
@@ -317,6 +388,17 @@ class YDWXMassPreviewRequest extends YDWXMassRequest{
      * @var unknown
      */
     public $towxname;
+    public function valid(){
+        if( $this->to || $this->towxname ) throw new YDWXException("客服消息缺少接受者");
+    }
+    protected function formatArgs(){
+        $args = parent::formatArgs();
+        if( ! $args['towxname']){
+            $args['touser'] = $args['to'];            
+        }
+        unset($args['to']);
+        return $args;
+    }
 }
 /**
  * 根据分组群发消息
@@ -325,15 +407,10 @@ class YDWXMassPreviewRequest extends YDWXMassRequest{
  */
 class YDWXMassByGroupRequest extends YDWXMassRequest{
     /**
-     * 是否发送给所有人
+     * 是否发送给所有人,is_to_all为true则忽略to
      * @var array
      */
     public $is_to_all;
-    /**
-     * is_to_all为true则忽略该属性
-     * @var unknown
-     */
-    public $group_id;
     
     public function valid(){
     }
@@ -341,10 +418,10 @@ class YDWXMassByGroupRequest extends YDWXMassRequest{
         $args = parent::formatArgs();
         $args['filter'] = array(
             "is_to_all"=>$this->is_to_all,
-            "group_id"=>$this->group_id
+            "group_id"=>$this->to
         );
         unset($args['is_to_all']);
-        unset($args['group_id']);
+        unset($args['to']);
         return $args;
     }
     public static function buildVideoMsg(YDWXVideoMsg $arg){
@@ -542,26 +619,6 @@ class YDWXQyMsgRequest extends YDWXMassRequest implements YDWXMsgBuilder{
         return $msg;
     }
 
-    public static function buildTextMsg($text){
-        $msg = new YDWXQyMsgRequest();
-        $msg->msgtype  = "text";
-        $msg->text    = array("content" => $text);
-        return $msg;
-    }
-
-    public static function buildImageMsg($media_id){
-        $msg = new YDWXQyMsgRequest();
-        $msg->msgtype  = "image";
-        $msg->image    = array("media_id" => $media_id);
-        return $msg;
-    }
-
-    public static function buildVoiceMsg($media_id){
-        $msg = new YDWXQyMsgRequest();
-        $msg->msgtype  = "voice";
-        $msg->voice    = array("media_id" => $media_id);
-        return $msg;
-    }
 
     public static function buildVideoMsg(YDWXVideoMsg $arg){
         $msg = new YDWXQyMsgRequest();
@@ -585,14 +642,21 @@ class YDWXQyMsgRequest extends YDWXMassRequest implements YDWXMsgBuilder{
         return $msg;
     }
     public function valid(){
-        if($this->touser && is_array($this->touser)){
-            $this->touser =  join("|", $this->touser);
+        
+    }
+    protected function formatArgs(){
+        $args = parent::formatArgs();
+        $args['touser'] = $args['to'];
+        if($args['touser'] && is_array($args['touser'])){
+            $args['touser'] =  join("|", $args['touser']);
         }
-        if($this->toparty && is_array($this->toparty)){
-            $this->toparty = join("|", $this->toparty);
+        if($args['toparty'] && is_array($args['toparty'])){
+            $args['toparty'] = join("|", $args['toparty']);
         }
-        if($this->totag && is_array($this->totag)){
-            $this->totag   = join("|", $this->totag);
+        if($args['totag'] && is_array($args['totag'])){
+            $args['totag']   = join("|", $args['totag']);
         }
+        unset($args['to']);
+        return $args;
     }
 }

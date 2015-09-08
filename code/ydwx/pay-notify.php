@@ -10,9 +10,9 @@ include_once dirname(__FILE__).'/__config__.php';
 
 $data = @$GLOBALS["HTTP_RAW_POST_DATA"];
 
-$msg = new YDWXPayNotifyResponse($data);
+$msg = new YDWXPaiedNotifyResponse($data);
 if($msg->isSuccess()){
-    if($msg->product_id){
+    if(is_a($msg, "YDWXPayingNotifyResponse")){
         $result = new YDWXPayNotifyRequest();
         
         try{
