@@ -25,23 +25,42 @@ final class YDWXHook {
      */
     const GET_JSAPI_TICKET = "GET_JSAPI_TICKET";
     /**
-     * 参数AccessTokenRefresh
+     * 刷新公众号的token 参数AccessTokenRefresh
      * @var unknown
      */
     const ACCESS_TOKEN_REFRESH = "ACCESS_TOKEN_REFRESH";
     /**
-     * 参数 JsapiTicketRefresh
+     * 刷新公众号的js ticket 参数 JsapiTicketRefresh
      * @var unknown
      */
     const JSAPI_TICKET_REFRESH = "JSAPI_TICKET_REFRESH";
 
+    /**
+     * 刷新托管平台的token 参数 YDWXAccessTokenResponse
+     * @var unknown
+     */
+    const AGENT_ACCESS_TOKEN_REFRESH = "AGENT_ACCESS_TOKEN_REFRESH";
+    /**
+     * 无参数，返回托管平台的ticket（微信推送过来的，通过YDWXHook::EVENT_COMPONENT_VERIFY_TICKET得到）
+     * @var unknown
+     */
+    const GET_VERIFY_TICKET = "GET_VERIFY_TICKET";
     
     /**
      * 用户取消授权, hook 无参数
      * @var unknown
      */
     const AUTH_CANCEL  = "auth_cancel";
+    /**
+     * hook 参数YDWXAuthFailResponse
+     * @var unknown
+     */
     const AUTH_FAIL    = "auth_fail";
+    /**
+     * 公众号授权第三方平台成功，hook参数是是数组，array(YDWXAgentAuthInfo, YDWXAgentAuthUser)
+     * @var unknown
+     */
+    const AUTH_AGENT_SUCCESS   = "AUTH_AGENT_SUCCESS"; 
     /**
      * 微信app内 web应用登录成功
      * 参数 YDWXOAuthUser
@@ -212,10 +231,20 @@ final class YDWXHook {
     const EVENT_MASSSENDJOBFINISH  = "event_masssendjobfinish";
     
     /**
-     * 在模版消息发送任务完成后通知 YDWXEventTEMPLATESENDJOBFINISH
+     * 第三方平台刷新ticket通知 YDWXEventComponent_verify_ticket
      * @var unknown
      */
-    const EVENT_TEMPLATESENDJOBFINISH  = "event_templatesendjobfinish";
+    const EVENT_COMPONENT_VERIFY_TICKET  = "event_component_verify_ticket";
+    /**
+     * 公众后取消对第三方平台的授权通知 YDWXEventUnauthorized
+     * @var unknown
+     */
+    const EVENT_UNAUTHORIZED  = "event_unauthorized";
+    /**
+     * 未知事件 YDWXEventUnknow
+     * @var unknown
+     */
+    const EVENT_UNKONW  = "EVENT_UNKONW";
     
     private static $listeners = array ();
     /**

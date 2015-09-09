@@ -21,6 +21,42 @@ define("YDWX_WEIXIN_ACCOUNT_TYPE_SERVICE",    2);
 define("YDWX_WEIXIN_ACCOUNT_TYPE_CROP",    3);
 
 /**
+ * 代表未认证
+ * @var unknown
+ */
+define("YDWX_WEIXIN_VERIFY_TYPE_NONE",    -1);
+/**
+ * 代表微信认证
+ * @var unknown
+ */
+define("YDWX_WEIXIN_VERIFY_TYPE_WEIXIN",    0);
+/**
+ * 代表新浪微博认证
+ * @var unknown
+ */
+define("YDWX_WEIXIN_VERIFY_TYPE_SINA",    1);
+/**
+ * 代表腾讯微博认证
+ * @var unknown
+ */
+define("YDWX_WEIXIN_VERIFY_TYPE_TENCENT",    2);
+/**
+ * 代表已资质认证通过但还未通过名称认证，
+ * @var unknown
+ */
+define("YDWX_WEIXIN_VERIFY_TYPE_QUALIFICATION",    3);
+/**
+ * 代表已资质认证通过、还未通过名称认证，但通过了新浪微博认证，
+ * @var unknown
+ */
+define("YDWX_WEIXIN_VERIFY_TYPE_QUALIFICATION_SINA",    4);
+
+/**
+ * 代表已资质认证通过、还未通过名称认证，但通过了腾讯微博认证
+ */
+define("YDWX_WEIXIN_VERIFY_TYPE_QUALIFICATION_TENCENT",    5);
+
+/**
  * IT科技	互联网/电子商务
  * @VAR UNKNOWN
  */
@@ -226,8 +262,69 @@ DEFINE("YDWX_INDUSTRY_PRESS",    40);
  */
 DEFINE("YDWX_INDUSTRY_OTHER",    41);
 
+
+/**
+ * 消息与菜单权限集
+ * @var unknown
+ */
+DEFINE("YDWX_FUNC_COMMAND_AND_MENU", 1);
+/**
+ * 用户管理权限集
+ * @var unknown
+ */
+DEFINE("YDWX_FUNC_USER", 2);
+/**
+ * 帐号管理权限集
+ * @var unknown
+ */
+DEFINE("YDWX_FUNC_ACCOUNT", 3);
+/**
+ * 网页授权权限集
+ * @var unknown
+ */
+DEFINE("YDWX_FUNC_OAUTH", 4);
+/**
+ * 微信小店权限集
+ * @var unknown
+ */
+DEFINE("YDWX_FUNC_SHOP", 5);
+/**
+ * 多客服权限集
+ * @var unknown
+ */
+DEFINE("YDWX_FUNC_SUPPORT", 6);
+/**
+ * 业务通知权限集
+ * @var unknown
+ */
+DEFINE("YDWX_FUNC_BUSINESS_NOTIFICATION", 7);
+/**
+ * 微信卡券权限集
+ */
+DEFINE("YDWX_FUNC_CARD", 8);
+/**
+ * 微信扫一扫权限集
+ */
+DEFINE("YDWX_FUNC_SCAN", 9);
+/**
+ * 微信连WIFI权限集
+ */
+DEFINE("YDWX_FUNC_WIFI", 10);
+/**
+ * 素材管理权限集
+ */
+DEFINE("YDWX_FUNC_MATERIAL", 11);
+/**
+ * 摇一摇周边权限集
+ */
+DEFINE("YDWX_FUNC_SHAKEAROUND", 12);
+/**
+ * 微信门店权限集
+ */
+DEFINE("YDWX_FUNC_STORE", 13);
+
 define("YDWX_WEIXIN_BASE_URL",           "https://api.weixin.qq.com/cgi-bin/");
-define("YDWX_WEIXIN_BASE_URL2",           "https://api.weixin.qq.com/");
+define("YDWX_WEIXIN_BASE_URL2",          "https://api.weixin.qq.com/");
 define("YDWX_WEIXIN_WEB_BASE_URL",       "https://api.weixin.qq.com/sns/");
 define("YDWX_YDWX_WEIXIN_BASE_URL2",     "http://api.weixin.qq.com/cgi-bin/");
 define("YDWX_WEIXIN_QY_BASE_URL",        "https://qyapi.weixin.qq.com/cgi-bin/");

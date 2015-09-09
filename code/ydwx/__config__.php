@@ -35,6 +35,10 @@ define("YDWX_WEIXIN_APICLIENT_KEY",      "");
 define("YDWX_WEIXIN_WEB_APP_ID",         "");
 define("YDWX_WEIXIN_WEB_APP_SECRET",     "");
 
+//如果你想作为微信第三方托管平台
+define("YDWX_WEIXIN_COMPONENT_APP_ID",         "");
+define("YDWX_WEIXIN_COMPONENT_APP_SECRET",     "");
+
 //企业号的cropid
 define("YDWX_WEIXIN_CROP_ID",     "");
 define("YDWX_WEIXIN_CROP_SECRET", "");

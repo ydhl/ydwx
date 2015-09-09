@@ -89,3 +89,112 @@ class YDWXAuthFailResponse extends YDWXResponse{
         return $fail;
     }
 }
+
+
+/**
+ * 公众号授权给第三方平台的信息
+ * @author leeboo
+ *
+ */
+class YDWXAgentAuthInfo extends YDWXResponse{
+    /**
+     * 授权方appid
+     */
+    public $authorizer_appid;
+    /**
+     * 授权方令牌（在授权的公众号具备API权限时，才有此返回值）
+     */
+    public $authorizer_access_token;
+    /**
+     * 有效期（在授权的公众号具备API权限时，才有此返回值）
+     */
+    public $expires_in;
+    /**
+     * 刷新令牌（在授权的公众号具备API权限时，才有此返回值），刷新令牌主要用于公众号第三方平台获取和刷新已授权用户的access_token，只会在授权时刻提供，请妥善保存。 一旦丢失，只能让用户重新授权，才能再次拿到新的刷新令牌
+     */
+    public $authorizer_refresh_token;
+    /**
+     * 公众号授权给开发者的权限集列表（请注意，当出现用户已经将消息与菜单权限集授权给了某个第三方，
+     * 再授权给另一个第三方时，由于该权限集是互斥的，后一个第三方的授权将去除此权限集，
+     * 开发者可以在返回的func_info信息中验证这一点，避免信息遗漏），见YDWX_FUNC_XX常量；
+     * 请注意，该字段的返回不会考虑公众号是否具备该权限集的权限（因为可能部分具备），请根据公众号的帐号类型和认证情况，来判断公众号的接口权限。
+     * @var array
+     */
+    public $func_info;
+
+    public function build($msg){
+        parent::build($msg);
+        $this->authorizer_appid             = $this->rawData['authorization_info']['authorizer_appid'];
+        $this->authorizer_access_token      = $this->rawData['authorization_info']['authorizer_access_token'];
+        $this->authorizer_refresh_token     = $this->rawData['authorization_info']['authorizer_refresh_token'];
+        $this->expires_in                   = $this->rawData['authorization_info']['expires_in'];
+
+        foreach ($this->rawData['authorization_info']['func_info'] as $func){
+            $this->func_info[] = $func['funcscope_category']['id'];
+        }
+    }
+}
+
+/**
+ * 授权给第三方平台的公众号信息
+ * @author leeboo
+ *
+ */
+class YDWXAgentAuthUser extends YDWXResponse{
+    /**
+     * 授权方昵称
+     */
+    public $nick_name;
+    /**
+     * 授权方头像
+     */
+    public $head_img;
+    /**
+     * 授权方公众号类型，0代表订阅号，1代表由历史老帐号升级后的订阅号，2代表服务号
+     * 见YDWX_WEIXIN_ACCOUNT_TYPE_XX常量
+     */
+    public $service_type_info;
+    /**
+     * 授权方认证类型，-1代表未认证，0代表微信认证，
+     * 1代表新浪微博认证，2代表腾讯微博认证，
+     * 3代表已资质认证通过但还未通过名称认证，
+     * 4代表已资质认证通过、还未通过名称认证，但通过了新浪微博认证，
+     * 5代表已资质认证通过、还未通过名称认证，但通过了腾讯微博认证
+     * 见 YDWX_WEIXIN_VERIFY_TYPE_XX常量
+     */
+    public $verify_type_info;
+    /**
+     * 授权方公众号的原始ID
+     */
+    public $user_name;
+    /**
+     * 授权方公众号所设置的微信号，可能为空
+     */
+    public $alias;
+    /**
+     * 二维码图片的URL，开发者最好自行也进行保存
+     */
+    public $qrcode_url;
+    /**
+     * 授权方appid
+     */
+    public $appid;
+    public $func_info;
+    
+    public function build($msg){
+        parent::build($msg);
+        $this->nick_name             = $this->rawData['authorizer_info']['nick_name'];
+        $this->head_img              = $this->rawData['authorizer_info']['head_img'];
+        $this->service_type_info     = $this->rawData['authorizer_info']['service_type_info'];
+        $this->verify_type_info      = $this->rawData['authorizer_info']['verify_type_info'];
+        $this->user_name             = $this->rawData['authorizer_info']['user_name'];
+        $this->alias                 = $this->rawData['authorizer_info']['alias'];
+        
+        $this->appid                 = $this->rawData['authorization_info']['appid'];
+        foreach ($this->rawData['authorization_info']['func_info'] as $func){
+            foreach ($this->rawData['authorization_info']['func_info'] as $func){
+                $this->func_info[] = $func['funcscope_category']['id'];
+            }
+        }
+    }
+}

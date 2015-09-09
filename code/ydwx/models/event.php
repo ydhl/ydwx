@@ -36,8 +36,12 @@ class YDWXEvent extends YDWXResponse{
         $obj =  new YDWXEvent($msg);
         if($obj->Event){
             $clsname  = "YDWX".ucfirst((strtolower($obj->MsgType))).ucfirst(strtolower($obj->Event));
-        }else{
+        }else if($obj->MsgType){
             $clsname = "YDWXEventMsg".ucfirst(strtolower($obj->MsgType));
+        }else if($obj->InfoType){
+            $clsname = "YDWXEvent".ucfirst(strtolower($obj->InfoType));
+        }else{
+            $clsname = "YDWXEventUnknow";
         }
         return new $clsname($msg);
     }
@@ -49,11 +53,50 @@ class YDWXEvent extends YDWXResponse{
     public function HookName(){
         if($this->Event){
             $hookname = strtoupper($this->MsgType."_".$this->Event);
-        }else{
+        }else if($obj->MsgType){
             $hookname = "EVENT_MSG_".strtoupper($this->MsgType);
+        }else if($obj->InfoType){
+            $hookname = "EVENT_".ucfirst(strtolower($obj->InfoType));
+        }else{
+            $hookname = "EVENT_UNKONW";
         }
         return constant("YDWXHook::{$hookname}");
     }
+}
+/**
+ * 第三方平台的ticket刷新通知
+ * @author leeboo
+ *
+ */
+class YDWXEventComponent_verify_ticket extends YDWXEvent{
+    public $AppId;
+    public $CreateTime;
+    public $InfoType;
+    public $ComponentVerifyTicket;
+}
+
+/**
+ * 微信公众号取消第三方授权的通知
+ * @author leeboo
+ *
+ */
+class YDWXEventUnauthorized extends YDWXEvent{
+    public $AppId;
+    public $CreateTime;
+    public $InfoType;
+    /**
+     * 取消授权的公众号
+     */
+    public $AuthorizerAppid;
+}
+
+/**
+ * 未知微信消息
+ * @author leeboo
+ *
+ */
+class YDWXEventUnknow extends YDWXEvent{
+    
 }
 
 /**
