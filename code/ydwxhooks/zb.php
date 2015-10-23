@@ -6,7 +6,7 @@
  * include_once 'your-lib-file.php';
  * chdir ( $oldcwd );
  */
- 
-YDWXHook::add_hook(YDWXHook::YDWX_LOG, function($msg){
+
+YDWXHook::add_hook(YDWXHook::EVENT_SHAKEAROUNDUSERSHAKE, function( YDWXEventShakearoundusershake $msg){
     
 });

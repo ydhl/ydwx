@@ -79,7 +79,7 @@ function ydwx_pay_refund(YDWXPayRefundRequest $arg){
     $arg->sign();
     $args = $arg->toXMLString();
 
-    $http = new YDHttps();
+    $http = new YDHttps($arg->appid);
     $info = $http->post(YDWX_WEIXIN_PAY_URL."secapi/pay/refund", $args);
 
     $msg  = new YDWXPayRefundResponse($info);
@@ -153,7 +153,7 @@ function ydwx_pay_unifiedorder(YDWXPayUnifiedOrderRequest $arg){
     
     $msg  = new YDWXPayUnifiedOrderResponse($info);
     if( ! $msg->isSuccess()){
-        throw new YDWXException($msg->errmsg);
+        throw new YDWXException($msg->errmsg, $msg->errcode);
     }
     return $msg;
 }
@@ -169,19 +169,23 @@ function ydwx_pay_unifiedorder(YDWXPayUnifiedOrderRequest $arg){
  * 可以把返回结果再次调用ydwx_pay_short_qrcode()得到更精简的二维码内容，减少二维码复杂度
  * 
  * @param unknown $product_id 你系统的产品id
+ * @param unknown $appid 当前公众号appid，如果不是第三方平台，则传入YDWX_WEIXIN_APP_ID
  */
-function ydwx_pay_product_qrcode($product_id){
+function ydwx_pay_product_qrcode($product_id, $appid){
     $nonceStr   = uniqid();
     $time_stamp = time();
     
-    $str = "appid=".YDWX_WEIXIN_APP_ID
-    ."&mch_id=".YDWX_WEIXIN_MCH_ID
+    $mchkey = YDWX_WEIXIN_COMPONENT_APP_ID ? YDWXHook::do_hook(YDWXHook::GET_HOST_MCH_KEY, $appid) : YDWX_WEIXIN_MCH_KEY;
+    $mchid  = YDWX_WEIXIN_COMPONENT_APP_ID ? YDWXHook::do_hook(YDWXHook::GET_HOST_MCH_ID, $appid) : YDWX_WEIXIN_MCH_ID;
+    
+    $str = "appid=".$appid
+    ."&mch_id=".$mchid
     ."&nonce_str=".$nonceStr."&product_id=".$product_id
     ."&time_stamp=".$time_stamp;
-    $signStr = strtoupper(md5($str."&key=".YDWX_WEIXIN_MCH_KEY));
+    $signStr = strtoupper(md5($str."&key=".$mchkey));
     
     return "weixin://wxpay/bizpayurl?sign={$signStr}&appid="
-            .YDWX_WEIXIN_APP_ID."&mch_id=".YDWX_WEIXIN_MCH_ID
+            .$appid."&mch_id=".$mchid
     ."&product_id={$product_id}&time_stamp={$time_stamp}&nonce_str={$nonceStr}";
 }
 
@@ -198,9 +202,10 @@ function ydwx_pay_product_qrcode($product_id){
  * 
  * @param unknown $jsapi_ticket
  * @param unknown $curr_page_uri
+ * @param unknown $appid
  * @return string
  */
-function ydwx_jspay_script($jsapi_ticket, $curr_page_uri){
+function ydwx_jspay_script($jsapi_ticket, $curr_page_uri, $appid){
     ob_start();
 ?>
 <script type="text/javascript">
@@ -212,7 +217,7 @@ function ydwx_jspay_script($jsapi_ticket, $curr_page_uri){
 
 wx.config({
     debug: false,
-    appId: '<?php echo YDWX_WEIXIN_APP_ID?>',
+    appId: '<?php echo $appid?>',
     timestamp:'<?php echo $time?>' ,
     nonceStr: '<?php echo $nonceStr?>',
     signature: '<?php echo $signStr?>',
@@ -225,7 +230,7 @@ wx.error(function(res){
 
 function jsPayApi(openid, trace_no, totalPrice, attach, pay_desc, success, fail, cancel){
     $.post("<?php echo YDWX_SITE_URL."pay.php"?>", {
-        price:totalPrice, trace_no:trace_no, action:"prepay", "attach":attach, "payDesc":pay_desc, "timestamp":"<?php echo $time?>", "noncestr":"<?php echo $nonceStr?>"
+        appid:<?php echo $appid?>,price:totalPrice, trace_no:trace_no, action:"prepay", "attach":attach, "payDesc":pay_desc, "timestamp":"<?php echo $time?>", "noncestr":"<?php echo $nonceStr?>"
         }, function(data){
             if( ! data.success){
                 fail(data.msg);

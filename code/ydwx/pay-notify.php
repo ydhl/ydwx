@@ -9,15 +9,16 @@ chdir(dirname(__FILE__));//把工作目录切换到文件所在目录
 include_once dirname(__FILE__).'/__config__.php';
 
 $data = @$GLOBALS["HTTP_RAW_POST_DATA"];
-
+YDWXHook::do_hook(YDWXHook::YDWX_LOG, $data);
 $msg = new YDWXPaiedNotifyResponse($data);
 if($msg->isSuccess()){
-    if(is_a($msg, "YDWXPayingNotifyResponse")){
-        $result = new YDWXPayNotifyRequest();
+    if($msg->product_id){
+        $PayingMsg  = new YDWXPayingNotifyResponse($data);
+        $result     = new YDWXPayNotifyRequest();
         
         try{
-            $arg = YDWXHook::do_hook(YDWXHook::QRCODE_PAY_NOTIFY_SUCCESS, $msg);
-            $arg->openid        = $msg->openid;
+            $arg = YDWXHook::do_hook(YDWXHook::QRCODE_PAY_NOTIFY_SUCCESS, $PayingMsg);
+            $arg->openid        = $PayingMsg->openid;
             $msg = ydwx_pay_unifiedorder($arg);
             $result_code = "SUCCESS";
             $err_code_des = "OK";

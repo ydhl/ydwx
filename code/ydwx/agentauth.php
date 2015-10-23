@@ -20,4 +20,5 @@ try{
     die();
 }
 
-YDWXHook::do_hook(YDWXHook::AUTH_AGENT_SUCCESS, array($auth_info, ydwx_agent_get_auth_account($auth_info->authorizer_appid)));
+YDWXHook::do_hook(YDWXHook::AUTH_AGENT_SUCCESS, 
+    array($auth_info, ydwx_agent_get_auth_account($auth_info->authorizer_appid)));

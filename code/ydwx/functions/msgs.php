@@ -88,7 +88,14 @@ function ydwx_qy_message_send($accessToken, YDWXQyMsgRequest $arg){
  */
 function ydwx_answer_msg(YDWXAnswerMsg $msg){
     ob_start();
-    echo $msg->toXMLString();
+    if(YDWX_WEIXIN_COMPONENT_APP_ID){//第三方平台要加密
+        $crypt = new WXBizMsgCrypt(YDWX_WEIXIN_COMPONENT_TOKEN, YDWX_WEIXIN_COMPONENT_ENCODING_AES_KEY, YDWX_WEIXIN_COMPONENT_APP_ID);
+        $encryptMsg = "";
+        $crypt->encryptMsg($msg->toXMLString(), time(), uniqid(), $encryptMsg);
+        echo $encryptMsg;
+    }else{
+        echo $msg->toXMLString();
+    }
     ob_end_flush();
 }
 /**
@@ -160,10 +167,7 @@ function ydwx_message_template_send($accessToken,  YDWXTemplateRequest $tpl){
  * @return YDWXMassResponse
  */
 function ydwx_message_send_by_openid($accessToken,  YDWXMassRequest $arg){
-    if( ! YDWX_WEIXIN_IS_AUTHED){
-        throw new YDWXException("群发模板消息, 要求先认证");
-    }
-    
+
     $http = new YDHttp();
     $info = $http->post(YDWX_WEIXIN_BASE_URL."message/mass/send?access_token={$accessToken}", 
         $arg->toJSONString());
@@ -180,10 +184,6 @@ function ydwx_message_send_by_openid($accessToken,  YDWXMassRequest $arg){
  */
 function ydwx_message_send_by_group($accessToken,  YDWXMassByGroupRequest $arg){
     $openids = (array)$openids;
-    if( ! YDWX_WEIXIN_IS_AUTHED){
-        throw new YDWXException("群发模板消息, 要求先认证");
-    }
-
     $http = new YDHttp();
     $info = $http->post(YDWX_WEIXIN_BASE_URL."message/mass/sendall?access_token={$accessToken}",
     $arg->toJSONString());

@@ -38,11 +38,11 @@ function ydwx_menu_create($accessToken, $menus){
     foreach ($menus as $menu){
         $save_menus['button'][] = $menu->toArray();
     }
-
-    $info = json_decode($http->post(YDWX_WEIXIN_BASE_URL."menu/create?access_token=".$accessToken, 
-            urldecode(json_encode($save_menus))), true);
-
-    return ! $info['errcode'];
+    $info = $http->post(YDWX_WEIXIN_BASE_URL."menu/create?access_token=".$accessToken, 
+            ydwx_json_encode($save_menus));
+    $res  = new YDWXResponse($info);
+    if($res->isSuccess())return true;
+    throw new YDWXException($res->errmsg, $res->errcode);
 }
 
 /**
@@ -54,7 +54,7 @@ function ydwx_menu_create($accessToken, $menus){
 function ydwx_menu_delete($accessToken){
     $http = new YDHttp();
     $info = json_decode($http->get(YDWX_WEIXIN_BASE_URL."menu/delete?access_token=".$accessToken), true);
-    var_dump($info);
+    
     return ! $info['errcode'];
     
 }

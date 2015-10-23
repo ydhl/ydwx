@@ -48,7 +48,11 @@ class YDWXOAuthUser extends YDWXResponse{
      * @var unknown
      */
     public $state;
-
+    /**
+     * 第三方托管模式下有用，指用户登录的是哪家公众号；公众号托管后第三方平台便可得到appid
+     * @var unknown
+     */
+    public $appid;
 }
 
 /**
@@ -84,7 +88,7 @@ class YDWXAuthFailResponse extends YDWXResponse{
 
     public static function errMsg($msg, $errcode=-1){
         $fail = new YDWXAuthFailResponse();
-        $fail->errmsg  = $msg;
+        $fail->errmsg  = $msg."($errcode)";
         $fail->errcode = $errcode;
         return $fail;
     }
@@ -124,12 +128,12 @@ class YDWXAgentAuthInfo extends YDWXResponse{
 
     public function build($msg){
         parent::build($msg);
-        $this->authorizer_appid             = $this->rawData['authorization_info']['authorizer_appid'];
-        $this->authorizer_access_token      = $this->rawData['authorization_info']['authorizer_access_token'];
-        $this->authorizer_refresh_token     = $this->rawData['authorization_info']['authorizer_refresh_token'];
-        $this->expires_in                   = $this->rawData['authorization_info']['expires_in'];
+        $this->authorizer_appid             = $this->authorization_info['authorizer_appid'];
+        $this->authorizer_access_token      = $this->authorization_info['authorizer_access_token'];
+        $this->authorizer_refresh_token     = $this->authorization_info['authorizer_refresh_token'];
+        $this->expires_in                   = $this->authorization_info['expires_in'];
 
-        foreach ($this->rawData['authorization_info']['func_info'] as $func){
+        foreach ($this->authorization_info['func_info'] as $func){
             $this->func_info[] = $func['funcscope_category']['id'];
         }
     }
@@ -183,16 +187,16 @@ class YDWXAgentAuthUser extends YDWXResponse{
     
     public function build($msg){
         parent::build($msg);
-        $this->nick_name             = $this->rawData['authorizer_info']['nick_name'];
-        $this->head_img              = $this->rawData['authorizer_info']['head_img'];
-        $this->service_type_info     = $this->rawData['authorizer_info']['service_type_info'];
-        $this->verify_type_info      = $this->rawData['authorizer_info']['verify_type_info'];
-        $this->user_name             = $this->rawData['authorizer_info']['user_name'];
-        $this->alias                 = $this->rawData['authorizer_info']['alias'];
+        $this->nick_name             = $this->authorizer_info['nick_name'];
+        $this->head_img              = $this->authorizer_info['head_img'];
+        $this->service_type_info     = $this->authorizer_info['service_type_info'];
+        $this->verify_type_info      = $this->authorizer_info['verify_type_info'];
+        $this->user_name             = $this->authorizer_info['user_name'];
+        $this->alias                 = $this->authorizer_info['alias'];
         
-        $this->appid                 = $this->rawData['authorization_info']['appid'];
-        foreach ($this->rawData['authorization_info']['func_info'] as $func){
-            foreach ($this->rawData['authorization_info']['func_info'] as $func){
+        $this->appid                 = $this->authorizer_info['appid'];
+        foreach ($this->authorizer_info['func_info'] as $func){
+            foreach ($this->authorizer_info['func_info'] as $func){
                 $this->func_info[] = $func['funcscope_category']['id'];
             }
         }

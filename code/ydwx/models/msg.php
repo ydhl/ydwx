@@ -190,10 +190,10 @@ interface YDWXMsgBuilder{
     public static function buildMusicMsg(YDWXMusicMsg $arg);
     /**
      * 构建图文消息
-     * @param YDWXNewsMsg $arg 可变参数
+     * @param array $arg YDWXNewsMsg数组
      * @return YDWXMsgBuilder
     */
-    public static function buildNewsMsg(YDWXNewsMsg $arg);
+    public static function buildNewsMsg(array $arg);
 
     /**
      * 构建卡券消息
@@ -206,7 +206,10 @@ interface YDWXMsgBuilder{
      * @param unknown $media_id
     */
     public static function buildMPNewsMsgByID($media_id);
-    public static function buildMPNewsMsg(YDWXMpNewsMsg $var);
+    /**
+     * @param array $arg YDWXMpNewsMsg数组
+     */
+    public static function buildMPNewsMsg(array $var);
 }
 /**
  * 群发消息请求参数
@@ -234,11 +237,11 @@ class YDWXMassRequest extends YDWXRequest implements YDWXMsgBuilder{
     protected $wxcard;
 
 
-    public static function buildNewsMsg(YDWXNewsMsg $var){
+    public static function buildNewsMsg(array $args){
         throw new YDWXException("公众号图文群发请使用buildMPNewsMsgByID");
     }
 
-    public static function buildMPNewsMsg(YDWXMpNewsMsg $var){
+    public static function buildMPNewsMsg(array $var){
         throw new YDWXException("公众号图文群发请使用buildMPNewsMsgByID");
     }
 
@@ -248,7 +251,7 @@ class YDWXMassRequest extends YDWXRequest implements YDWXMsgBuilder{
 
     public static function buildTextMsg($text){
         $cls = get_called_class();
-        $msg = $cls();
+        $msg = new $cls();
         $msg->msgtype  = "text";
         $msg->text    = array("content" => $text);
         return $msg;
@@ -274,28 +277,32 @@ class YDWXMassRequest extends YDWXRequest implements YDWXMsgBuilder{
     }
 
     public static function buildVideoMsg(YDWXVideoMsg $arg){
-        $msg = new YDWXMassRequest();
+        $cls = get_called_class();
+        $msg = new $cls();
         $msg->msgtype  = "video";
         $msg->video    = $arg->toArray();
         return $msg;
     }
 
     public static function buildMusicMsg(YDWXMusicMsg $arg){
-        $msg = new YDWXMassRequest();
+        $cls = get_called_class();
+        $msg = new $cls();
         $msg->msgtype  = "music";
         $msg->music    = $arg->toArray();
         return $msg;
     }
 
     public static function buildWXCardMsg($card_id){
-        $msg = new YDWXMassRequest();
+        $cls = get_called_class();
+        $msg = new $cls();
         $msg->msgtype  = "wxcard";
-        $msg->wxcard   = array("card_id" => $media_id);
+        $msg->wxcard   = array("card_id" => $card_id);
         return $msg;
     }
 
     public static function buildMPNewsMsgByID($media_id){
-        $msg = new YDWXMassRequest();
+        $cls = get_called_class();
+        $msg = new $cls();
         $msg->msgtype  = "mpnews";
         $msg->mpnews    = array("media_id" => $media_id);
         return $msg;
@@ -314,18 +321,18 @@ class YDWXMassRequest extends YDWXRequest implements YDWXMsgBuilder{
 }
 class YDWXMassCustomRequest extends YDWXMassRequest{
     public $kf_account;
-    public static function buildNewsMsg(YDWXNewsMsg $var){
+    public static function buildNewsMsg(array $msgs){
         $msg = new YDWXMassCustomRequest();
         $msg->msgtype   = "news";
-        $num = min(func_num_args(), 10);
+        $num = min(count($msgs), 10);
         for($i=0; $i< $num; $i++){
-            $arg = func_get_arg($i);
+            $arg = $msgs[$i];
             $msg->news['articles'][]      = $arg->toArray();
         }
         return $msg;
     }
     
-    public static function buildMPNewsMsg(YDWXMpNewsMsg $var){
+    public static function buildMPNewsMsg(array $var){
         throw new YDWXException("客服消息不支持MPNews");
     }
     
@@ -334,14 +341,14 @@ class YDWXMassCustomRequest extends YDWXMassRequest{
     }
     
     public static function buildVideoMsg(YDWXVideoMsg $arg){
-        $msg = new YDWXMassRequest();
+        $msg = new YDWXMassCustomRequest();
         $msg->msgtype  = "video";
         $msg->video    = $arg->toArray();
         return $msg;
     }
     
     public static function buildMusicMsg(YDWXMusicMsg $arg){
-        $msg = new YDWXMassRequest();
+        $msg = new YDWXMassCustomRequest();
         $msg->msgtype  = "music";
         $_ = array();
         $_['title']         = $arg->title;
@@ -354,7 +361,7 @@ class YDWXMassCustomRequest extends YDWXMassRequest{
     }
     
     public static function buildWXCardMsg($card_id){
-        $msg = new YDWXMassRequest();
+        $msg = new YDWXMassCustomRequest();
         $msg->msgtype  = "wxcard";
         $msg->wxcard   = array("card_id" => $media_id);
         return $msg;
@@ -365,11 +372,11 @@ class YDWXMassCustomRequest extends YDWXMassRequest{
     }
     
     public function valid(){
-        if( $this->to ) throw new YDWXException("客服消息缺少接受者");
+        if( ! $this->to ) throw new YDWXException("客服消息缺少接受者");
     }
     protected function formatArgs(){
         $args = parent::formatArgs();
-        $args['touser'] = $args['to'];
+        $args['touser'] = $this->to;
         if($this->kf_account){
             $args['customservice']['kf_account'] = $this->kf_account;
         }
@@ -471,19 +478,19 @@ class YDWXAnswerMsg extends YDWXRequest implements YDWXMsgBuilder{
         //override 以便得到private属性
         return get_object_vars($this);
     }
-    public static function buildNewsMsg(YDWXNewsMsg $var){
+    public static function buildNewsMsg(array $msgs, YDWXEvent $source=null){
         $msg = new YDWXAnswerMsg();
         $msg->MsgType  = "news";
         $msg->Articles = array();
 
-        $num = min(func_num_args(), 10);
+        $num = min(count($msgs), 10);
         $msg->ArticleCount = $num;
 
         for($i=0; $i< $num; $i++){
             /**
              * @var YDWXNewsMsg
              */
-            $arg = func_get_arg($i);
+            $arg = $msgs[$i];
             $item = array();
             $item['Title']       = $arg->title;
             $item['Description'] = $arg->description;
@@ -491,51 +498,76 @@ class YDWXAnswerMsg extends YDWXRequest implements YDWXMsgBuilder{
             $item['Url']         = $arg->url;
             $msg->Articles[$i]['item']      = $item;
         }
+        if($source){
+            $msg->FromUserName = $source->ToUserName;
+            $msg->ToUserName   = $source->FromUserName;
+            $msg->CreateTime   = time();
+        }
         return $msg;
     }
 
-    public static function buildMPNewsMsg(YDWXMpNewsMsg $var){
+    public static function buildMPNewsMsg(array $var, YDWXEvent $source=null){
         throw new YDWXException("自动应答不支持回复MpNew");
     }
 
-    public static function buildFileMsg($media_id){
+    public static function buildFileMsg($media_id, YDWXEvent $source=null){
         throw new YDWXException("自动应答不支持回复文件");
     }
 
-    public static function buildTextMsg($text){
+    public static function buildTextMsg($text, YDWXEvent $source=null){
         $msg = new YDWXAnswerMsg();
         $msg->MsgType  = "text";
         $msg->Content  = $text;
+        if($source){
+            $msg->FromUserName = $source->ToUserName;
+            $msg->ToUserName   = $source->FromUserName;
+            $msg->CreateTime   = time();
+        }
         return $msg;
     }
 
-    public static function buildImageMsg($media_id){
+    public static function buildImageMsg($media_id, YDWXEvent $source=null){
         $msg = new YDWXAnswerMsg();
         $msg->MsgType  = "image";
         $msg->Image    = array("MediaId" => $media_id);
+        if($source){
+            $msg->FromUserName = $source->ToUserName;
+            $msg->ToUserName   = $source->FromUserName;
+            $msg->CreateTime   = time();
+        }
         return $msg;
     }
 
-    public static function buildVoiceMsg($media_id){
+    public static function buildVoiceMsg($media_id, YDWXEvent $source=null){
         $msg = new YDWXAnswerMsg();
         $msg->MsgType  = "voice";
         $msg->Voice    = array("MediaId" => $media_id);
+        if($source){
+            $msg->FromUserName = $source->ToUserName;
+            $msg->ToUserName   = $source->FromUserName;
+            $msg->CreateTime   = time();
+        }
         return $msg;
     }
 
-    public static function buildVideoMsg(YDWXVideoMsg $arg){
+    public static function buildVideoMsg(YDWXVideoMsg $arg, YDWXEvent $source=null){
         $msg = new YDWXAnswerMsg();
         $msg->MsgType    = "video";
         $args = array();
         $args['MediaId'] = $arg->media_id;
         $args['Title']   = $arg->title;
         $args['Description'] = $arg->description;
-        asort($args);
+        ksort($args);
         $msg->Video      = $args;
+        if($source){
+            $msg->FromUserName = $source->ToUserName;
+            $msg->ToUserName   = $source->FromUserName;
+            $msg->CreateTime   = time();
+        }
         return $msg;
     }
 
-    public static function buildMusicMsg(YDWXMusicMsg $arg){
+    public static function buildMusicMsg(YDWXMusicMsg $arg, YDWXEvent $source=null){
         $msg = new YDWXAnswerMsg();
         $msg->MsgType  = "music";
         $args = array();
@@ -544,16 +576,21 @@ class YDWXAnswerMsg extends YDWXRequest implements YDWXMsgBuilder{
         $args['Description']    = $arg->description;
         $args['HQMusicUrl']     = $arg->hq_music_url;
         $args['ThumbMediaId']   = $arg->thumb_media_id;
-        asort($args);
+        ksort($args);
         $msg->Music    = $args;
+        if($source){
+            $msg->FromUserName = $source->ToUserName;
+            $msg->ToUserName   = $source->FromUserName;
+            $msg->CreateTime   = time();
+        }
         return $msg;
     }
 
-    public static function buildWXCardMsg($card_id){
+    public static function buildWXCardMsg($card_id, YDWXEvent $source=null){
         throw new YDWXException("公众号不支持回复卡券");
     }
 
-    public static function buildMPNewsMsgByID($media_id){
+    public static function buildMPNewsMsgByID($media_id, YDWXEvent $source=null){
         throw new YDWXException("公众号不支持回复MpNew, 请使用buildNewsMsg");
     }
 
@@ -590,23 +627,23 @@ class YDWXQyMsgRequest extends YDWXMassRequest implements YDWXMsgBuilder{
      */
     public $safe;
 
-    public static function buildNewsMsg(YDWXNewsMsg $var){
+    public static function buildNewsMsg(array $vars){
         $msg = new YDWXQyMsgRequest();
         $msg->msgtype   = "news";
-        $num = min(func_num_args(), 10);
+        $num = min(count($vars), 10);
         for($i=0; $i< $num; $i++){
-            $arg = func_get_arg($i);
+            $arg = $vars[$i];
             $msg->news['articles'][]      = $arg->toArray();
         }
         return $msg;
     }
 
-    public static function buildMPNewsMsg(YDWXMpNewsMsg $var){
+    public static function buildMPNewsMsg(array $var){
         $msg = new YDWXQyMsgRequest();
         $msg->msgtype   = "mpnews";
-        $num = min(func_num_args(), 10);
+        $num = min(count($var), 10);
         for($i=0; $i< $num; $i++){
-            $arg = func_get_arg($i);
+            $arg = $var[$i];
             $msg->mpnews['articles'][]      = $arg->toArray();
         }
         return $msg;

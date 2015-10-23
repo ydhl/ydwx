@@ -191,23 +191,40 @@ abstract class YDWXRequest{
      * 这是在toString，toJSONString，toXMLString之前会调用的一步
      */
     public abstract function valid();
+    
+    public static function ignoreNull(array $args){
+        $array = array();
+        foreach($args as $name=>$value){
+            if(is_array($value)){
+                $array[$name] = YDWXRequest::ignoreNull($value);
+            }else if( ! is_null($value)){
+                $array[$name] = $value;
+            }
+        }
+        return $array;
+    }
+    /**
+     * 使用URL键值对的格式（即key1=value1&key2=value2…）拼接成字符串，
+     * 注意这里返回的字符串是urlencode格式的，在某些签名场合注意urldecode出原内容
+     * @return string
+     */
     public function toString(){
         $this->valid();
-        $args = array_filter($this->sortArg());
+        $args = YDWXRequest::ignoreNull($this->sortArg());
         return http_build_query($args);
     }
     public function toJSONString(){
         $this->valid();
-        $args = array_filter($this->sortArg());
+        $args = YDWXRequest::ignoreNull($this->sortArg());
         return ydwx_json_encode($args);
     }
     public function toArray(){
         $this->valid();
-        return array_filter($this->sortArg());
+        return YDWXRequest::ignoreNull($this->sortArg());
     }
     public function toXMLString(){
         $this->valid();
-        $args = array_filter($this->sortArg());
+        $args = YDWXRequest::ignoreNull($this->sortArg());
         
         $xml = "<xml>";
         foreach ($args as $name=>$value){
@@ -241,22 +258,23 @@ abstract class YDWXRequest{
      * @return multitype:
      */
     protected function formatArgs(){
-        return get_object_vars($this);
+        return YDWXRequest::ignoreNull(get_object_vars($this));
     }
     /**
-     * 返回按字典排序后的属性数组
+     * 返回按字典排序后的属性数组,排序依据是key
      */
     public final function sortArg(){
         $args = $this->formatArgs();
-        asort($args);
+        ksort($args);
         return $args;
     }
     /**
      * 根据微信的要求进行签名并设置sign属性
+     * 缺省实现是微信支付的sign实现，见https://pay.weixin.qq.com/wiki/doc/api/native.php?chapter=4_3
+     * 其实sign规则需要重载该方法
      */
     public function sign(){
-        $str = $this->toString();
-        $this->sign = strtoupper(md5($str."&key=".YDWX_WEIXIN_MCH_KEY));
+        
     }
 }
 
@@ -297,6 +315,9 @@ class YDWXResponse{
         if($info){
             foreach ($info as $name => $value){
                 $this->$name = $value;
+            }
+            if($this->errcode){
+                $this->errmsg .= "(".$this->errcode.")";
             }
         }else{
             $this->errcode = -1;

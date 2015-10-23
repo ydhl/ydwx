@@ -20,26 +20,82 @@ final class YDWXHook {
      */
     const GET_ACCESS_TOKEN = "GET_ACCESS_TOKEN";
     /**
+     * 无参数，返回第三方平台的access token
+     * @var unknown
+     */
+    const GET_AGENT_ACCESS_TOKEN = "GET_AGENT_ACCESS_TOKEN";
+    /**
+     * 获取托管的公众号的acess token，参数是appid
+     * @var unknown
+     */
+    const GET_HOST_ACCESS_TOKEN = "GET_HOST_ACCESS_TOKEN";
+    /**
+     * 获取托管的公众号的JSAPI_TICKET，参数是appid
+     * @var unknown
+     */
+    const GET_HOST_JSAPI_TICKET = "GET_HOST_JSAPI_TICKET";
+    /**
+     * 获取托管的公众号的CARD_JSAPI_TICKET，参数是appid
+     * @var unknown
+     */
+    const GET_HOST_CARD_JSAPI_TICKET= "GET_HOST_CARD_JSAPI_TICKET";
+    /**
+     * 第三方平台取得授权公众号的mch key, 参数是app id
+     * @var unknown
+     */
+    const GET_HOST_MCH_KEY = "GET_HOST_MCH_KEY";
+    /**
+     * 第三方平台取得授权公众号的mch id, 参数是app id
+     * @var unknown
+     */
+    const GET_HOST_MCH_ID  = "GET_HOST_MCH_ID";
+    /**
+     * 第三方平台取得授权公众号证书pem格式的绝对路径, 参数是app id
+     * @var unknown
+     */
+    const GET_HOST_APICLIENT_CERT_PATH = "GET_HOST_APICLIENT_CERT_PATH";
+    /**
+     * 第三方平台取得授权公众号证书密钥pem格式的绝对路径, 参数是app id
+     * @var unknown
+     */
+    const GET_HOST_APICLIENT_KEY_PATH  = "GET_HOST_APICLIENT_KEY_PATH";
+    /**
+     * 第三方平台取得授权公众号CA证书pem格式的绝对路径, 参数是app id
+     * @var unknown
+     */
+    const GET_HOST_ROOT_CA  = "GET_HOST_ROOT_CA";
+    /**
      * 无参数，返回jsapi ticket
      * @var unknown
      */
     const GET_JSAPI_TICKET = "GET_JSAPI_TICKET";
     /**
-     * 刷新公众号的token 参数AccessTokenRefresh
+     * 刷新公众号的token 参数YDWXAccessTokenResponse
      * @var unknown
      */
-    const ACCESS_TOKEN_REFRESH = "ACCESS_TOKEN_REFRESH";
+    const REFRESH_ACCESS_TOKEN = "REFRESH_ACCESS_TOKEN";
     /**
-     * 刷新公众号的js ticket 参数 JsapiTicketRefresh
+     * 刷新公众号的js ticket 参数 YDWXJsapiTicketResponse
      * @var unknown
      */
-    const JSAPI_TICKET_REFRESH = "JSAPI_TICKET_REFRESH";
+    const REFRESH_JSAPI_TICKET = "REFRESH_JSAPI_TICKET";
+    /**
+     * 刷新公众号微信卡券 js ticket 参数 YDWXJsapiTicketResponse
+     * @var unknown
+     */
+    const REFRESH_CARD_JSAPI_TICKET = "REFRESH_CARD_JSAPI_TICKET";
+    /**
+     * 无参数，返回微信卡券用的jsapi ticket
+     * @var unknown
+     */
+    const GET_CARD_JSAPI_TICKET = "GET_CARD_JSAPI_TICKET";
 
     /**
      * 刷新托管平台的token 参数 YDWXAccessTokenResponse
      * @var unknown
      */
-    const AGENT_ACCESS_TOKEN_REFRESH = "AGENT_ACCESS_TOKEN_REFRESH";
+    const REFRESH_AGENT_ACCESS_TOKEN = "REFRESH_AGENT_ACCESS_TOKEN";
+
     /**
      * 无参数，返回托管平台的ticket（微信推送过来的，通过YDWXHook::EVENT_COMPONENT_VERIFY_TICKET得到）
      * @var unknown
@@ -113,7 +169,7 @@ final class YDWXHook {
     
     /**
      * 微信扫码支付通知成功
-     * hook参数YDWXPaiedNotifyResponse, hook 函数根据接收的数据在自己的系统中生成订单.
+     * hook参数YDWXPayingNotifyResponse, hook 函数根据接收的数据在自己的系统中生成订单.
      * 参数中有被扫描产品的product id,并构建YDWXPayUnifiedOrderRequest并返回
      * 如果出现错误抛出异常，
      * @var unknown
@@ -223,6 +279,7 @@ final class YDWXHook {
      * @var unknown
      */
     const EVENT_LOCATION_SELECT    = "event_location_select";
+    const EVENT_LOCATION    = "event_location";
     
     /**
      * 群发推送结果 YDWXEventMASSSENDJOBFINISH
@@ -245,6 +302,68 @@ final class YDWXHook {
      * @var unknown
      */
     const EVENT_UNKONW  = "EVENT_UNKONW";
+    
+    /**
+     * 摇一摇周边事件通知 YDWXEventShakearoundusershake
+     * @var unknown
+     */
+    const EVENT_SHAKEAROUNDUSERSHAKE  = "EVENT_SHAKEAROUNDUSERSHAKE";
+    
+    /**
+     * 核销事件通知 YDWXEventUserConsumeCard
+     * @var unknown
+     */
+    const EVENT_USER_CONSUME_CARD     = "EVENT_USER_CONSUME_CARD";
+    /**
+     * 用户使用卡券买单事件通知 YDWXEventUserPaidByCard
+     * @var unknown
+     */
+    const EVENT_USER_PAID_BY_CARD     = "EVENT_USER_PAID_BY_CARD";
+    /**
+     * 用户领取卡券事件通知 YDWXEventUser_get_card
+     * @var unknown
+     */
+    const EVENT_USER_GET_CARD     = "EVENT_USER_GET_CARD";
+    /**
+     * 生成的卡券通过审核时，微信事件推送YDWXEventCard_pass_check
+     * @var unknown
+     */
+    const EVENT_CARD_PASS_CHECK   = "EVENT_CARD_PASS_CHECK";
+    /**
+     * 生成的卡券没通过审核时，微信事件推送YDWXEventCard_not_pass_check
+     * @var unknown
+     */
+    const EVENT_CARD_NOT_PASS_CHECK   = "EVENT_CARD_NOT_PASS_CHECK";
+    /**
+     * 用户在删除卡券时推送事件YDWXEventUser_del_card
+     * @var unknown
+     */
+    const EVENT_USER_DEL_CARD   = "EVENT_USER_DEL_CARD";
+    /**
+     * 进入会员卡事件推送 YDWXEventUser_view_card
+     * 需要开发者在创建会员卡时填入need_push_on_view	字段并设置为true。开发者须综合考虑领卡人数和服务器压力，决定是否接收该事件。
+     * @var unknown
+     */
+    const EVENT_USER_VIEW_CARD   = "EVENT_USER_VIEW_CARD";
+    
+    /**
+     * 从卡券进入公众号会话事件推送 YDWXEventUser_enter_session_from_card
+     * @var unknown
+     */
+    const EVENT_USER_ENTER_SESSION_FROM_CARD   = "EVENT_USER_ENTER_SESSION_FROM_CARD";
+    
+    /**
+     * 新创建的门店在审核通过后事件推送 YDWXEventPoi_check_notify
+     * @var unknown
+     */
+    const EVENT_POI_CHECK_NOTIFY   = "EVENT_POI_CHECK_NOTIFY";
+    /**
+     * 红包绑定用户事件通知
+     * 注：红包绑定用户不等同于用户领取红包。用户进入红包页面后，有可能不拆红包，但该红包ticket已被绑定，不能再被其他用户绑定，过期后会退回商户财付通账户
+     * YDWXEventShakearoundlotterybind
+     * @var unknown
+     */
+    const EVENT_SHAKEAROUNDLOTTERYBIND   = "EVENT_SHAKEAROUNDLOTTERYBIND";
     
     private static $listeners = array ();
     /**

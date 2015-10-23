@@ -17,31 +17,38 @@
 chdir(dirname(__FILE__));//把工作目录切换到文件所在目录
 include_once dirname(__FILE__).'/__config__.php';
 
-$http = new YDHttp();
-
-if(YDWX_WEIXIN_ACCOUNT_TYPE == YDWX_WEIXIN_ACCOUNT_TYPE_CROP){//企业号
-    $msg = $http->get(YDWX_WEIXIN_QY_BASE_URL."gettoken?corpid=".YDWX_WEIXIN_CROP_ID."&corpsecret=".YDWX_WEIXIN_CROP_SECRET);
-}else{//其它微信号
-    $msg = $http->get(YDWX_WEIXIN_BASE_URL."token?grant_type=client_credential&appid=".YDWX_WEIXIN_APP_ID."&secret=".YDWX_WEIXIN_APP_SECRET);
-}
-$accessToken = new YDWXAccessTokenResponse($msg);
-if($accessToken->isSuccess()) YDWXHook::do_hook(YDWXHook::ACCESS_TOKEN_REFRESH, $accessToken);
-
-if(YDWX_WEIXIN_ACCOUNT_TYPE == YDWX_WEIXIN_ACCOUNT_TYPE_CROP){//企业号
-    $msg = $http->get(YDWX_WEIXIN_QY_BASE_URL."get_jsapi_ticket?access_token=".$accessToken->access_token);
-}else{//其它微信号
-    $msg = $http->get(YDWX_WEIXIN_BASE_URL."ticket/getticket?type=jsapi&access_token=".$accessToken->access_token);
-    
-}
-$ticket = new YDWXJsapiTicketResponse($msg);
-if($ticket->isSuccess()) YDWXHook::do_hook(YDWXHook::JSAPI_TICKET_REFRESH, $info);
-
-if(YDWX_WEIXIN_COMPONENT_APP_ID){//作为第三方平台
+//作为第三方平台刷新平台的access token,这时所托管的公众号token的刷新要开发者自己负责
+//
+if(YDWX_WEIXIN_COMPONENT_APP_ID){
     try{
         $token = ydwx_agent_access_token(YDWXHook::do_hook(YDWXHook::GET_VERIFY_TICKET));
-        YDWXHook::do_hook(YDWXHook::AGENT_ACCESS_TOKEN_REFRESH, $token);
+        YDWXHook::do_hook(YDWXHook::REFRESH_AGENT_ACCESS_TOKEN, $token);
     }catch (\Exception $e){
-        
+        echo " agent_access_token: ".$e->getMessage();
+    }
+}else{
+    //刷新access_token
+    try{
+        if(YDWX_WEIXIN_ACCOUNT_TYPE == YDWX_WEIXIN_ACCOUNT_TYPE_CROP){//企业号
+            $accessToken = ydwx_qy_refresh_access_token(YDWX_WEIXIN_CROP_ID, YDWX_WEIXIN_CROP_SECRET);
+        }else{//其它微信号
+            $accessToken = ydwx_refresh_access_token(YDWX_WEIXIN_APP_ID, YDWX_WEIXIN_APP_SECRET);
+        }
+        YDWXHook::do_hook(YDWXHook::REFRESH_ACCESS_TOKEN, $accessToken);
+    
+        //刷新jsapi ticket
+        if(YDWX_WEIXIN_ACCOUNT_TYPE == YDWX_WEIXIN_ACCOUNT_TYPE_CROP){//企业号
+            $ticket = ydwx_qy_refresh_jsapi_ticket($accessToken->access_token);
+        }else{//其它微信号
+            $ticket = ydwx_refresh_jsapi_ticket($accessToken->access_token);
+        }
+        YDWXHook::do_hook(YDWXHook::REFRESH_JSAPI_TICKET, $ticket);
+    
+        //刷新微信card api ticket
+        $ticket = ydwx_refresh_card_jsapi_ticket($accessToken->access_token);
+        YDWXHook::do_hook(YDWXHook::REFRESH_CARD_JSAPI_TICKET, $ticket);
+    }catch (\Exception $e){
+        echo " accessToken: ".$e->errmsg."<br/>";
     }
 }
 

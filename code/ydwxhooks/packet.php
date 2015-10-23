@@ -7,6 +7,8 @@
  * chdir ( $oldcwd );
  */
  
-YDWXHook::add_hook(YDWXHook::YDWX_LOG, function($msg){
-    
+ 
+YDWXHook::add_hook(YDWXHook::EVENT_SHAKEAROUNDLOTTERYBIND, function (YDWXEventShakearoundLotteryBind $bind){
+    //微信红包绑定事件
+	
 });

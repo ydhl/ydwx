@@ -1,7 +1,7 @@
 <?php
 
 /**
- * 上传临时文件, 账号需要认证，文件会在3天后删除
+ * 上传临时文件, 只对认证的公众号和第三方平台开放，文件会在3天后删除; 
  * 
  * @param unknown $accessToken
  * @param unknown $type 图片（image）、语音（voice）、视频（video）和缩略图（thumb）
@@ -9,10 +9,6 @@
  * @return string MEDIA_ID
  */
 function ydwx_media_upload($accessToken, $type, $media){
-    if( ! YDWX_WEIXIN_IS_AUTHED){
-        throw new YDWXException("上传文件需要认证账号");
-    }
-    
     $http = new YDHttp();
     $info = $http->post(YDWX_WEIXIN_BASE_URL."media/upload?access_token={$accessToken}&type=$type", 
             array("media"=>"@".$media) ,true);
@@ -32,16 +28,13 @@ function ydwx_media_upload($accessToken, $type, $media){
  * @throws YDWXException
  */
 function ydwx_material_add_news($accessToken, array $articles){
-    if( ! YDWX_WEIXIN_IS_AUTHED){
-        throw new YDWXException("上传文件需要认证账号");
-    }
     $array = array();
     foreach ($articles as $article){
-        $array[] = $article->toJSONString();
+        $array[] = $article->toArray();
     }
     $http = new YDHttp();
     $info = $http->post(YDWX_WEIXIN_BASE_URL."material/add_news?access_token={$accessToken}",
-    ydwx_json_encode($array));
+    ydwx_json_encode(array("articles"=>$array)));
     $msg  = new YDWXResponse($info);
     if($msg->isSuccess()){
         return $msg->media_id;
@@ -60,16 +53,55 @@ function ydwx_material_add_news($accessToken, array $articles){
  * @throws YDWXException
  */
 function ydwx_media_uploadimg($accessToken, $media){
-    if( ! YDWX_WEIXIN_IS_AUTHED){
-        throw new YDWXException("上传文件需要认证账号");
-    }
-    
     $http = new YDHttp();
     $info = $http->post(YDWX_WEIXIN_BASE_URL."media/uploadimg?access_token={$accessToken}", 
             array("media"=>"@".$media) ,true);
     $msg  = new YDWXResponse($info); 
     if($msg->isSuccess()){
         return $msg->url; 
+    }
+    throw new YDWXException($msg->errmsg);
+}
+
+/**
+ * 新增其他类型永久素材
+ * 
+ * @param unknown $accessToken
+ * @param unknown $type 媒体文件类型，分别有图片（image）、语音（voice）和缩略图（thumb）
+ * @param unknown $media
+ * @throws YDWXException
+ * @return YDWXMaterialResponse
+ */
+function ydwx_media_add_material($accessToken, $type, $media){
+    $http = new YDHttp();
+    $info = $http->post(YDWX_WEIXIN_BASE_URL."material/add_material?access_token={$accessToken}&type=$type",
+    array("media"=>"@".$media) ,true);
+
+    $msg  = new YDWXMaterialResponse($info);
+
+    if($msg->isSuccess()){
+        return $msg;
+    }
+    throw new YDWXException($msg->errmsg);
+}
+/**
+ * 新增视频类型永久素材
+ *
+ * @param unknown $accessToken
+ * @param unknown $media
+ * @param unknown $title 视频素材的标题
+ * @param unknown $introduction 视频素材的描述
+ * @throws YDWXException
+ * @return YDWXMaterialResponse
+ */
+function ydwx_media_add_material_video($accessToken, $media, $title, $introduction){
+    $http = new YDHttp();
+    $info = $http->post(YDWX_WEIXIN_BASE_URL."material/add_material?access_token={$accessToken}&type=video",
+    array("media"=>"@".$media, 
+            "description"=>ydwx_json_encode(array("title"=>$title, "introduction"=>$introduction))) ,true);
+    $msg  = new YDWXMaterialResponse($info);
+    if($msg->isSuccess()){
+        return $msg;
     }
     throw new YDWXException($msg->errmsg);
 }
@@ -84,7 +116,7 @@ function ydwx_media_uploadimg($accessToken, $media){
  */
 function ydwx_media_get($accessToken, $mediaid, $isVideo=false){
     $http    = new YDHttp();
-    $content = $http->get( ($isVideo ? YDWX_YDWX_WEIXIN_BASE_URL2 : YDWX_WEIXIN_BASE_URL)."media/get?access_token={$accessToken}&media_id={$mediaid}");
+    $content = $http->get( ($isVideo ? YDWX_WEIXIN_NO_SSL_URL : YDWX_WEIXIN_BASE_URL)."media/get?access_token={$accessToken}&media_id={$mediaid}");
     $info    = json_decode($content, true);
     if( array_key_exists("errcode", $info))return false;
     return $content;

@@ -30,3 +30,77 @@ class YDWXJsapiTicketResponse extends YDWXResponse{
     public $ticket;
     public $expires_in;
 }
+
+class YDWXPayBaseResponse extends YDWXResponse{
+    /**
+     * SUCCESS/FAIL
+     * @var unknown
+     */
+    protected $return_code;
+    /**
+     * 返回信息，如非空，为错误原因
+     * 签名失败
+     * 参数格式校验错误
+     * @var unknown
+     */
+    protected $return_msg;
+    /**
+     * SUCCESS/FAIL
+     * SUCCESS退款申请接收成功，结果通过退款查询接口查询
+     * FAIL
+     * @var unknown
+     */
+    protected $result_code;
+    /**
+     * 详细参见第6节错误列表
+     * @var unknown
+     */
+    protected $err_code;
+    /**
+     * 结果信息描述
+     * @var unknown
+     */
+    protected $err_code_des;
+    /**
+     * 微信分配的公众账号ID
+     * @var unknown
+     */
+    protected $appid;
+    /**
+     * 微信支付分配的商户号
+     * @var unknown
+     */
+    protected $mch_id;
+    /**
+     * 随机字符串，不长于32位
+     * @var unknown
+     */
+    protected $nonce_str;
+    protected $sign;
+
+    public function isSuccess(){
+        return $this->isPrepaySuccess() &&  $this->isPrepayResultSuccess();
+    }
+
+    protected function isPrepaySuccess(){
+        return strcasecmp($this->return_code, "success")==0;
+    }
+
+    protected function isPrepayResultSuccess(){
+        return strcasecmp($this->result_code, "success")==0;
+    }
+    public function build($msg){
+        $arr = simplexml_load_string($msg, 'SimpleXMLElement', LIBXML_NOCDATA);
+        foreach ((array)$arr as $name=>$value){
+            $this->$name = $value;
+        }
+        if( ! $this->isPrepaySuccess() && $this->return_code){
+            $this->errcode = -1;
+            $this->errmsg  = $this->return_msg;
+        }
+        if( ! $this->isPrepayResultSuccess() && $this->result_code){
+            $this->errcode = -1;
+            $this->errmsg  = $this->err_code_des;
+        }
+    }
+}

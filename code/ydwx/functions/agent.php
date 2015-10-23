@@ -1,15 +1,16 @@
 <?php
+
 /**
  * 公众号第三方平台生成授权连接
  */
 function ydwx_agent_create_preauthcode(){
-    $accessToken = YDWXHook::do_hook(YDWXHook::GET_ACCESS_TOKEN);
+    $accessToken = YDWXHook::do_hook(YDWXHook::GET_AGENT_ACCESS_TOKEN);
     $http = new YDHttp();
     $info = $http->post(YDWX_WEIXIN_BASE_URL."component/api_create_preauthcode?component_access_token={$accessToken}",
         ydwx_json_encode(array("component_appid"=>YDWX_WEIXIN_COMPONENT_APP_ID)));
     $msg  = new YDWXResponse($info);
     if( ! $msg->isSuccess()){
-        return "#";
+        return "#".$msg->errmsg;
     }
     
     return "https://mp.weixin.qq.com/cgi-bin/componentloginpage?component_appid="
@@ -23,7 +24,7 @@ function ydwx_agent_create_preauthcode(){
  * @return YDWXAgentAuthInfo
  */
 function ydwx_agent_query_auth($auth_code){
-    $accessToken = YDWXHook::do_hook(YDWXHook::GET_ACCESS_TOKEN);
+    $accessToken = YDWXHook::do_hook(YDWXHook::GET_AGENT_ACCESS_TOKEN);
     $http = new YDHttp();
     $info = $http->post(YDWX_WEIXIN_BASE_URL."component/api_query_auth?component_access_token={$accessToken}",
         ydwx_json_encode(array(
@@ -37,20 +38,20 @@ function ydwx_agent_query_auth($auth_code){
 }
 
 /**
- * 或者授权的公众号信息
+ * 获取授权的公众号信息
  * 
  * @param unknown $appid
  * @throws YDWXException
  * @return YDWXAgentAuthInfo
  */
 function ydwx_agent_get_auth_account($appid){
-    $accessToken = YDWXHook::do_hook(YDWXHook::GET_ACCESS_TOKEN);
+    $accessToken = YDWXHook::do_hook(YDWXHook::GET_AGENT_ACCESS_TOKEN);
     $http = new YDHttp();
     $info = $http->post(YDWX_WEIXIN_BASE_URL."component/api_get_authorizer_info?component_access_token={$accessToken}",
     ydwx_json_encode(array(
             "component_appid" =>YDWX_WEIXIN_COMPONENT_APP_ID,
             "authorizer_appid"=>$appid)));
-    $msg  = new YDWXAgentAuthInfo($info);
+    $msg  = new YDWXAgentAuthUser($info);
     if( $msg->isSuccess()){
         return $msg;
     }
@@ -72,7 +73,7 @@ function ydwx_agent_access_token($verify_ticket){
             "component_appsecret"=>YDWX_WEIXIN_COMPONENT_APP_SECRET,
             "component_verify_ticket"=>$verify_ticket)));
     $msg  = new YDWXAccessTokenResponse($info);
-    $msg->access_token = @$msg->rawData['component_access_token'];
+    $msg->access_token = $msg->component_access_token;
     if( $msg->isSuccess()){
         return $msg;
     }
@@ -80,13 +81,13 @@ function ydwx_agent_access_token($verify_ticket){
 }
 
 /**
- * 属性授权的公众号的令牌
+ * 刷新授权的公众号的令牌
  * @param 授权公众号的 appid
  * @param 授权公众号的 refreshToken
  * @return string access token
  */
 function ydwx_agent_refresh_auth_token($appid, $refreshToken){
-    $accessToken = YDWXHook::do_hook(YDWXHook::GET_ACCESS_TOKEN);
+    $accessToken = YDWXHook::do_hook(YDWXHook::GET_AGENT_ACCESS_TOKEN);
     $http = new YDHttp();
     $info = $http->post(YDWX_WEIXIN_BASE_URL."component/api_authorizer_token?component_access_token={$accessToken}",
     ydwx_json_encode(array(
@@ -96,7 +97,32 @@ function ydwx_agent_refresh_auth_token($appid, $refreshToken){
 	    )));
     $msg  = new YDWXAuthorizerTokenResponse($info);
     if( $msg->isSuccess()){
-        return YDWXAuthorizerTokenResponse;
+        return $msg;
+    }
+    throw new YDWXException($msg->errmsg);
+}
+
+/**
+ * 该 API 用于第三方平台确认接受公众号将某权限集高级权限的授权
+ * @param unknown $appid
+ * @param unknown $funcscope_category_id 功能集合，见YDWX_FUNC_XX常量
+ * @param boolean $confirm true 确认 false取消
+ * @throws YDWXException
+ * @return boolean
+ */
+function ydwx_agent_confirm_authorization($appid, $funcscope_category_id, $confirm){
+    $accessToken = YDWXHook::do_hook(YDWXHook::GET_AGENT_ACCESS_TOKEN);
+    $http = new YDHttp();
+    $info = $http->post(YDWX_WEIXIN_BASE_URL."component/api_confirm_authorization?component_access_token={$accessToken}",
+    ydwx_json_encode(array(
+            "component_appid"   => YDWX_WEIXIN_COMPONENT_APP_ID,
+            "authorizer_appid"  => $appid,
+            "funcscope_category_id"=>$funcscope_category_id,
+            "confirm_value"     => $confirm ? 1 :2
+    )));
+    $msg  = new YDWXResponse($info);
+    if( $msg->isSuccess()){
+        return true;
     }
     throw new YDWXException($msg->errmsg);
 }

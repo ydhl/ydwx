@@ -6,7 +6,11 @@
  * include_once 'your-lib-file.php';
  * chdir ( $oldcwd );
  */
- 
-YDWXHook::add_hook(YDWXHook::YDWX_LOG, function($msg){
+
+YDWXHook::add_hook(YDWXHook::EVENT_MSG_TEXT, function(YDWXEventMsgText $msg){
+    
+
+});
+YDWXHook::add_hook(YDWXHook::EVENT_LOCATION, function(YDWXEventLocation $msg){
     
 });

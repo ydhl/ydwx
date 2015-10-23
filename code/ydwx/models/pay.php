@@ -152,11 +152,11 @@ class YDWXPaiedNotifyResponse extends YDWXPayBaseResponse{
                 $this->$name = $value;
             }
         }
-        if( ! $this->isPrepaySuccess()){
+        if( ! $this->isPrepaySuccess() && $this->return_code){
             $this->errcode = -1;
             $this->errmsg  = $this->return_msg;
         }
-        if( ! $this->isPrepayResultSuccess()){
+        if( ! $this->isPrepayResultSuccess() && $this->result_code){
             $this->errcode = -1;
             $this->errmsg  = $this->err_code_des;
         }
@@ -201,79 +201,6 @@ class YDWXOrderQueryResponse extends YDWXPaiedNotifyResponse{
     public $trade_state_desc;
 }
 
-class YDWXPayBaseResponse extends YDWXResponse{
-    /**
-     * SUCCESS/FAIL
-     * @var unknown
-     */
-    protected $return_code;
-    /**
-     * 返回信息，如非空，为错误原因
-     * 签名失败
-     * 参数格式校验错误
-     * @var unknown
-     */
-    protected $return_msg;
-    /**
-     * SUCCESS/FAIL
-     * SUCCESS退款申请接收成功，结果通过退款查询接口查询
-     * FAIL
-     * @var unknown
-     */
-    protected $result_code;
-    /**
-     * 详细参见第6节错误列表
-     * @var unknown
-     */
-    protected $err_code;
-    /**
-     * 结果信息描述
-     * @var unknown
-     */
-    protected $err_code_des;
-    /**
-     * 微信分配的公众账号ID
-     * @var unknown
-     */
-    protected $appid;
-    /**
-     * 微信支付分配的商户号
-     * @var unknown
-     */
-    protected $mch_id;
-    /**
-     * 随机字符串，不长于32位
-     * @var unknown
-     */
-    protected $nonce_str;
-    protected $sign;
-
-    public function isSuccess(){
-        return $this->isPrepaySuccess() &&  $this->isPrepayResultSuccess();
-    }
-    
-    protected function isPrepaySuccess(){
-        return strcasecmp($this->return_code, "success")==0;
-    }
-    
-    protected function isPrepayResultSuccess(){
-        return strcasecmp($this->result_code, "success")==0;
-    }
-    public function build($msg){
-        $arr = simplexml_load_string($msg, 'SimpleXMLElement', LIBXML_NOCDATA);
-        foreach ((array)$arr as $name=>$value){
-            $this->$name = $value;
-        }
-        if( ! $this->isPrepaySuccess()){
-            $this->errcode = -1;
-            $this->errmsg  = $this->return_msg;
-        }
-        if( ! $this->isPrepayResultSuccess()){
-            $this->errcode = -1;
-            $this->errmsg  = $this->err_code_des;
-        }
-    }
-}
 /**
  * 申请退款响应数据
  * @author leeboo
@@ -732,10 +659,16 @@ class YDWXPayShorturlResponse extends  YDWXPayBaseResponse{
 }
 ////////////////////////////// request ////////////////////////////////////////
 
+/**
+ * appid 和mch id默认读取的是config中的配置，如果作为第三方平台带公众号处理的时候可自行设置
+ * @author leeboo
+ *
+ */
 class YDWXPayBaseRequest extends YDWXRequest{
     protected $nonce_str;
-    protected $appid;
-    protected $mch_id;
+    public $appid;
+    public $mch_id;
+    public $mch_key;
 
     /**
      * 终端设备号(门店号或收银设备ID)，注意：PC网页或公众号内支付请传"WEB"
@@ -744,18 +677,30 @@ class YDWXPayBaseRequest extends YDWXRequest{
     private $device_info ="WEB";
 
     public function formatArgs(){
-        if(YDWX_WEIXIN_ACCOUNT_TYPE==YDWX_WEIXIN_ACCOUNT_TYPE_CROP){
-            $this->appid = YDWX_WEIXIN_CROP_ID;
-        }else{
-            $this->appid = YDWX_WEIXIN_APP_ID;
+        if( ! YDWX_WEIXIN_COMPONENT_APP_ID){
+            if(YDWX_WEIXIN_ACCOUNT_TYPE==YDWX_WEIXIN_ACCOUNT_TYPE_CROP){
+                $this->appid = YDWX_WEIXIN_CROP_ID;
+            }else{
+                $this->appid = YDWX_WEIXIN_APP_ID;
+            }
+            $this->mch_id  = YDWX_WEIXIN_MCH_ID;
+            $this->mch_key = YDWX_WEIXIN_MCH_KEY;
         }
-        $this->mch_id = YDWX_WEIXIN_MCH_ID;
-        $this->nonce_str = uniqid();
-        return parent::formatArgs();
+        if( ! $this->nonce_str) $this->nonce_str = uniqid();
+        
+        $args = parent::formatArgs();
+        unset($args['mch_key']);
+        return $args;
     }
     
     public function valid(){
-        
+        if( ! $this->appid)   throw new YDWXException("appid missing");
+        if( ! $this->mch_id)  throw new YDWXException("mch_id missing");
+        if( ! $this->mch_key) throw new YDWXException("mch_key missing");
+    }
+    public function sign(){
+        $str = $this->toString();
+        $this->sign = strtoupper(md5(urldecode($str)."&key=".$this->mch_key));
     }
 }
 
@@ -771,10 +716,10 @@ class YDWXPayShorturlRequest extends YDWXPayBaseRequest{
     public function sign(){
         //$long_url 签名用原串，传输需URLencode
         $this->valid();
-        $args = array_filter($this->sortArg());
+        $args = YDWXRequest::ignoreNull($this->sortArg());
         $args['long_url'] = urldecode($args['long_url']);
         $str  = http_build_query($args);
-        $this->sign = strtoupper(md5($str."&key=".YDWX_WEIXIN_MCH_KEY));
+        $this->sign = strtoupper(md5(urldecode($str)."&key=".$this->mch_key));
     }
 }
 /**
@@ -813,7 +758,7 @@ class YDWXPayNotifyRequest extends YDWXPayBaseRequest{
     
 
     public function valid(){
-        
+        parent::valid();
     }
 }
 
@@ -887,30 +832,31 @@ class YDWXPayUnifiedOrderRequest extends YDWXPayNotifyRequest{
      */
     public $openid;
 
-    private $notify_url;
+    protected $notify_url;
     /**
      * APP和网页支付提交用户端ip，Native支付填调用微信支付API的机器IP。
      * @var unknown
      */
-    private $spbill_create_ip;
+    protected $spbill_create_ip;
 
     /**
      * 取值如下：JSAPI，NATIVE，APP，WAP,详细说明见参数规定
      * @var unknown
      */
-    private $trade_type="JSAPI";
+    protected $trade_type="JSAPI";
 
     /**
      * 
-     * @param string $return_code_url 是否返回扫描支付二维码内容, 如果为true，则必须指定product_id；负责必须指定openid
+     * @param string $return_code_url 是否返回扫描支付二维码内容, 如果为true，则必须指定product_id；否则必须指定openid
      */
     public function __construct($return_code_url=false){
-        $this->notify_url  = YDWX_SITE_URL."pay-notify.php";
+        $this->notify_url  = YDWX_SITE_URL."ydwx/pay-notify.php";
         if($return_code_url){
             $this->trade_type = "NATIVE";
         }
     }
     public function valid(){
+        parent::valid();
         if($this->trade_type == "JSAPI"){
             $this->spbill_create_ip = $_SERVER['REMOTE_ADDR'];
         }else if($this->trade_type == "NATIVE"){
@@ -934,6 +880,7 @@ class YDWXCloseOrderRequest extends YDWXPayBaseRequest{
      */
     public $out_trade_no;
     public function valid(){
+        parent::valid();
         if(!$this->out_trade_no){
             throw new YDWXException("out_trade_no不能为空");
         }
@@ -952,6 +899,7 @@ class YDWXOrderQueryRequest extends YDWXPayBaseRequest{
      */
     public $transaction_id;
     public function valid(){
+        parent::valid();
         if(!$this->transaction_id && !$this->out_trade_no){
             throw new YDWXException("transaction_id与out_trade_no至少设置一个");
         }
@@ -1003,6 +951,7 @@ class YDWXPayRefundRequest extends YDWXPayBaseRequest{
      */
     public $op_user_id = null;
     public function valid(){
+        parent::valid();
         if(!$this->transaction_id && !$this->out_trade_no){
             throw new YDWXException("transaction_id与out_trade_no至少设置一个");
         }
@@ -1055,6 +1004,7 @@ class YDWXPayRefundQueryRequest extends YDWXPayRefundRequest
     public $refund_id = null;
 
     public function valid(){
+        parent::valid();
         if(!$this->transaction_id && !$this->out_trade_no && !$this->refund_id && !$this->out_refund_no){
             throw new YDWXException("transaction_id与out_trade_no,out_refund_no,refund_id至少设置一个");
         }
@@ -1089,6 +1039,7 @@ class YDWXPayDownloadbillRequest extends YDWXPayBaseRequest
     
     
     public function valid(){
+        parent::valid();
         if(!$this->bill_date){
             throw new YDWXException("bill_date未设置");
         }

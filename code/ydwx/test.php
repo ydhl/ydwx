@@ -23,7 +23,7 @@ $menu3->key  = "scan_qrcode";
 
 $access_token = lookup("value", "options", "name='access_token'");
 //echo "access token",$access_token,"<br/>";
-createMenus($access_token, array($menu1, $menu2, $menu3));
+// createMenus($access_token, array($menu1, $menu2, $menu3));
 //removeMenus($access_token);
 echo "getmenus:<br/>";
 print_r(getMenus($access_token));

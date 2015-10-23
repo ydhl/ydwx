@@ -24,7 +24,16 @@ class YDHttp{
 	public $useragent = 'ydwx';
 
 	static $boundary = "";
+	public $errno;
+	public $error;
 
+	protected $appid;
+	protected $ci;
+	
+	public function __construct($appid=null){
+	    $this->appid = $appid;
+	    $this->ci = curl_init();
+	}
 
 	public function get($url, $params = array())
 	{
@@ -44,7 +53,7 @@ class YDHttp{
 		}else{
 			$query = $params;
 		}
-
+		
 		return $this->http($url,'POST', $query, $multi);
 	}
 
@@ -86,7 +95,7 @@ class YDHttp{
 				$multipartbody .= $value."\r\n";
 			}
 		}
-		$multipartbody .=  $endMPboundary;
+		$multipartbody .=  $endMPboundary."\r\n";//微信服务器不加\r\n会提示media data is missing
 		return $multipartbody;
 
 	}
@@ -117,15 +126,14 @@ class YDHttp{
 	 * @return API results
 	 */
 	protected function http($url, $method, $postfields = NULL, $multi = false) {
+	    $ci = $this->ci;
 		$this->http_info = array();
-		$ci = curl_init();
 		/* Curl settings */
 		curl_setopt($ci, CURLOPT_USERAGENT, $this->useragent);
 		curl_setopt($ci, CURLOPT_CONNECTTIMEOUT, $this->connecttimeout);
 		curl_setopt($ci, CURLOPT_TIMEOUT, $this->timeout);
 		curl_setopt($ci, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($ci, CURLOPT_HTTPHEADER, array('Expect:'));
-		curl_setopt($ci, CURLOPT_SSL_VERIFYPEER, $this->ssl_verifypeer);
 		curl_setopt($ci, CURLOPT_HEADER, FALSE);
 
 		switch ($method) {
@@ -153,12 +161,19 @@ class YDHttp{
 		$response = curl_exec($ci);
 		$this->http_code = curl_getinfo($ci, CURLINFO_HTTP_CODE);
 		$this->http_info = array_merge($this->http_info, curl_getinfo($ci));
+		$this->errno     = curl_errno($ci);
+		$this->error     = curl_error($ci);
 		$this->url = $url;
 		curl_close ($ci);
 		return trim($response);
 	}
 
 }
+/**
+ * 对于第三方平台，构造函数需要传入所授权appid
+ * @author leeboo
+ *
+ */
 class YDHttps extends YDHttp{
     /**
      * Make an HTTP request
@@ -166,14 +181,40 @@ class YDHttps extends YDHttp{
      * @return API results
      */
     protected function http($url, $method, $postfields = NULL, $multi = false) {
-        curl_setopt($ci, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ci, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($this->ci, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($this->ci, CURLOPT_SSL_VERIFYHOST, 1);
         
-        curl_setopt($ci,CURLOPT_SSLCERTTYPE,'PEM');
-        curl_setopt($ci,CURLOPT_SSLCERT,YDWX_WEIXIN_APICLIENT_CERT);
-        curl_setopt($ci,CURLOPT_SSLKEYTYPE,'PEM');
-        curl_setopt($ci,CURLOPT_SSLKEY, YDWX_WEIXIN_APICLIENT_KEY);
-    
+        if(YDWX_WEIXIN_COMPONENT_APP_ID){
+            $cert_file = YDWXHook::do_hook(YDWXHook::GET_HOST_APICLIENT_CERT_PATH, $this->appid);
+            if(SAE_TMP_PATH){
+                if(copy($cert_file, SAE_TMP_PATH."cert.pem")){
+                    $cert_file = SAE_TMP_PATH."cert.pem";
+                }
+            }
+        }else{
+            $cert_file = YDWX_WEIXIN_APICLIENT_CERT;
+        }
+        curl_setopt($this->ci,CURLOPT_SSLCERTTYPE,'PEM');
+        curl_setopt($this->ci,CURLOPT_SSLCERT, $cert_file);
+        
+        
+        if(YDWX_WEIXIN_COMPONENT_APP_ID){
+            $key_file = YDWXHook::do_hook(YDWXHook::GET_HOST_APICLIENT_KEY_PATH, $this->appid);
+            if(SAE_TMP_PATH){
+                if(copy($key_file, SAE_TMP_PATH."key.pem")){
+                    $key_file = SAE_TMP_PATH."key.pem";
+                }
+            }
+        }else{
+            $key_file = YDWX_WEIXIN_APICLIENT_KEY;
+        }
+
+        curl_setopt($this->ci,CURLOPT_SSLKEYTYPE,'PEM');
+        curl_setopt($this->ci,CURLOPT_SSLKEY,  $key_file);
+        
+        curl_setopt($this->ci,CURLOPT_SSLKEYPASSWD,  YDWX_WEIXIN_COMPONENT_APP_ID ?
+        YDWXHook::do_hook(YDWXHook::GET_HOST_MCH_KEY, $this->appid) :
+        YDWX_WEIXIN_MCH_KEY);
         return parent::http($url, $method, $postfields, $multi);
     }
 }

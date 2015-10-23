@@ -16,6 +16,10 @@ class YDWXEvent extends YDWXResponse{
     public $ToUserName;
     public $CreateTime;
     public $FromUserName;
+    /**
+     * 对于第三方平台，该字段标明通知消息是那个托管的公众号的
+     */
+    public $APPID;
     protected $xml;
     public function build($msg){
         $this->xml = simplexml_load_string($msg, 'SimpleXMLElement', LIBXML_NOCDATA);
@@ -30,12 +34,20 @@ class YDWXEvent extends YDWXResponse{
     }
     /**
      * 
-     * @param YDWXEvent $msg
+     * @return YDWXEvent
      */
     public static function CreateEventMsg($msg){
         $obj =  new YDWXEvent($msg);
         if($obj->Event){
-            $clsname  = "YDWX".ucfirst((strtolower($obj->MsgType))).ucfirst(strtolower($obj->Event));
+            if($obj->Event=="user_consume_card"){//同一个事件的两种作用
+                if($obj->TransId){
+                    $clsname = "YDWXEventUserPaidByCard";
+                }else{
+                    $clsname = "YDWXEventUserConsumeCard";
+                }
+            }else{
+                $clsname  = "YDWX".ucfirst((strtolower($obj->MsgType))).ucfirst(strtolower($obj->Event));
+            }
         }else if($obj->MsgType){
             $clsname = "YDWXEventMsg".ucfirst(strtolower($obj->MsgType));
         }else if($obj->InfoType){
@@ -52,16 +64,221 @@ class YDWXEvent extends YDWXResponse{
      */
     public function HookName(){
         if($this->Event){
-            $hookname = strtoupper($this->MsgType."_".$this->Event);
-        }else if($obj->MsgType){
+            if($obj->Event=="user_consume_card"){//同一个事件的两种作用
+                if($obj->TransId){
+                    $hookname = "EVENT_USER_PAID_BY_CARD";
+                }else{
+                    $hookname = "EVENT_USER_CONSUME_CARD";
+                }
+            }else{
+                $hookname = strtoupper($this->MsgType."_".$this->Event);
+            }
+        }else if($this->MsgType){
             $hookname = "EVENT_MSG_".strtoupper($this->MsgType);
-        }else if($obj->InfoType){
-            $hookname = "EVENT_".ucfirst(strtolower($obj->InfoType));
+        }else if($this->InfoType){
+            $hookname = "EVENT_".strtoupper($this->InfoType);
         }else{
             $hookname = "EVENT_UNKONW";
         }
         return constant("YDWXHook::{$hookname}");
     }
+}
+/**
+ * 用户在进入会员卡时，微信会把这个事件推送。
+ * 需要开发者在创建会员卡时填入need_push_on_view	字段并设置为true。开发者须综合考虑领卡人数和服务器压力，决定是否接收该事件。
+ * @author leeboo
+ *
+ */
+class YDWXEventUser_view_card extends YDWXEvent{
+    public $CardId;
+    /**
+     * code序列号。自定义code及非自定义code的卡券被领取后都支持事件推送。
+     * @var unknown
+     */
+    public $UserCardCode;
+}
+/**
+ * 领取卡券事件消息
+ * @author leeboo
+ *
+ */
+class YDWXEventUser_get_card extends YDWXEvent{
+    /**
+     * 卡券ID。
+     * @var unknown
+     */
+    public $CardId;
+   
+    /**
+     * 卡券Code码。
+     * @var unknown
+     */
+    public $UserCardCode;
+    /**
+     * 投放二维码时设置,领取场景值，用于领取渠道数据统计。可在生成二维码接口及添加JS API接口中自定义该字段的整型值。
+     * @var unknown
+     */
+    public $OuterId;
+    /**
+     * 是否为转赠，1代表是，0代表否。
+     * @var unknown
+     */
+    public $IsGiveByFriend;
+    /**
+     * 赠送方账号（一个OpenID），"IsGiveByFriend”为1时填写该参数。
+     * @var unknown
+     */
+    public $FriendUserName;
+    /**
+     * 转赠前的code序列号。
+     * @var unknown
+     */
+    public $OldUserCardCode;
+}
+/**
+ * 生成的卡券通过审核Event
+ * @author leeboo
+ *
+ */
+class YDWXEventCard_pass_check extends YDWXEvent{
+    public $CardId;
+}
+/**
+ * 生成的卡券不通过审核Event
+ * @author leeboo
+ *
+ */
+class YDWXEventCard_not_pass_check extends YDWXEvent{
+    public $CardId;
+}
+/**
+ * 红包绑定用户事件通知 FromUserName	红包绑定用户（一个OpenID）。
+ * 注：红包绑定用户不等同于用户领取红包。用户进入红包页面后，有可能不拆红包，但该红包ticket已被绑定，不能再被其他用户绑定，过期后会退回商户财付通账户
+ * @author leeboo
+ *
+ */
+class YDWXEventShakearoundlotterybind extends YDWXEvent{
+    /**
+     * 红包活动id
+     * @var unknown
+     */
+    public $LotteryId;
+    /**
+     * 红包ticket
+     * @var unknown
+     */
+    public $Ticket;
+    /**
+     * 红包金额
+     * @var unknown
+     */
+    public $Money;
+    /**
+     * 红包绑定时间
+     * @var unknown
+     */
+    public $BindTime;
+}
+class YDWXEventPoi_check_notify extends YDWXEvent{
+    /**
+     * 商户自己内部ID，即字段中的sid
+     * @var unknown
+     */
+    public $UniqId;
+    /**
+     * 微信的门店ID，微信内门店唯一标示ID
+     * @var unknown
+     */
+    public $PoiId;
+    /**
+     * 审核结果，成功succ 或失败fail
+     * @var unknown
+     */
+    public $Result;
+    /**
+     * 成功的通知信息，或审核失败的驳回理由
+     * @var unknown
+     */
+    public $Msg;
+}
+/**
+ * 用户在卡券里点击查看公众号进入会话时（需要用户已经关注公众号），微信推送事件。
+ * 开发者可识别从卡券进入公众号的用户身份
+ * @author leeboo
+ *
+ */
+class YDWXEventUser_enter_session_from_card extends YDWXEvent{
+    public $CardId;
+    /**
+     * code序列号。自定义code及非自定义code的卡券被领取后都支持事件推送。
+     * @var unknown
+     */
+    public $UserCardCode;
+}
+/**
+ * 用户删除会员卡事件推送
+ * @author leeboo
+ *
+ */
+class YDWXEventUser_del_card extends YDWXEvent{
+    public $CardId;
+    /**
+     * code序列号。自定义code及非自定义code的卡券被领取后都支持事件推送。
+     * @var unknown
+     */
+    public $UserCardCode;
+}
+class YDWXEventConsumeCardBase extends YDWXEvent{
+    /**
+     * 卡券ID。
+     * @var unknown
+     */
+    public $CardId;
+    /**
+     * 卡券Code码。
+     * @var unknown
+     */
+    public $UserCardCode;
+    /**
+     * 核销来源。支持开发者统计API核销（YDWX_CARD_Consume_FROM_API）、公众平台核销（YDWX_CARD_Consume_FROM_MP）、
+     * 卡券商户助手核销（YDWX_CARD_Consume_FROM_MOBILE_HELPER）（核销员微信号）
+     * @var unknown
+     */
+    public $ConsumeSource;
+}
+/**
+ * 核销事件推送
+ * @author leeboo
+ *
+ */
+class YDWXEventUserConsumeCard extends YDWXEventConsumeCardBase{
+    /**
+     * 门店名称，当前卡券核销的门店名称（只有通过卡券商户助手和买单核销时才会出现）
+     * @var unknown
+     */
+    public $LocationName;
+    /**
+     * 核销该卡券核销员的openid（只有通过卡券商户助手核销时才会出现）
+     * @var unknown
+     */
+    public $StaffOpenId;
+}
+/**
+ * 微信卡券买单事件通知
+ * @author leeboo
+ *
+ */
+class YDWXEventUserPaidByCard extends YDWXEventConsumeCardBase{
+    /**
+     * 微信支付交易订单号
+     * @var unknown
+     */
+    public $OutTradeNo;
+    /**
+     * 商户订单号
+     * @var unknown
+     */
+    public $TransId;
 }
 /**
  * 第三方平台的ticket刷新通知
@@ -97,6 +314,55 @@ class YDWXEventUnauthorized extends YDWXEvent{
  */
 class YDWXEventUnknow extends YDWXEvent{
     
+}
+
+/**
+ * 摇一摇事件通知
+ * 推送内容包含摇一摇时“周边”页卡展示出来的页面所对应的设备信息，以及附近最多五个属于该公众账号的设备的信息
+ * @author leeboo
+ * @see http://mp.weixin.qq.com/wiki/4/f70a51e8d80631751514778070e2c2b0.html
+ */
+class YDWXEventShakearoundusershake extends YDWXEvent{
+    /**
+     * YDWXZBChooseDevice
+     * @var YDWXZBChooseDevice
+     */
+    public $ChosenBeacon;
+    /**
+     * YDWXZBChooseDevice 组成的数组
+     * @var array
+     */
+    public $AroundBeacons = array();
+    
+    public function build($msg){
+        parent::build($msg);
+        if( $this->xml){
+            $device = new YDWXZBChosenBeacon();
+            
+            $beacon = (array)$this->ChosenBeacon;
+            $device->uuid  = $beacon['Uuid'];
+            $device->major = $beacon['Major'];
+            $device->minor = $beacon['Minor'];
+            $device->distance = $beacon['Distance'];
+            $this->ChosenBeacon = $device;
+            
+            
+            $beacons = (array)$this->AroundBeacons;
+            $array = array();
+            
+            foreach($beacons['AroundBeacon'] as $value){
+                $device = new YDWXZBChosenBeacon();
+                $value = (array)$value;
+            
+                $device->uuid  = $value['Uuid'];
+                $device->major = $value['Major'];
+                $device->minor = $value['Minor'];
+                $device->distance = $value['Distance'];
+                $array[] = $device;
+            }
+            $this->AroundBeacons = $array;
+        }
+    }
 }
 
 /**
