@@ -20,8 +20,14 @@ include_once dirname(__FILE__).'/__config__.php';
 if( ! @$_GET['back'] ){
     $state = "ydwx";
 }else{
-    $state = urlencode($_GET['back']);
+    $state = $_GET['back'];
 }
+
+if($_GET['realappid']){//第三方平台代替无oauth权限的公众号进行oauth登录时使用，其值为公众号的appid，这时的$_GET['appid']为第三方平台appid
+    $state .= ">".$_GET['realappid'];
+}
+
+$state = urlencode(base64_encode($state));
 
 $redirect = YDWX_SITE_URL.'ydwx/auth.php';
 
@@ -71,8 +77,14 @@ if($isAgent || YDWX_WEIXIN_ACCOUNT_TYPE != YDWX_WEIXIN_ACCOUNT_TYPE_CROP){
     }
     
     try{
+        $state = base64_decode($_GET['state']);
+        $rst = preg_match('/>(?P<realappid>.+)$/', $state, $matches);
+        if($rst){
+            $state = preg_replace('/>.+$/', "", $state);
+            $appid = $matches['realappid'];
+        }
         $user = ydwx_sns_userinfo($info['access_token'], $info['openid']);
-        $user->state = $_GET['state'];
+        $user->state = $state;
         $user->appid = $appid;
         YDWXHook::do_hook(YDWXHook::AUTH_INAPP_SUCCESS, $user);
     }catch (\Exception $e){

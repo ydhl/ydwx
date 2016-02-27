@@ -9,6 +9,8 @@
  *
  */
 class YDWXPacketPreorderRequest extends YDWXRequest{
+    const TYPE_SHAKEAROUND = "shakearound";
+    const TYPE_YAOTV       = "yaotv";
     /**
      * 随机字符串，不长于32位
      * @var unknown
@@ -93,13 +95,24 @@ class YDWXPacketPreorderRequest extends YDWXRequest{
      * @var unknown
      */
     public $risk_cntl;
+    /**
+     * 默认摇一摇红包
+     * @var unknown
+     */
+    public $type="shakearound";
     protected function formatArgs(){
         if( ! $this->nonce_str)$this->nonce_str = uniqid();
         $args = parent::formatArgs();
         $args['total_amount']   = intval($args['total_amount']);
         $args['total_num']      = intval($args['total_num']);
-        $args['auth_mchid']     = "1000052601";
-        $args['auth_appid']     = 'wxbf42bd79c4391863';
+        if($this->type==self::TYPE_YAOTV){
+            $args['auth_mchid']     = "1000048201";
+            $args['auth_appid']     = 'wxbe43ea14debca355';
+        }else{
+            $args['auth_mchid']     = "1000052601";
+            $args['auth_appid']     = 'wxbf42bd79c4391863';
+        }
+        unset( $args['type'] );
         unset( $args['mch_key'] );
         return $args;
     }
@@ -473,12 +486,20 @@ class YDWXPacketGetHBInfoResponse extends YDWXPayBaseResponse{
         parent::build($msg);
         $array = array();
         $hblist = (array)$this->hblist;
-        foreach ($hblist['hbinfo'] as $hbinfo){
-            $hbinfo = (array)$hbinfo;
+        if( ! is_array($hblist['hbinfo'])){
+            $hbinfo = (array)$hblist['hbinfo'];
             $array[] = array(
-                        "openid"=>$hbinfo['openid'],
-                        "amount"=>$hbinfo['amount'],
-                        "rcv_time"=>$hbinfo['rcv_time']);
+                    "openid"=>$hbinfo['openid'],
+                    "amount"=>$hbinfo['amount'],
+                    "rcv_time"=>$hbinfo['rcv_time']);
+        }else{
+            foreach ($hblist['hbinfo'] as $hbinfo){
+                $hbinfo = (array)$hbinfo;
+                $array[] = array(
+                            "openid"=>$hbinfo['openid'],
+                            "amount"=>$hbinfo['amount'],
+                            "rcv_time"=>$hbinfo['rcv_time']);
+            }
         }
         $this->hblist = $array;
     }
@@ -638,8 +659,7 @@ class YDWXPacketSendGroupRequest extends YDWXPacketSendRequest{
     
     protected function formatArgs(){
         $args = parent::formatArgs();
-        $args['total_num']    = intval($args['total_num']);;
-        $args['total_amount'] = intval($args['total_amount']);
+        $args['total_num']    = intval($this->total_num);
         unset( $args['mch_key'] );
         unset( $args['client_ip'] );
         return $args;

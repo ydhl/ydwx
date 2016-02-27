@@ -16,7 +16,7 @@ function ydwx_media_upload($accessToken, $type, $media){
     if($msg->isSuccess()){
         return $msg->media_id; 
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg,$msg->errcode);
 }
 
 /**
@@ -39,7 +39,7 @@ function ydwx_material_add_news($accessToken, array $articles){
     if($msg->isSuccess()){
         return $msg->media_id;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg,$msg->errcode);
 }
 
 /**
@@ -60,7 +60,7 @@ function ydwx_media_uploadimg($accessToken, $media){
     if($msg->isSuccess()){
         return $msg->url; 
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg,$msg->errcode);
 }
 
 /**
@@ -82,7 +82,7 @@ function ydwx_media_add_material($accessToken, $type, $media){
     if($msg->isSuccess()){
         return $msg;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg,$msg->errcode);
 }
 /**
  * 新增视频类型永久素材
@@ -103,7 +103,7 @@ function ydwx_media_add_material_video($accessToken, $media, $title, $introducti
     if($msg->isSuccess()){
         return $msg;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg,$msg->errcode);
 }
 
 /**
@@ -118,6 +118,6 @@ function ydwx_media_get($accessToken, $mediaid, $isVideo=false){
     $http    = new YDHttp();
     $content = $http->get( ($isVideo ? YDWX_WEIXIN_NO_SSL_URL : YDWX_WEIXIN_BASE_URL)."media/get?access_token={$accessToken}&media_id={$mediaid}");
     $info    = json_decode($content, true);
-    if( array_key_exists("errcode", $info))return false;
+    if( array_key_exists("errcode", $info))throw new YDWXException($info['errmsg']);
     return $content;
 }

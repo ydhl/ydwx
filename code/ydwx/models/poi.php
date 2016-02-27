@@ -137,7 +137,7 @@ class YDWXPoiGetResponse extends YDWXResponse{
  */
 class YDWXPoiGetListResponse extends YDWXResponse{
     /**
-     *
+     * 门店总数量
      */
     public $total_count;
     /**

@@ -17,7 +17,7 @@ function ydwx_shakearound_register($accessToken,  YDWXShakeAroundRegister $reque
     if($msg->isSuccess()){
         return true;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg, $msg->errcode);
 }
 
 /**
@@ -34,7 +34,7 @@ function ydwx_shakearound_register_status($accessToken){
     if($msg->isSuccess()){
         return $msg;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg, $msg->errcode);
 }
 /**
  * 申请设备ID
@@ -53,7 +53,7 @@ function ydwx_shakearound_device_apply($accessToken, YDWXZBDeviceRegister $reque
     if($msg->isSuccess()){
         return $msg;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg, $msg->errcode);
 }
 
 /**
@@ -72,7 +72,7 @@ function ydwx_shakearound_device_status($accessToken, $applyid){
     if($msg->isSuccess()){
         return $msg;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg, $msg->errcode);
 }
 /**
  * 编辑设备信息
@@ -94,7 +94,7 @@ function ydwx_shakearound_device_update($accessToken, YDWXZBDeviceBase $device, 
     if($msg->isSuccess()){
         return true;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg, $msg->errcode);
 }
 
 /**
@@ -116,7 +116,7 @@ function ydwx_shakearound_device_bindlocation($accessToken, YDWXZBDeviceBase $de
     if($msg->isSuccess()){
         return true;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg, $msg->errcode);
 }
 
 /**
@@ -136,15 +136,15 @@ function ydwx_shakearound_device_search($accessToken, YDWXZBDeviceBase $device){
     if($msg->isSuccess()){
         return $msg;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg, $msg->errcode);
 }
 
 /**
  * 分页查询设备
  *
  * @param unknown $accessToken
- * @param int $begin
- * @param int $count
+ * @param int $begin 设备列表的起始索引值
+ * @param int $count 待查询的设备数量，不能超过50个
  * @param string $apply_id 传入则只查询该批次的
  * @throws YDWXException
  * @return YDWXZBDeviceSearchResponse
@@ -162,7 +162,7 @@ function ydwx_shakearound_device_search_range($accessToken, $begin, $count, $app
     if($msg->isSuccess()){
         return $msg;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg, $msg->errcode);
 }
 
 /**
@@ -179,7 +179,7 @@ function ydwx_shakearound_page_add($accessToken, YDWXZBPage $page){
     if($msg->isSuccess()){
         return $msg->data['page_id'];
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg, $msg->errcode);
 }
 /**
  * 编辑摇一摇页面，成功返回true
@@ -196,7 +196,7 @@ function ydwx_shakearound_page_update($accessToken, YDWXZBPage $page){
     if($msg->isSuccess()){
         return true;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg, $msg->errcode);
 }
 /**
  * 删除页面
@@ -213,7 +213,7 @@ function ydwx_shakearound_page_delete($accessToken, $pageid){
     if($msg->isSuccess()){
         return true;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg, $msg->errcode);
 }
 /**
  * 分页查询摇一摇页面
@@ -232,7 +232,7 @@ function ydwx_shakearound_page_search_range($accessToken, $begin, $count){
     if($msg->isSuccess()){
         return $msg;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg, $msg->errcode);
 }
 
 /**
@@ -255,7 +255,7 @@ function ydwx_shakearound_page_search($accessToken, $pageid){
     if($msg->isSuccess()){
         return $msg;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg, $msg->errcode);
 }
 
 /**
@@ -280,7 +280,7 @@ function ydwx_shakearound_upload($accessToken, $media){
     if($msg->isSuccess()){
         return $msg->data['pic_url']; 
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg, $msg->errcode);
 }
 
 /**
@@ -301,7 +301,7 @@ function ydwx_shakearound_upload_license($accessToken, $media){
     if($msg->isSuccess()){
         return $msg->data['pic_url'];
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg, $msg->errcode);
 }
 
 /**
@@ -327,7 +327,7 @@ function ydwx_shakearound_device_bind_page($accessToken, YDWXZBDeviceBase $devic
     if($msg->isSuccess()){
         return true;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg, $msg->errcode);
 }
 
 /**
@@ -348,7 +348,7 @@ function ydwx_shakearound_relation_search($accessToken, YDWXZBDeviceBase $device
     if($msg->isSuccess()){
         return $msg;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg, $msg->errcode);
 }
 
 /**
@@ -369,7 +369,7 @@ function ydwx_shakearound_relation_search_range($accessToken, $page_id, $begin, 
     if($msg->isSuccess()){
         return $msg;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg, $msg->errcode);
 }
 
 /**
@@ -378,7 +378,7 @@ function ydwx_shakearound_relation_search_range($accessToken, $page_id, $begin, 
  * @param unknown $accessToken
  * @param unknown $ticket 摇周边业务的ticket，可在摇到的URL中得到，ticket生效时间为30分钟，每一次摇都会重新生成新的ticket
  * @throws YDWXException
- * @return YDWXZBRelationSearchResponse
+ * @return YDWXZBShakeInfoResponse
  */
 function ydwx_shakearound_get_shake_info($accessToken, $ticket){
     $http = new YDHttp();
@@ -389,7 +389,7 @@ function ydwx_shakearound_get_shake_info($accessToken, $ticket){
     if($msg->isSuccess()){
         return $msg;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg, $msg->errcode);
 }
 
 /**
@@ -452,7 +452,7 @@ function ydwx_shakearound_statistics_device($accessToken, YDWXZBDeviceBase $devi
         }
         return $array;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg, $msg->errcode);
 }
 
 /**
@@ -480,7 +480,7 @@ function ydwx_shakearound_statistics_devicelist($accessToken, $date, $page){
     if($msg->isSuccess()){
         return $msg;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg, $msg->errcode);
 }
 
 /**
@@ -518,7 +518,7 @@ function ydwx_shakearound_statistics_page($accessToken, $pageid, $begin, $end){
         }
         return $array;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg, $msg->errcode);
 }
 
 /**
@@ -544,7 +544,287 @@ function ydwx_shakearound_statistics_pagelist($accessToken, $date, $page){
     if($msg->isSuccess()){
         return $msg;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg, $msg->errcode);
 }
 
+/**
+ * 新建设备分组，每个帐号下最多只有1000个分组。
+ * 
+ * @param unknown $accessToken
+ * @param unknown $group_name 分组名称，不超过100汉字或200个英文字母
+ * @throws YDWXException
+ * @return groupid
+ */
+function ydwx_shakearound_device_group_add($accessToken, $group_name){
+    $http = new YDHttp();
+    $array= array();
+    $array['group_name'] = $group_name;
+    $info = $http->post(YDWX_WEIXIN_BASE_URL2."shakearound/device/group/add?access_token={$accessToken}",
+    ydwx_json_encode($array));
+
+    $msg  = new YDWXResponse($info);
+    if($msg->isSuccess()){
+        return $msg->data['group_id'];
+    }
+    throw new YDWXException($msg->errmsg, $msg->errcode);
+}
+
+/**
+ * 编辑设备分组信息，目前只能修改分组名。
+ * 
+ * @param unknown $accessToken
+ * @param unknown $group_id
+ * @param unknown $group_name 分组名称，不超过100汉字或200个英文字母
+ * @throws YDWXException
+ * @return boolean
+ */
+function ydwx_shakearound_device_group_update($accessToken, YDWXZBDeviceGroup $group){
+    $http = new YDHttp();
+    $info = $http->post(YDWX_WEIXIN_BASE_URL2."shakearound/device/group/update?access_token={$accessToken}",
+    $group->toJSONString());
+
+    $msg  = new YDWXResponse($info);
+    if($msg->isSuccess()){
+        return true;
+    }
+    throw new YDWXException($msg->errmsg, $msg->errcode);
+}
+
+/**
+ * 删除设备分组，若分组中还存在设备，则不能删除成功。需把设备移除以后，才能删除。
+ * 
+ * @param unknown $accessToken
+ * @param unknown $group_id
+ * @throws YDWXException
+ * @return boolean
+ */
+function ydwx_shakearound_device_group_delete($accessToken, $group_id){
+    $http = new YDHttp();
+    $array= array();
+    $array['group_id'] = intval($group_id);
+    $info = $http->post(YDWX_WEIXIN_BASE_URL2."shakearound/device/group/delete?access_token={$accessToken}",
+    ydwx_json_encode($array));
+
+    $msg  = new YDWXResponse($info);
+    if($msg->isSuccess()){
+        return true;
+    }
+    throw new YDWXException($msg->errmsg, $msg->errcode);
+}
+
+/**
+ * 查询账号下所有的分组。
+ * 
+ * @param unknown $accessToken
+ * @param unknown $begin 分组列表的起始索引值
+ * @param unknown $count 待查询的分组数量，不能超过1000个
+ * @throws YDWXException
+ * @return multitype:YDWXZBDeviceGroup
+ */
+function ydwx_shakearound_device_group_getlist($accessToken, $begin=0, $count=1000){
+    $http = new YDHttp();
+    $array= array();
+    $array['begin'] = intval($begin);
+    $array['count'] = intval($count);
+    $info = $http->post(YDWX_WEIXIN_BASE_URL2."shakearound/device/group/getlist?access_token={$accessToken}",
+    ydwx_json_encode($array));
+    $msg  = new YDWXResponse($info);
+    if($msg->isSuccess()){
+        $array = array();
+        foreach ($msg->data->groups as $info){
+            $stistic = new YDWXZBDeviceGroup();
+            $stistic->group_id   = $info['group_id'];
+            $stistic->group_name = $info['group_name'];
+            $array[] = $stistic;
+        }
+        return $array;
+    }
+    throw new YDWXException($msg->errmsg, $msg->errcode);
+}
+
+/**
+ * 查询分组详情，包括分组名，分组id，分组里的设备列表。
+ * @param unknown $accessToken
+ * @param unknown $groupid
+ * @param number $begin 分组里设备的起始索引值
+ * @param number $count 待查询的分组里设备的数量，不能超过1000个
+ * @throws YDWXException
+ * @return YDWXZBDeviceGroupDevices
+ */
+function ydwx_shakearound_device_group_getdetail($accessToken, $groupid, $begin=0, $count=1000){
+    $http = new YDHttp();
+    $array= array();
+    $array['groupid'] = intval($groupid);
+    $array['begin'] = intval($begin);
+    $array['count'] = intval($count);
+    $info = $http->post(YDWX_WEIXIN_BASE_URL2."shakearound/device/group/getdetail?access_token={$accessToken}",
+    ydwx_json_encode($array));
+    $msg  = new YDWXResponse($info);
+    if($msg->isSuccess()){
+        $detail = new YDWXZBDeviceGroupDevices();
+        $detail->total_count = $msg->data->total_count;
+        $group = new YDWXZBDeviceGroup();
+        $group->group_id    = $msg->data->group_id;
+        $group->group_name  = $msg->data->group_name;
+        $detail->group = $group;
+        $array = array();
+        foreach ($msg->data->devices as $info){
+            $stistic = new YDWXZBDevice();
+            $stistic->comment   = $info['comment'];
+            $stistic->poi_id    = $info['poi_id'];
+            $stistic->device_id = $info['device_id'];
+            $stistic->major   = $info['major'];
+            $stistic->minor   = $info['minor'];
+            $stistic->uuid    = $info['uuid'];
+            $array[] = $stistic;
+        }
+        $detail->devices = $array;
+        return $detail;
+    }
+    throw new YDWXException($msg->errmsg, $msg->errcode);
+}
+
+/**
+ * 添加设备到分组，每个分组能够持有的设备上限为10000，并且每次添加操作的添加上限为1000。只有在摇周边申请的设备才能添加到分组。
+ * 
+ * @param unknown $accessToken
+ * @param unknown $group_id
+ * @param array $devices YDWXZBDevice数组 设备编号，若填了UUID、major、minor，即可不填设备编号，二者选其一
+ * @throws YDWXException
+ * @return boolean
+ */
+function ydwx_shakearound_device_group_adddevice($accessToken, $group_id, array $devices){
+    $http = new YDHttp();
+    $array= array();
+    $array['group_id'] = intval($group_id);
+    foreach ($devices as $device){
+        $array['device_identifiers'][] = $device->baseInfo();
+    }
+    $info = $http->post(YDWX_WEIXIN_BASE_URL2."shakearound/device/group/adddevice?access_token={$accessToken}",
+    ydwx_json_encode($array));
+
+    $msg  = new YDWXResponse($info);
+    if($msg->isSuccess()){
+        return true;
+    }
+    throw new YDWXException($msg->errmsg, $msg->errcode);
+}
+
+/**
+ * 从分组中移除设备，每次删除操作的上限为1000。
+ * 
+ * @param unknown $accessToken
+ * @param unknown $group_id
+ * @param array $devices YDWXZBDevice数组 设备编号，若填了UUID、major、minor，即可不填设备编号，二者选其一
+ * @throws YDWXException
+ * @return boolean
+ */
+function ydwx_shakearound_device_group_deletedevice($accessToken, $group_id, array $devices){
+    $http = new YDHttp();
+    $array= array();
+    $array['group_id'] = intval($group_id);
+    foreach ($devices as $device){
+        $array['device_identifiers'][] = $device->baseInfo();
+    }
+    $info = $http->post(YDWX_WEIXIN_BASE_URL2."shakearound/device/group/deletedevice?access_token={$accessToken}",
+    ydwx_json_encode($array));
+
+    $msg  = new YDWXResponse($info);
+    if($msg->isSuccess()){
+        return true;
+    }
+    throw new YDWXException($msg->errmsg, $msg->errcode);
+}
+/**
+ * 开启查找周边ibeacon设备接口,该方法输出接口ydwx_startSearchBeacons(ticket, cb, listener)
+ * ticket:摇周边的业务ticket，系统自动添加在摇出来的页面链接后面,可不传
+ * cb: 回调，参数status. 返回相关的状态
+ * listener： 获取设备的回调，当检测到设备后会调用，参数是设备数组，每个设备的数据有
+ * 示例：
+ * 
+ * ydwx_startSearchBeacons(ticket, function(status){
+ *  if(status=='startSearchBeacons:ok'){//打开成功返回
+ *  }else if(status=='startSearchBeacons:already started'){//打开后未stop再次打开 
+ *  }else if(status=='startSearchBeacons:bluetooth power off'){//蓝牙未打开返回
+ *  }else if(status=='startSearchBeacons:location service disable'){//地理位置服务未打开返回
+ *  }else if(status=='startSearchBeacons:system unsupported'){//系统不支持返回
+ *  }else{//其他错误
+ *  }
+ * }, function(devices){
+ * for(var i=0; i<devices.length; i++){
+ *  devices[i].major
+ *  devices[i].minor
+ *  devices[i].uuid
+ *  devices[i].accuracy 距离，单位为米
+ *  devices[i].rssi 接收信号的强度指示
+ *  devices[i].proximity 精度，0：CLProximityUnknown, 1：CLProximityImmediate, 2：CLProximityNear, 3：CLProximityFar
+ *  devices[i].heading 接收信号时设备的方向（安卓设备返回有此字段，iOS无）；iOS设备若需要获取方向，可以利用HTML5标准API获取 http://o2o.gtimg.com/ibeacon/download/html5_compass_direction.html
+ * }
+ * });
+ * 
+ * @return string
+ */
+function ydwx_startSearchBeacons_script(){
+    ob_start();
+    ?>
+    function ydwx_startSearchBeacons(ticket, cb, listener){
+        wx.startSearchBeacons({
+           ticket:ticket,
+           complete:function(argv){
+            cb(argv);
+            if(argv=='startSearchBeacons:ok'){
+                wx.onSearchBeacons({
+                       complete:function(argv){
+                        listener(argv.onSearchBeacons.beacons);
+                       }
+                    });
+                }
+           }
+        });
+    }
+<?php 
+return ob_get_clean();
+}
+
+/**
+ * 关闭查找周边设备接口ydwx_stopSearchBeacons(cb);
+ * cb: 回调，参数status.
+ * 示例：
+ * 
+ * ydwx_stopSearchBeacons(function(status){
+ *  if(status=='stopSearchBeacons:ok'){//成功
+ *  }else{//其他错误
+ *  }
+ * });
+ * @return string
+ */
+function ydwx_stopSearchBeacons_script(){
+    ob_start();
+    ?>
+    function ydwx_stopSearchBeacons(cb){
+        wx.stopSearchBeacons({
+           complete:function(argv){
+            if(cb)cb(argv);
+           }
+        });
+    }
+<?php 
+return ob_get_clean();
+}
+
+/**
+ * 查询红包活动信息。
+ * @param unknown $lotteryid
+ * @throws YDWXException
+ * @return YDWXZBLotteryInfo
+ */
+function ydwx_shakearound_querylottery($accessToken, $lotteryid){
+    $http = new YDHttp();
+    $info = $http->get(YDWX_WEIXIN_BASE_URL2."shakearound/lottery/querylottery?access_token={$accessToken}&lottery_id={$lotteryid}");
+    $msg  = new YDWXZBLotteryInfo($info);
+    if($msg->isSuccess()){
+        return $msg;
+    }
+    throw new YDWXException($msg->errmsg, $msg->errcode);
+}
 ?>

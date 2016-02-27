@@ -34,5 +34,6 @@ if( !@$info['openid']){
     YDWXHook::do_hook(YDWXHook::AUTH_FAIL, YDWXAuthFailResponse::errMsg($info['errmsg'], $info['errcode']));
     die;
 }
-
-YDWXHook::do_hook(YDWXHook::AUTH_WEB_SUCCESS, ydwx_sns_userinfo($info['access_token'], $info['openid'], $_GET['state']));
+$user = ydwx_sns_userinfo($info['access_token'], $info['openid']);
+$user->state = $_GET['state'];
+YDWXHook::do_hook(YDWXHook::AUTH_WEB_SUCCESS, $user);

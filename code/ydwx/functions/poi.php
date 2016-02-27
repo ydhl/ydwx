@@ -63,7 +63,7 @@ function ydwx_poi_get($accessToken, $poiid){
     ydwx_json_encode(array("poi_id"=>$poiid)));
     $msg  = new YDWXPoiGetResponse($info);
     if($msg->isSuccess()){
-        return YDWXPoiGetResponse;
+        return $msg;
     }
     throw new YDWXException($msg->errmsg);
 }
@@ -73,8 +73,8 @@ function ydwx_poi_get($accessToken, $poiid){
  * 商户可以通过该接口，批量查询自己名下的门店list，并获取已审核通过的poi_id（所有状态均会返回poi_id，但该poi_id不一定为最终id）、商户自身sid 用于对应、商户名、分店名、地址字段
  * 
  * @param unknown $accessToken
- * @param unknown $begin
- * @param unknown $limit
+ * @param unknown $begin 开始位置，0 即为从第一条开始查询
+ * @param unknown $limit 返回数据条数，最大允许50，默认为20
  * @throws YDWXException
  * @return YDWXPoiGetListResponse
  */

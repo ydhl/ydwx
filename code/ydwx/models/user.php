@@ -125,6 +125,11 @@ class YDWXAgentAuthInfo extends YDWXResponse{
      * @var array
      */
     public $func_info;
+    /**
+     * 地址上的get参数
+     * @var unknown
+     */
+    public $query;
 
     public function build($msg){
         parent::build($msg);
@@ -134,7 +139,10 @@ class YDWXAgentAuthInfo extends YDWXResponse{
         $this->expires_in                   = $this->authorization_info['expires_in'];
 
         foreach ($this->authorization_info['func_info'] as $func){
-            $this->func_info[] = $func['funcscope_category']['id'];
+            $this->func_info[$func['funcscope_category']['id']] = array(
+                "need_confirm"   =>$func['confirm_info']['need_confirm'],
+                "already_confirm"=>$func['confirm_info']['already_confirm']
+            );
         }
     }
 }

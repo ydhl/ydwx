@@ -53,7 +53,7 @@ if(@$_GET['appid']){//第三方托管授权
 //第一步，引导用户到微信页面授权
 if( ! @$_GET['code'] &&  ! @$_GET['state']){
     ob_clean();
-    header($authorize_url);
+    header("Location: {$authorize_url}");
     die;
 }
 

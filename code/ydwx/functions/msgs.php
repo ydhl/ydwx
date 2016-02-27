@@ -78,7 +78,9 @@ function ydwx_qy_message_send($accessToken, YDWXQyMsgRequest $arg){
 
     $http = new YDHttp();
     $info = $http->post(YDWX_WEIXIN_QY_BASE_URL."message/send?access_token={$accessToken}", $arg->toJSONString());
-    return new YDWXResponse($info);
+    $info = new YDWXResponse($info);
+    if($info->isSuccess())return $info;
+    throw new YDWXException($info->errmsg, $info->errcode);
 }
 
 /**
@@ -107,10 +109,6 @@ function ydwx_answer_msg(YDWXAnswerMsg $msg){
  * @return string 模板的id
  */
 function ydwx_message_template_add($accessToken,  $template_id){
-    if( ! YDWX_WEIXIN_IS_AUTHED || YDWX_WEIXIN_ACCOUNT_TYPE != YDWX_WEIXIN_ACCOUNT_TYPE_SERVICE){
-        throw new YDWXException("发送模板消息, 要求是认证的服务号");
-    }
-
     $http = new YDHttp();
     $info = $http->post(YDWX_WEIXIN_BASE_URL."template/api_add_template?access_token={$accessToken}",
     ydwx_json_encode(array("template_id_short"=>$template_id)));
@@ -155,7 +153,9 @@ function ydwx_message_template_send($accessToken,  YDWXTemplateRequest $tpl){
     $http = new YDHttp();
     $info = $http->post(YDWX_WEIXIN_BASE_URL."message/template/send?access_token={$accessToken}",
     $tpl->toJSONString());
-    return new YDWXTemplateResponse($info);
+    $info = new YDWXTemplateResponse($info);
+    if($info->isSuccess())return $info;
+    throw new YDWXException($info->errmsg, $info->errcode);
 }
 
 /**
@@ -171,7 +171,9 @@ function ydwx_message_send_by_openid($accessToken,  YDWXMassRequest $arg){
     $http = new YDHttp();
     $info = $http->post(YDWX_WEIXIN_BASE_URL."message/mass/send?access_token={$accessToken}", 
         $arg->toJSONString());
-    return new YDWXMassResponse($info);
+    $info = new YDWXMassResponse($info);
+    if($info->isSuccess())return $info;
+    throw new YDWXException($info->errmsg, $info->errcode);
 }
 
 /**
@@ -187,5 +189,7 @@ function ydwx_message_send_by_group($accessToken,  YDWXMassByGroupRequest $arg){
     $http = new YDHttp();
     $info = $http->post(YDWX_WEIXIN_BASE_URL."message/mass/sendall?access_token={$accessToken}",
     $arg->toJSONString());
-    return new YDWXMassResponse($info);
+    $info = new YDWXMassResponse($info);
+    if($info->isSuccess())return $info;
+    throw new YDWXException($info->errmsg, $info->errcode);
 }

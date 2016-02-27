@@ -310,15 +310,16 @@ final class YDWXHook {
     const EVENT_SHAKEAROUNDUSERSHAKE  = "EVENT_SHAKEAROUNDUSERSHAKE";
     
     /**
-     * 核销事件通知 YDWXEventUserConsumeCard
+     * 核销事件通知 YDWXEventUser_consume_card
      * @var unknown
      */
     const EVENT_USER_CONSUME_CARD     = "EVENT_USER_CONSUME_CARD";
+    
     /**
-     * 用户使用卡券买单事件通知 YDWXEventUserPaidByCard
+     * 微信买单完成时推送 YDWXEventUser_pay_from_pay_cell
      * @var unknown
      */
-    const EVENT_USER_PAID_BY_CARD     = "EVENT_USER_PAID_BY_CARD";
+    const EVENT_USER_PAY_FROM_PAY_CELL = "EVENT_USER_PAY_FROM_PAY_CELL";
     /**
      * 用户领取卡券事件通知 YDWXEventUser_get_card
      * @var unknown
@@ -345,6 +346,11 @@ final class YDWXHook {
      * @var unknown
      */
     const EVENT_USER_VIEW_CARD   = "EVENT_USER_VIEW_CARD";
+    /**
+     * 当用户的会员卡积分余额发生变动时，微信会推送事件告知开发者
+     * @var YDWXEventUpdate_member_card
+     */
+    const EVENT_UPDATE_MEMBER_CARD   = "EVENT_UPDATE_MEMBER_CARD";
     
     /**
      * 从卡券进入公众号会话事件推送 YDWXEventUser_enter_session_from_card
@@ -364,6 +370,72 @@ final class YDWXHook {
      * @var unknown
      */
     const EVENT_SHAKEAROUNDLOTTERYBIND   = "EVENT_SHAKEAROUNDLOTTERYBIND";
+    
+    /**
+     * 会员卡激活，用户填写、提交资料后，会有事件推送给商家，开发者可以在接收到事件通知后调用激活接口，
+     * 传入会员卡号、初始积分等信息或者调用拉取会员信息接口获取会员信息，进行会员管理。
+     * YDWXEventSubmit_membercard_user_info
+     * @var unknown
+     */
+    const EVENT_SUBMIT_MEMBERCARD_USER_INFO   = "EVENT_SUBMIT_MEMBERCARD_USER_INFO";
+    
+    /**
+     * 子商户审核结果通知
+     * 开发者所代理的子商户审核通过后，会收到微信服务器发送的事件推送。
+     * YDWXEventCard_merchant_check_result
+     * @var unknown
+     */
+    const EVENT_CARD_MERCHANT_CHECK_RESULT = "EVENT_CARD_MERCHANT_CHECK_RESULT";
+    /**
+     * 商户审核结果通知
+     * 当子商户资质审核通过时，开发者将收到微信服务器推送的事件。
+     * YDWXEventCard_merchant_auth_check_result
+     * @var unknown
+     */
+    const EVENT_CARD_MERCHANT_AUTH_CHECK_RESULT = "EVENT_CARD_MERCHANT_AUTH_CHECK_RESULT";
+    
+    /**
+     * 当最后一个用户领券时，会发送事件给商户，事件每隔5min发送一次。
+     * @var YDWXEventCard_sku_remind
+     */
+    const EVENT_CARD_SKU_REMIND = "EVENT_CARD_SKU_REMIND";
+    
+    /**
+     * 资质认证成功
+     * @var YDWXEventQualification_verify_success
+     */
+    const EVENT_QUALIFICATION_VERIFY_SUCCESS="EVENT_QUALIFICATION_VERIFY_SUCCESS";
+    /**
+     * 资质认证失败
+     * @var YDWXEventQualification_verify_fail
+     */
+    const EVENT_QUALIFICATION_VERIFY_FAIL="EVENT_QUALIFICATION_VERIFY_FAIL";
+    /**
+     * 名称认证成功（即命名成功）
+     * @var YDWXEventNaming_verify_success
+     */
+    const EVENT_NAMING_VERIFY_SUCCESS = "EVENT_NAMING_VERIFY_SUCCESS";
+    /**
+     * 名称认证失败（这时虽然客户端不打勾，但仍有接口权限）
+     * @var YDWXEventNaming_verify_fail
+     */
+    const EVENT_NAMING_VERIFY_FAIL = "EVENT_NAMING_VERIFY_FAIL";
+    /**
+     * 公众号年审通知
+     * @var YDWXEventAnnual_renew
+     */
+    const EVENT_ANNUAL_RENEW = "EVENT_ANNUAL_RENEW";
+    /**
+     * 认证过期失效通知
+     * @var YDWXEventVerify_expired
+     */
+    const EVENT_VERIFY_EXPIRED = "EVENT_VERIFY_EXPIRED";
+    
+    /**
+     * Wi-Fi连网成功事件
+     * @var YDWXEventWificonnected
+     */
+    const EVENT_WIFICONNECTED = "EVENT_WIFICONNECTED";
     
     private static $listeners = array ();
     /**

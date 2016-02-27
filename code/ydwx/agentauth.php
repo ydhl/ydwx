@@ -19,6 +19,11 @@ try{
     YDWXHook::do_hook(YDWXHook::AUTH_FAIL, YDWXAuthFailResponse::errMsg($e->getMessage()));
     die();
 }
-
-YDWXHook::do_hook(YDWXHook::AUTH_AGENT_SUCCESS, 
+try{
+    $auth_info->query = $_GET;
+    YDWXHook::do_hook(YDWXHook::AUTH_AGENT_SUCCESS, 
     array($auth_info, ydwx_agent_get_auth_account($auth_info->authorizer_appid)));
+}catch (\Exception $e){
+    YDWXHook::do_hook(YDWXHook::AUTH_FAIL, YDWXAuthFailResponse::errMsg($e->getMessage()));
+    die();
+}

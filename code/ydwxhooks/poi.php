@@ -1,13 +1,20 @@
 <?php
-/**
- * $oldcwd = getcwd();
- * #如需要把工作目录切换到你项目中去，并包含项目的库文件来实现hook中的逻辑
- * chdir($your_work_dir);
- * include_once 'your-lib-file.php';
- * chdir ( $oldcwd );
- */
+use app\common\Option_Model;
+use app\wxpoi\Shop_Model;
+$oldcwd = getcwd ();
+chdir ( dirname ( __FILE__ ) . '/../' );
+require_once 'init.php';
+chdir ( $oldcwd );
 
 //门店审核通过的通知
 YDWXHook::add_hook ( YDWXHook::EVENT_POI_CHECK_NOTIFY, function (YDWXEventPoi_check_notify $info) {
-    
+    YDWXHook::do_hook(YDWXHook::YDWX_LOG, "EVENT_POI_CHECK_NOTIFY".$info->UniqId);
+    //保存门店id
+    $shop = Shop_Model::find_by_id($info->UniqId);
+    if( ! $shop)return;
+    if($info->result=="succ"){
+        $shop->set("poi_id", $info->PoiId)->set("available_state", 3)->save();
+    }else{
+        $shop->set("check_result", $info->msg)->set("available_state", 4)->save();
+    }
 } );

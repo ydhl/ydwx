@@ -210,8 +210,27 @@ abstract class YDWXCardBase extends YDWXRequest{
      */
     public $merchant_id;
     
+    /**
+     * code_type选择CODE_TYPE_NONE类型时 使用按钮名称，CODE_TYPE_NONE下有效
+     * @var unknown
+     */
+    public $center_title;
+    /**
+     * code_type选择CODE_TYPE_NONE类型时 使用按钮提示，CODE_TYPE_NONE下有效
+     * @var unknown
+     */
+    public $center_sub_title;
+    /**
+     * code_type选择CODE_TYPE_NONE类型时 使用按钮跳转连接，CODE_TYPE_NONE下有效
+     * @var unknown
+     */
+    public $center_url;
+    
     public function valid(){
         //TODO http://mp.weixin.qq.com/wiki/8/b7e310e7943f7763450eced91fa793b0.html#.E5.8D.A1.E5.88.B8.E5.9F.BA.E7.A1.80.E4.BF.A1.E6.81.AF.E5.AD.97.E6.AE.B5.EF.BC.88.E9.87.8D.E8.A6.81.EF.BC.89
+        if($this->code_type==YDWX_CARD_CODE_TYPE_NONE && ! $this->center_url){
+            throw new YDWXException("无code类型时必须填写按钮链接地址");
+        }
     } 
     
     
@@ -231,10 +250,13 @@ abstract class YDWXCardBase extends YDWXRequest{
             }, $args['location_id_list']);
         }
         
-        if($this->date_info_type==YDWX_DATE_TYPE_FIX_TIME_RANGE && $this->date_info_begin_timestamp){
+        if($this->date_info_type==YDWX_DATE_TYPE_FIX_TIME_RANGE && 
+                ($this->date_info_begin_timestamp || $this->date_info_end_timestamp)){
             $args['date_info']['type']        = $this->date_info_type;
-            $args['date_info']['begin_timestamp']  = intval($this->date_info_begin_timestamp);
-            $args['date_info']['end_timestamp']    = intval($this->date_info_end_timestamp);
+            if($this->date_info_begin_timestamp)$args['date_info']['begin_timestamp']  = intval($this->date_info_begin_timestamp);
+            if($this->date_info_end_timestamp)  $args['date_info']['end_timestamp']    = intval($this->date_info_end_timestamp);
+        }else if($this->date_info_type==YDWX_DATE_TYPE_PERMANENT){
+            $args['date_info']['type']        = $this->date_info_type;
         }else if($this->fixed_term){
             $args['date_info']['type']        = $this->date_info_type;
             $args['date_info']['fixed_term']        = intval($this->fixed_term);
@@ -290,7 +312,7 @@ class YDWXCardGroupon extends YDWXCardBase{
     /**
      * 团购券专用，团购详情。
      */
-    public $deal_detail = '';
+    public $deal_detail;
     const  CARD_TYPE = 'GROUPON';
     protected function formatArgs(){
         $args = parent::formatArgs();
@@ -341,8 +363,8 @@ class YDWXCardCash extends YDWXCardBase{
     
     protected function formatArgs(){
         $args = parent::formatArgs();
-        $args['card']['cash']['least_cost']  = intval($this->least_cost);
-        $args['card']['cash']['reduce_cost'] = intval($this->reduce_cost);
+        if($this->least_cost) $args['card']['cash']['least_cost']  = intval($this->least_cost);
+        if($this->reduce_cost)$args['card']['cash']['reduce_cost'] = intval($this->reduce_cost);
         unset($args['card']['cash']['base_info']['least_cost']);
         unset($args['card']['cash']['base_info']['reduce_cost']);
         return $args;
@@ -360,13 +382,13 @@ class YDWXCardGeneralCoupon extends YDWXCardBase
      * 优惠券专用，填写优惠详情。
      * @var string
      */
-    public $default_detail = '';
+    public $default_detail;
 
     const CARD_TYPE = 'GENERAL_COUPON';
 
     protected function formatArgs(){
         $args = parent::formatArgs();
-        $args['card']['general_coupon']['default_detail']  = $this->default_detail;
+        if($this->default_detail)$args['card']['general_coupon']['default_detail']  = $this->default_detail;
         unset($args['card']['general_coupon']['base_info']['default_detail']);
         return $args;
     }
@@ -379,35 +401,154 @@ class YDWXCardGeneralCoupon extends YDWXCardBase
 class YDWXCardMemberCard extends YDWXCardBase{
     const CARD_TYPE = "MEMBER_CARD";
     /**
-     * 会员卡专属字段，表示是否支持积分，填写true或false，如填写true，积分相关字段均为必填。
+     * 等级
      * @var unknown
      */
-    public $supply_balance;
+    const FIELD_NAME_TYPE_LEVEL = "FIELD_NAME_TYPE_LEVEL";
     /**
-     * 会员卡专属字段，表示否支持储值，填写true或false，如填写true，储值相关字段均为必填。
+     * 优惠券
      * @var unknown
      */
-    public $supply_bonus;
+    const FIELD_NAME_TYPE_COUPON = "FIELD_NAME_TYPE_COUPON";
     /**
-     * 积分清零规则。
+     * 印花
      * @var unknown
      */
-    public $bonus_cleared;
+    const FIELD_NAME_TYPE_STAMP = "FIELD_NAME_TYPE_STAMP";
     /**
-     * 积分规则。
+     * 折扣
      * @var unknown
      */
-    public $bonus_rules;
+    const FIELD_NAME_TYPE_DISCOUNT = "FIELD_NAME_TYPE_DISCOUNT";
     /**
-     * 储值规则。
+     * 成就
      * @var unknown
      */
-    public $balance_rules;
+    const FIELD_NAME_TYPE_ACHIEVEMEN = "FIELD_NAME_TYPE_ACHIEVEMEN";
     /**
-     * 会员卡专属字段，表示特权说明。
+     * 历程
+     * @var unknown
+     */
+    const FIELD_NAME_TYPE_MILEAGE = "FIELD_NAME_TYPE_MILEAGE";
+    
+    /**
+     * 会员卡专属字段，表示特权说明。如持白金会员卡到店消费，可享8折优惠。
      * @var unknown
      */
     public $prerogative;
+    /**
+     * 设置为true时用户领取会员卡后系统自动将其激活，无需调用激活接口，
+     * 这时激活链接activate_url和一键开卡接口设置都会失效；
+     * 建议开发者activate_url auto_activate和wx_activate只填写一项。
+     * @var boolean
+     */
+    public $auto_activate;
+    
+    /**
+     * 设置为true时会员卡支持一键开卡，不允许同时传入activate_url字段，否则设置wx_activate失效。
+     * 填入该字段后仍需调用接口设置开卡项方可生效，详情见一键开卡。
+     * .建议开发者activate_url auto_activate和wx_activate只填写一项。
+     * @var boolean
+     */
+    public $wx_activate;
+    /**
+     * 会员卡专属字段，表示是否支持积分，填写true或false，如填写true，积分相关字段均为必填。
+     * @var boolean
+     */
+    public $supply_bonus;
+    /**
+     * 设置跳转外链查看积分详情。仅适用于积分无法通过激活接口同步的情况下使用该字段。
+     * @var string
+     */
+    public $bouns_url;
+    /**
+     * 会员卡专属字段，表示否支持储值，填写true或false，如填写true，储值相关字段均为必填。
+     * @var boolean
+     */
+    public $supply_balance;
+    
+    /**
+     * 设置跳转外链查看余额详情。仅适用于余额无法通过激活接口同步的情况下使用该字段。
+     * @var string
+     */
+    public $balance_url;
+    
+    /**
+     * 自定义会员信息类目1名称，会员卡激活后显示
+     * 用本类的FIELD_NAME_TYPE_XX常量放入数组
+     * @var array
+     */
+    public $custom_field_name_type;
+    /**
+     * 自定义会员信息类，点击类目1跳转外链url
+     * @var array
+     */
+    public $custom_field_url;
+    
+    /**
+     * 积分清零规则描述。如每年年底12月30号积分清0。
+     * @var string
+     */
+    public $bonus_cleared;
+    /**
+     * 积分规则描述。如每消费一元获取1点积分
+     * @var string
+     */
+    public $bonus_rules;
+    /**
+     * 储值规则描述。
+     * @var string
+     */
+    public $balance_rules;
+    /**
+     * 激活会员卡的url。
+     * 建议开发者activate_url auto_activate和wx_activate只填写一项。
+     * @var string
+     */
+    public $activate_url;
+    
+    /**
+     * 自定义会员信息类目入口名称。会员卡激活后显示。
+     * @var array
+     */
+    public $custom_cell_name;
+    /**
+     * 自定义会员信息类目入口右侧提示语，6个汉字内。会员卡激活后显示。
+     * @var array
+     */
+    public $custom_cell_tips;
+    /**
+     * 自定义会员信息类目入口跳转链接。会员卡激活后显示。
+     * @var array
+     */
+    public $custom_cell_url;
+    
+    /**
+     * 积分规则,消费金额。以分为单位。用于微信买单功能
+     * @var int
+     */
+    public $bonus_rule_cost_money_unit;
+    /**
+     * 积分规则,对应增加的积分。用于微信买单功能
+     * @var int
+     */
+    public $bonus_rule_increase_bonus;
+    /**
+     * 积分规则,积分上限。用于微信买单功能
+     * @var int
+     */
+    public $bonus_rule_max_increase_bonus;
+    /**
+     * 积分规则,初始设置积分。用于微信买单功能
+     * @var int
+     */
+    public $bonus_rule_init_increase_bonus;
+    
+    /**
+     * 折扣，该会员卡享受的折扣优惠,填10就是九折。
+     * @var int
+     */
+    public $discount;
     /**
      * 绑定旧卡的url。
      * @var unknown
@@ -418,32 +559,68 @@ class YDWXCardMemberCard extends YDWXCardBase{
      * @var unknown
      */
     public $need_push_on_view;
-    /**
-     * 激活会员卡。
-     * @var unknown
-     */
-    public $activate_url;
+    
     
     protected function formatArgs(){
         $args = parent::formatArgs();
-        $args['card']['member_card']['supply_balance'] = $this->supply_balance;
-        $args['card']['member_card']['supply_bonus'] = $this->supply_bonus;
-        $args['card']['member_card']['activate_url'] = $this->activate_url;
-        $args['card']['member_card']['need_push_on_view'] = $this->need_push_on_view;
-        $args['card']['member_card']['bind_old_card_url'] = $this->bind_old_card_url;
-        $args['card']['member_card']['prerogative'] = $this->prerogative;
-        $args['card']['member_card']['balance_rules'] = $this->balance_rules;
-        $args['card']['member_card']['bonus_rules'] = $this->bonus_rules;
-        $args['card']['member_card']['onus_cleared'] = $this->onus_cleared;
-        unset($args['card']['member_card']['base_info']['supply_balance']);
-        unset($args['card']['member_card']['base_info']['supply_bonus']);
-        unset($args['card']['member_card']['base_info']['activate_url']);
-        unset($args['card']['member_card']['base_info']['need_push_on_view']);
-        unset($args['card']['member_card']['base_info']['bind_old_card_url']);
+        $args['card']['member_card']['prerogative']     = $this->prerogative;
+        if($this->auto_activate) $args['card']['member_card']['auto_activate']   = (boolean)$this->auto_activate;
+        if($this->wx_activate) $args['card']['member_card']['wx_activate']     = (boolean)$this->wx_activate;
+        if($this->supply_bonus) $args['card']['member_card']['supply_bonus']    = (boolean)$this->supply_bonus;
+        $args['card']['member_card']['bonus_url']       = $this->bonus_url;
+        if($this->supply_balance) $args['card']['member_card']['supply_balance']  = (boolean)$this->supply_balance;
+        $args['card']['member_card']['balance_url']     = $this->balance_url;
+        
+        foreach ($this->custom_field_name_type as $index=>$name_type){
+            $args['card']['member_card']['custom_field'.($index+1)] = array(
+                "name_type" =>$name_type,
+                "url"       =>$this->custom_field_url[$index]
+            );
+        }
+        
+        $args['card']['member_card']['bonus_cleared']     = $this->bonus_cleared;
+        $args['card']['member_card']['bonus_rules']       = $this->bonus_rules;
+        $args['card']['member_card']['balance_rules']     = $this->balance_rules;
+        $args['card']['member_card']['activate_url']      = $this->activate_url;
+        
+        foreach ($this->custom_cell_name as $index=>$name){
+            $args['card']['member_card']['custom_cell'.($index+1)] = array(
+                    "name"  =>$name,
+                    "tips"  =>$this->custom_cell_tips[$index],
+                    "url"   =>$this->custom_cell_url[$index]
+            );
+        }
+        
+        $args['card']['member_card']['bonus_rule']     = array(
+            "cost_money_unit"       => intval($this->bonus_rule_cost_money_unit),
+            "increase_bonus"        => intval($this->bonus_rule_increase_bonus),
+            "max_increase_bonus"    => intval($this->bonus_rule_max_increase_bonus),
+            "init_increase_bonus"   => intval($this->bonus_rule_init_increase_bonus),
+        );
+        $args['card']['member_card']['discount']        = intval($this->discount);
+        
+        
         unset($args['card']['member_card']['base_info']['prerogative']);
-        unset($args['card']['member_card']['base_info']['balance_rules']);
+        unset($args['card']['member_card']['base_info']['auto_activate']);
+        unset($args['card']['member_card']['base_info']['wx_activate']);
+        unset($args['card']['member_card']['base_info']['supply_bonus']);
+        unset($args['card']['member_card']['base_info']['bonus_url']);
+        unset($args['card']['member_card']['base_info']['supply_balance']);
+        unset($args['card']['member_card']['base_info']['balance_url']);
+        unset($args['card']['member_card']['base_info']['custom_field_url']);
+        unset($args['card']['member_card']['base_info']['custom_field_name_type']);
+        unset($args['card']['member_card']['base_info']['bonus_cleared']);
         unset($args['card']['member_card']['base_info']['bonus_rules']);
-        unset($args['card']['member_card']['base_info']['onus_cleared']);
+        unset($args['card']['member_card']['base_info']['balance_rules']);
+        unset($args['card']['member_card']['base_info']['activate_url']);
+        unset($args['card']['member_card']['base_info']['custom_cell_url']);
+        unset($args['card']['member_card']['base_info']['custom_cell_tips']);
+        unset($args['card']['member_card']['base_info']['custom_cell_name']);
+        unset($args['card']['member_card']['base_info']['bonus_rule_cost_money_unit']);
+        unset($args['card']['member_card']['base_info']['bonus_rule_increase_bonus']);
+        unset($args['card']['member_card']['base_info']['bonus_rule_max_increase_bonus']);
+        unset($args['card']['member_card']['base_info']['bonus_rule_init_increase_bonus']);
+        unset($args['card']['member_card']['base_info']['discount']);
         return $args;
     }
 }
@@ -469,6 +646,11 @@ class YDWXCardBoardingPass extends YDWXCardBase{
      * @var unknown
      */
     public $flight;
+    /**
+     * 机型，上限为8个汉字。
+     * @var unknown
+     */
+    public $air_model;
     /**
      * 起飞时间。（Unix时间戳格式）
      * @var unknown
@@ -504,6 +686,9 @@ class YDWXCardBoardingPass extends YDWXCardBase{
         $args['card']['boarding_pass']['flight']            = $this->flight;
         $args['card']['boarding_pass']['from']              = $this->from;
         $args['card']['boarding_pass']['to']                = $this->to;
+        $args['card']['boarding_pass']['air_model']         = $this->air_model;
+        
+        unset($args['card']['boarding_pass']['base_info']['air_model']);
         unset($args['card']['boarding_pass']['base_info']['boarding_time']);
         unset($args['card']['boarding_pass']['base_info']['gate']);
         unset($args['card']['boarding_pass']['base_info']['check_in_url']);
@@ -560,10 +745,13 @@ class YDWXCardQrcodeRequest extends YDWXRequest{
         $args = parent::formatArgs();
         unset($args['expire_seconds']);
         
-        $args['action_name']    = "QR_CARD";
-        $args['expire_seconds'] = $this->expire_seconds;
-        $args['action_info']['card'] = $args;
-        return $args;
+        $arr = array();
+        $arr['action_name']    = "QR_CARD";
+        if($this->expire_seconds){
+            $arr['expire_seconds'] = intval($this->expire_seconds);
+        }
+        $arr['action_info']['card'] = $args;
+        return $arr;
     }
 }
 /**
@@ -573,9 +761,24 @@ class YDWXCardQrcodeRequest extends YDWXRequest{
  */
 class YDWXCardScenicTicket extends YDWXCardBase{
     const CARD_TYPE = "SCENIC_TICKET";
+    /**
+     * 平日全票	票类型，例如平日全票，套票等
+     * @var unknown
+     */
+    public $ticket_class;
+    /**
+     * xxx.com	导览图url
+     * @var unknown
+     */
+    public $guide_url;
     protected function formatArgs(){
         $args = parent::formatArgs();
-//         $args['scenic_ticket']['meeting_detail']     = $this->meeting_detail;
+        
+        $args['card']['scenic_ticket']['ticket_class']  = $this->ticket_class;
+        $args['card']['scenic_ticket']['guide_url']     = $this->guide_url;
+        unset($args['card']['scenic_ticket']['base_info']['ticket_class']);
+        unset($args['card']['scenic_ticket']['base_info']['guide_url']);
+        
         return $args;
     }
 }
@@ -586,9 +789,17 @@ class YDWXCardScenicTicket extends YDWXCardBase{
  */
 class YDWXCardMovieTicket extends YDWXCardBase{
     const CARD_TYPE = "MOVIE_TICKET";
+    /**
+     * 电影名：xxx，电影简介：xxx。	电影票详情
+     * @var unknown
+     */
+    public $detail;
     protected function formatArgs(){
         $args = parent::formatArgs();
-        //         $args['movie_ticket']['meeting_detail']     = $this->meeting_detail;
+        
+        $args['card']['movie_ticket']['detail']     = $this->detail;
+        unset($args['card']['movie_ticket']['base_info']['detail']);
+        
         return $args;
     }
 }
@@ -924,16 +1135,22 @@ class YDWXCardResponse extends YDWXResponse{
     public function build($msg){
         parent::build($msg);
         switch ($this->card['card_type']){
-            case YDWXCardCash::CARD_TYPE:                   $this->card = new YDWXCardCash();break;
-            case YDWXCardGeneralCoupon::CARD_TYPECARD_TYPE: $this->card = new YDWXCardGeneralCoupon();break;
-            case YDWXCardGift::CARD_TYPE:                   $this->card = new YDWXCardGift();break;
-            case YDWXCardDiscount::CARD_TYPE:               $this->card = new YDWXCardDiscount();break;
+            case YDWXCardCash::CARD_TYPE:                   $card = new YDWXCardCash();break;
+            case YDWXCardGeneralCoupon::CARD_TYPE:          $card = new YDWXCardGeneralCoupon();break;
+            case YDWXCardGift::CARD_TYPE:                   $card = new YDWXCardGift();break;
+            case YDWXCardDiscount::CARD_TYPE:               $card = new YDWXCardDiscount();break;
+            case YDWXCardBoardingPass::CARD_TYPE:           $card = new YDWXCardBoardingPass();break;
+            case YDWXCardBusTicket::CARD_TYPE:              $card = new YDWXCardBusTicket();break;
+            case YDWXCardMeetingTicket::CARD_TYPE:          $card = new YDWXCardMeetingTicket();break;
+            case YDWXCardMemberCard::CARD_TYPE:             $card = new YDWXCardMemberCard();break;
+            case YDWXCardMovieTicket::CARD_TYPE:            $card = new YDWXCardMovieTicket();break;
+            case YDWXCardScenicTicket::CARD_TYPE:           $card = new YDWXCardScenicTicket();break;
             case YDWXCardGroupon::CARD_TYPE:                
-            default:                                        $this->card = new YDWXCardGroupon();break;
+            default:                                        $card = new YDWXCardGroupon();break;
         }
         
         $type = strtolower($this->card['card_type']);
-        $info = $this->card['card'][$type];
+        $info = $this->card[$type];
         
         $this->id = $info['base_info']['id'];
         $this->appid = $info['base_info']['appid'];
@@ -943,21 +1160,23 @@ class YDWXCardResponse extends YDWXResponse{
             if($name=="date_info"){
                 foreach ($value as $subname=>$subvalue){
                     $subname = "date_info_{$subname}";
-                    $this->card->$subname = $subvalue;
+                    $card->$subname = $subvalue;
                 }
             }else if($name=="sku"){
                 foreach ($value as $subname=>$subvalue){
                     $subname = "sku_{$subname}";
-                    $this->card->$subname = $subvalue;
+                    $card->$subname = $subvalue;
                 }
             }else{
-                $this->card->$name = $value;
+                $card->$name = $value;
             }
         }
         unset($info['base_info']);
         foreach ($info as $name=>$value){
-            $this->card->$name = $value;
+            $card->$name = $value;
         }
+        
+        $this->card = $card;
     }
 }
 class YDWXCardBatchgetResponse extends YDWXResponse{
@@ -1436,4 +1655,398 @@ class YDWXCardMPMerchantBatchGetResponse extends YDWXResponse{
         }
 
     }
+}
+
+/**
+ * 更新会议门票
+ * @author leeboo
+ *
+ */
+class YDWXCardMeetingTicketUpdate extends YDWXRequest{
+    /**
+     * 卡券Code码。
+     * @var unknown
+     */
+    public $code;
+    /**
+     * 要更新门票序列号所述的card_id，生成券时use_custom_code 填写true 时必填。
+     * @var unknown
+     */
+    public $card_id;
+    /**
+     * 开场时间，Unix时间戳格式。
+     * @var unknown
+     */
+    public $begin_time;
+    /**
+     * 结束时间，Unix时间戳格式。
+     * @var unknown
+     */
+    public $end_time;
+    /**
+     * 区域
+     * @var unknown
+     */
+    public $zone;
+    /**
+     * 入口。
+     * @var unknown
+     */
+    public $entrance;
+    /**
+     * 座位号。
+     * @var unknown
+     */
+    public $seat_number;
+    public function valid(){
+        
+    }
+    protected function formatArgs(){
+        $args = parent::formatArgs();
+        $args['begin_time'] = intval($args['begin_time']);
+        $args['end_time']   = intval($args['end_time']);
+        return $args;
+    }
+}
+
+
+/**
+ * 更新电影门票
+ * @author leeboo
+ *
+ */
+class YDWXCardMovieTicketUpdate extends YDWXRequest{
+    /**
+     * 卡券Code码。
+     * @var unknown
+     */
+    public $code;
+    /**
+     * 要更新门票序列号所述的card_id，生成券时use_custom_code 填写true 时必填。
+     * @var unknown
+     */
+    public $card_id;
+    /**
+     * 电影票的类别，如2D、3D。
+     * @var unknown
+     */
+    public $ticket_class;
+    /**
+     * 电影的放映时间，Unix时间戳格式。
+     * @var unknown
+     */
+    public $show_time;
+    /**
+     * 放映时长，填写整数。
+     * @var unknown
+     */
+    public $duration;
+    /**
+     * 该场电影的影厅信息。
+     * @var unknown
+     */
+    public $screening_room;
+    /**
+     * 座位号。string | array
+     * @var unknown
+     */
+    public $seat_number;
+    public function valid(){
+    
+    }
+    protected function formatArgs(){
+        $args = parent::formatArgs();
+        $args['show_time'] = intval($args['show_time']);
+        $args['duration']  = intval($args['duration']);
+        $args['seat_number']  = (array)$args['seat_number'];
+        return $args;
+    }
+}
+
+/**
+ * 更新飞机票
+ * @author leeboo
+ *
+ */
+class YDWXCardBoardingPassUpdate extends YDWXRequest{
+    /**
+     * 卡券Code码。
+     * @var unknown
+     */
+    public $code;
+    /**
+     * 要更新门票序列号所述的card_id，生成券时use_custom_code 填写true 时必填。
+     * @var unknown
+     */
+    public $card_id;
+    /**
+     * 乘客姓名
+     * @var unknown
+     */
+    public $passenger_name;
+    /**
+     * 舱等，如头等舱等，上限为5个汉字
+     * @var unknown
+     */
+    public $class;
+    /**
+     * 座位号
+     * @var unknown
+     */
+    public $seat;
+    /**
+     * 电子客票号，上限为14个数字。
+     * @var unknown
+     */
+    public $etkt_bnr;
+    /**
+     * 二维码数据。乘客用于值机的二维码字符串，微信会通过此数据为用户生成值机用的二维码。
+     * @var unknown
+     */
+    public $qrcode_data;
+    /**
+     * 是否取消值机。填写true或false。true代表取消，如填写true上述字段（如calss等）均不做判断，机票返回未值机状态，乘客可重新值机。默认填写false。
+     * @var unknown
+     */
+    public $is_cancel;
+    public function valid(){
+    
+    }
+    protected function formatArgs(){
+        $args = parent::formatArgs();
+        $args['is_cancel'] = $args['is_cancel'] ? true : false;
+        return $args;
+    }
+}
+
+/**
+ * 会员卡激活请求
+ * @author leeboo
+ *
+ */
+class YDWXCardMemberActivate extends YDWXRequest{
+    /**
+     * 会员卡编号，由开发者填入，作为序列号显示在用户的卡包里。可与Code码保持等值。
+     * @var string
+     */
+    public $membership_number;
+    /**
+     * 创建会员卡时获取的初始code
+     * @var string
+     */
+    public $code;
+    /**
+     * 激活后的有效起始时间。若不填写默认以创建时的 data_info 为准。Unix时间戳格式。
+     * @var int
+     */
+    public $activate_begin_time;
+    /**
+     * 激活后的有效截至时间。若不填写默认以创建时的 data_info 为准。Unix时间戳格式
+     * @var int
+     */
+    public $activate_end_time;
+    /**
+     * 初始积分，不填为0。
+     * @var int
+     */
+    public $init_bonus;
+    /**
+     * 初始余额，不填为0。
+     * @var int
+     */
+    public $init_balance;
+    /**
+     * 创建时字段custom_field定义类型的初始值，限制为4个汉字，12字节。
+     * @var Array
+     */
+    public $init_custom_field_value;
+    
+    public function valid(){
+
+    }
+    protected function formatArgs(){
+        $args = parent::formatArgs();
+        if($args['init_bonus']) $args['init_bonus']         = intval($args['init_bonus']);
+        if($args['init_balance']) $args['init_balance']       = intval($args['init_balance']);
+        if($args['activate_begin_time']) $args['activate_begin_time']= intval($args['activate_begin_time']);
+        if($args['activate_end_time']) $args['activate_end_time']  = intval($args['activate_end_time']);
+        return $args;
+    }
+}
+/**
+ * 设置会员卡微信一键激活的激活表单内容
+ * @author leeboo
+ *
+ */
+class YDWXCardMemberActivateForm extends YDWXRequest{
+    /**
+     * 	手机号
+     */
+    const USER_FORM_INFO_FLAG_MOBILE = "USER_FORM_INFO_FLAG_MOBILE";
+    /**
+     * 姓名
+     */
+    const USER_FORM_INFO_FLAG_NAME   = "USER_FORM_INFO_FLAG_NAME";
+    /**
+     * 生日
+     */
+    const USER_FORM_INFO_FLAG_BIRTHDAY="USER_FORM_INFO_FLAG_BIRTHDAY";
+    /**
+     * 身份证
+     */
+    const USER_FORM_INFO_FLAG_IDCARD = "USER_FORM_INFO_FLAG_IDCARD";
+    /**
+     * 邮箱
+     */
+    const USER_FORM_INFO_FLAG_EMAIL	 = "USER_FORM_INFO_FLAG_EMAIL";
+    /**
+     * 详细地址
+     */
+    const USER_FORM_INFO_FLAG_DETAIL_LOCATION = "USER_FORM_INFO_FLAG_DETAIL_LOCATION";
+    /**
+     * 教育背景
+     */
+    const USER_FORM_INFO_FLAG_EDUCATION_BACKGROUND="USER_FORM_INFO_FLAG_EDUCATION_BACKGROUND";
+    /**
+     * 职业
+     */
+    const USER_FORM_INFO_FLAG_CAREER    ="USER_FORM_INFO_FLAG_CAREER";
+    /**
+     * 行业
+     */
+    const USER_FORM_INFO_FLAG_INDUSTRY  = "USER_FORM_INFO_FLAG_INDUSTRY";
+    /**
+     * 收入
+     */
+    const USER_FORM_INFO_FLAG_INCOME    = "USER_FORM_INFO_FLAG_INCOME";
+    /**
+     * 兴趣爱好
+     */
+    const USER_FORM_INFO_FLAG_HABIT     = "USER_FORM_INFO_FLAG_HABIT";
+    
+    /**
+     * 卡券ID
+     * @var string
+     */
+    public $card_id;
+   
+    /**
+     * 微信格式化的选项类型。会员卡激活时的必填选项,
+     * 见本类的常量USER_FORM_INFO_XX
+     * @var array
+     */
+    public $required_common_field;
+    /**
+     * 自定义选项名称，会员卡激活时的必填选项
+     * 见本类的常量USER_FORM_INFO_XX
+     * @var array
+     */
+    public $required_custom_field;
+    /**
+     * 微信格式化的选项类型。会员卡激活时的选填项,
+     * 见本类的常量USER_FORM_INFO_XX
+     * @var array
+     */
+    public $option_common_field;
+    /**
+     * 自定义选项名称，会员卡激活时的选填项
+     * 见本类的常量USER_FORM_INFO_XX
+     * @var array
+     */
+    public $option_custom_field;
+    public function valid(){
+
+    }
+    protected function formatArgs(){
+        $args = parent::formatArgs();
+        
+        foreach($args['required_custom_field'] as $custom){
+            $args['required_form']['custom_field_list'][] = $custom;
+        }
+        foreach($args['required_common_field'] as $custom){
+            $args['required_form']['common_field_id_list'][] = $custom;
+        }
+        
+        foreach($args['option_custom_field'] as $custom){
+            $args['optional_form']['custom_field_list'][] = $custom;
+        }
+        foreach($args['option_common_field'] as $custom){
+            $args['optional_form']['common_field_id_list'][] = $custom;
+        }
+        
+        unset($args['required_custom_field']);
+        unset($args['required_common_field']);
+        unset($args['option_common_field']);
+        unset($args['option_custom_field']);
+        
+        return $args;
+    }
+}
+
+/**
+ * 拉取到的会员卡会员信息
+ * @author leeboo
+ *
+ */
+class YDWXCardMemberUserInfo extends YDWXResponse{
+    /**
+     * 正常
+     */
+    const NORMAL="NORMAL";
+    /**
+     * 已过期 
+     */  
+    const EXPIRE="EXPIRE";
+    /**
+     *  转赠中 
+     */
+    const GIFTING="GIFTING";
+    /**
+     *  转赠成功 
+     */
+    const GIFT_SUCC="GIFT_SUCC";
+    /**
+     *  转赠超时 
+     */
+    const GIFT_TIMEOUT="GIFT_TIMEOUT";
+    /**
+     *  已删除，
+     */
+    const DELETE="DELETE";
+    /**
+     * 已失效
+     */
+    const UNAVAILABLE="UNAVAILABLE" ;
+    /**
+     * 用户在本公众号内唯一识别码
+     * @var unknown
+     */
+    public $openid;
+    /**
+     * 用户昵称
+     * @var unknown
+     */
+    public $nickname;
+    public $membership_number;
+    /**
+     * 积分信息
+     * @var unknown
+     */
+    public $bouns;
+    /**
+     * 余额信息
+     * @var unknown
+     */
+    public $balance;
+    /**
+     * 用户性别
+     * @var unknown
+     */
+    public $sex;
+    public $user_info;
+    /**
+     * 当前用户的会员卡状态，NORMAL 正常 EXPIRE 已过期 GIFTING 转赠中 GIFT_SUCC 转赠成功 GIFT_TIMEOUT 转赠超时 DELETE 已删除，UNAVAILABLE 已失效
+     * @var unknown
+     */
+    public $user_card_status;
 }

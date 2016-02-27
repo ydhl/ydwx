@@ -288,11 +288,15 @@ class YDWXZBDeviceBase extends YDWXRequest{
     
     }
     public function formatArgs(){
+        return array("device_identifier"=>$this->baseinfo());
+    }
+    
+    public function baseinfo(){
         $args    = parent::formatArgs();
         if($args['device_id'])  $args['device_id']  = intval($args['device_id']);
         if($args['minor'])      $args['minor']      = intval($args['minor']);
         if($args['major'])      $args['major']      = intval($args['major']);
-        return array("device_identifier"=>$args);
+        return $args;
     }
 }
 class YDWXZBDeviceRelation extends YDWXZBDeviceBase{
@@ -566,6 +570,142 @@ class YDWXZBPageStatisticResult extends YDWXResponse{
             $stistic->shake_uv = $info['shake_uv'];
             $stistic->page_id  = $info['page_id'];
             $this->pages[] = $stistic;
+        }
+    }
+}
+
+/**
+ * 设备分组
+ * @author leeboo
+ *
+ */
+class YDWXZBDeviceGroup extends YDWXRequest{
+    public $group_id;
+    public $group_name;
+    
+    public function valid(){
+        
+    }
+    protected function formatArgs(){
+        $args = parent::formatArgs();
+        $args['group_id'] = intval($args['group_id']);
+        return $args;
+    }
+}
+/**
+ * 分组下的设备详情
+ * @author leeboo
+ *
+ */
+class YDWXZBDeviceGroupDevices extends YDWXResponse{
+    /**
+     * 分组
+     * @var YDWXZBDeviceGroup
+     */
+    public $group;
+    /**
+     * 此分组现有的总设备数
+     * @var int
+     */
+    public $total_count;
+    /**
+     * YDWXZBDevice 数组
+     * @var array
+     */
+    public $devices = array();
+}
+
+class YDWXZBLotteryInfo extends YDWXResponse{
+    /**
+     * 活动id
+     * @var unknown
+     */
+    public $lottery_id;
+    /**
+     * 抽奖活动名称（选择使用模板时，也作为摇一摇消息主标题），最长6个汉字，12个英文字母
+     * @var string
+     */
+    public $title;
+    /**
+     * 抽奖活动描述（选择使用模板时，也作为摇一摇消息副标题），最长7个汉字，14个英文字母。
+     * @var unknown
+     */
+    public $desc;
+    /**
+     * 抽奖开关。0关闭，1开启，默认为1
+     * @var unknown
+     */
+    public $onoff;
+    /**
+     * 抽奖活动开始时间，unix时间戳，单位秒
+     * @var unknown
+     */
+    public $begin_time;
+    /**
+     * 抽奖活动结束时间，unix时间戳，单位秒，红包活动有效期最长为91天
+     * @var unknown
+     */
+    public $expire_time;
+    /**
+     * 红包提供商户公众号的appid
+     * @var unknown
+     */
+    public $sponsor_appid;
+    /**
+     * 创建活动的开发者appid
+     * @var unknown
+     */
+    public $appid;
+    /**
+     * 创建活动时预设的录入红包ticket数量上限
+     * @var unknown
+     */
+    public $prize_count_limit;
+    /**
+     * 已录入的红包总数
+     * @var unknown
+     */
+    public $prize_count;
+    /**
+     * 红包关注界面后可以跳转到第三方自定义的页面
+     * @var unknown
+     */
+    public $jump_url;
+    /**
+     * 过期红包ticket数量
+     * @var unknown
+     */
+    public $expired_prizes;
+    /**
+     * 已发放的红包ticket数量
+     * @var unknown
+     */
+    public $drawed_prizes;
+    /**
+     * 可用的红包ticket数量
+     * @var unknown
+     */
+    public $available_prizes;
+    /**
+     * 已过期的红包金额总和
+     * @var unknown
+     */
+    public $expired_value;
+    /**
+     * 已发放的红包金额总和
+     * @var unknown
+     */
+    public $drawed_value;
+    /**
+     * 可用的红包金额总和
+     * @var unknown
+     */
+    public $available_value;
+    
+    public function build($msg){
+        parent::build($msg);
+        foreach ($this->result as $name=>$value){
+            $this->$name = $value;
         }
     }
 }

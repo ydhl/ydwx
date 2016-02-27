@@ -54,6 +54,8 @@ function ydwx_card_check_agent_qualification($accessToken){
  * 4、 商户名称在 12 个汉字长度内。
  * 5、同一个 appid 的申请，仅当驳回时可再次提交，审核中和审核通过时不可重复提交。
  * 
+ * 注意该接口只返回成功与失败，具体的子商户信息需要通过upload_card_merchant_qualification 取得
+ * 
  * @param unknown $accessTokent  第三方平台的access token
  * @param YDWXCardMerchantQualificationRequest $request
  * @throws YDWXException

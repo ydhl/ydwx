@@ -80,7 +80,7 @@ DEFINE("YDWX_INDUSTRY_IT_ELECTRONIC_TECHNIQUE",    4);
  * IT科技	通信与运营商
  * @VAR UNKNOWN
  */
-DEFINE("YDWX_INDUSTRY_IT_COMMUNICATION_CARRIER ",    5);
+DEFINE("YDWX_INDUSTRY_IT_COMMUNICATION_CARRIER",    5);
 /**
  * IT科技	网络游戏
  * @VAR UNKNOWN
@@ -400,6 +400,12 @@ DEFINE("YDWX_CARD_COLOR_102", 'Color102');
  */
 DEFINE("YDWX_CARD_CODE_TYPE_TEXT",        "CODE_TYPE_TEXT");
 /**
+ * 自定义使用按钮
+ * @var unknown
+ */
+DEFINE("YDWX_CARD_CODE_TYPE_NONE",        "CODE_TYPE_NONE");
+
+/**
  * 一维码
  * @var unknown
  */
@@ -424,6 +430,11 @@ DEFINE("YDWX_CARD_CODE_TYPE_ONLY_BARCODE","CODE_TYPE_ONLY_BARCODE");
  * @var unknown
  */
 DEFINE("YDWX_DATE_TYPE_FIX_TIME_RANGE","DATE_TYPE_FIX_TIME_RANGE");
+/**
+ * 表示永久有效
+ * @var unknown
+ */
+DEFINE("YDWX_DATE_TYPE_PERMANENT","DATE_TYPE_PERMANENT");
 /**
  * 表示固定时长（自领取后按天算)
  * @var unknown
@@ -480,6 +491,9 @@ DEFINE("YDWX_JSAPI_OPENPRODUCTSPECIFICVIEW","openProductSpecificView");
 DEFINE("YDWX_JSAPI_ADDCARD","addCard");
 DEFINE("YDWX_JSAPI_CHOOSECARD","chooseCard");
 DEFINE("YDWX_JSAPI_OPENCARD","openCard");
+DEFINE("YDWX_JSAPI_STARTSEARCHBEACONS","startSearchBeacons");
+DEFINE("YDWX_JSAPI_STOPSEARCHBEACONS","stopSearchBeacons");
+DEFINE("YDWX_JSAPI_ONSEARCHBEACONS","onSearchBeacons");
 /**
  *  附近
  * @var unknown

@@ -29,9 +29,6 @@ function ydwx_menu_get($accessToken){
  * @see http://mp.weixin.qq.com/wiki/13/43de8269be54a0a6f64413e4dfa94f39.html
  */
 function ydwx_menu_create($accessToken, $menus){
-    if (YDWX_WEIXIN_ACCOUNT_TYPE == YDWX_WEIXIN_ACCOUNT_TYPE_SUBSCRIBE && !YDWX_WEIXIN_IS_AUTHED){
-        throw new YDWXException("不支持创建菜单");
-    }
     $http = new YDHttp();
     
     $save_menus = array();
@@ -42,7 +39,7 @@ function ydwx_menu_create($accessToken, $menus){
             ydwx_json_encode($save_menus));
     $res  = new YDWXResponse($info);
     if($res->isSuccess())return true;
-    throw new YDWXException($res->errmsg, $res->errcode);
+    throw new YDWXException($res->errmsg.ydwx_json_encode($save_menus), $res->errcode);
 }
 
 /**

@@ -58,7 +58,7 @@ function ydwx_packet_setprizebucket($accessToken, YDWXPacketSetPrizeBucketReques
     $http = new YDHttp();
     $info = $http->post(YDWX_WEIXIN_BASE_URL2."shakearound/lottery/setprizebucket?access_token={$accessToken}", $request->toJSONString());
     $rst = new YDWXPacketSetPrizeBucketResponse($info);
-    if( ! $rst->isSuccess()) throw new YDWXException($rst->errmsg.$request->toJSONString(), $rst->errcode);
+    if( ! $rst->isSuccess()) throw new YDWXException($rst->errmsg, $rst->errcode);
     
     return $rst;
 }
@@ -114,13 +114,13 @@ function ydwx_packet_shake_js_api($lottery_id, $key, $openid){
             function(rst){
         BeaconShakehbJsBridge.ready(function(){
             BeaconShakehbJsBridge.invoke('jumpHongbao',{
-                lottery_id:  '<?php echo $lottery_id?> ',
+                lottery_id:  '<?php echo $lottery_id?>',
                 noncestr:    rst.data.noncestr,
-                openid:      <?php echo $openid?>,
+                openid:      '<?php echo $openid?>',
                 sign:        rst.data.sign
            });
        });
-    });
+    },"json");
     </script>
 <?php 
     return ob_get_clean();
@@ -138,7 +138,7 @@ function ydwx_packet_gethbinfo(YDWXPacketGetHBInfoRequest $request){
     $info = $http->post(YDWX_WEIXIN_PAY_URL."mmpaymkttransfers/gethbinfo",
             $request->toXMLString());
     $rst = new YDWXPacketGetHBInfoResponse($info);
-    if( ! $rst->isSuccess()) throw new YDWXException($rst->errmsg.$rst->errcode.$http->error, $rst->errcode);
+    if( ! $rst->isSuccess()) throw new YDWXException($rst->errmsg, $rst->errcode);
     
     return $rst;
 }
@@ -156,7 +156,7 @@ function ydwx_packet_send(YDWXPacketSendRequest $request){
     $info = $http->post(YDWX_WEIXIN_PAY_URL."mmpaymkttransfers/sendredpack",
             $request->toXMLString());
     $rst = new YDWXPacketSendResponse($info);
-    if( ! $rst->isSuccess()) throw new YDWXException($rst->errmsg.$rst->errcode.$http->error, $rst->errcode);
+    if( ! $rst->isSuccess()) throw new YDWXException($rst->errmsg, $rst->errcode);
 
     return $rst;
 }
@@ -175,7 +175,7 @@ function ydwx_packet_send_group(YDWXPacketSendGroupRequest $request){
     $info = $http->post(YDWX_WEIXIN_PAY_URL."mmpaymkttransfers/sendgroupredpack",
             $request->toXMLString());
     $rst = new YDWXPacketSendGroupResponse($info);
-    if( ! $rst->isSuccess()) throw new YDWXException($rst->errmsg.$rst->errcode.$http->error, $rst->errcode);
+    if( ! $rst->isSuccess()) throw new YDWXException($rst->errmsg, $rst->errcode);
 
     return $rst;
 }

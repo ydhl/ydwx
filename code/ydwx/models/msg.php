@@ -200,7 +200,7 @@ interface YDWXMsgBuilder{
      * @param unknown $text
      * @return YDWXMsgBuilder
     */
-    public static function buildWXCardMsg($card_id);
+    public static function buildWXCardMsg($card_id, $appid);
     /**
      * 根据图文id构建图文消息
      * @param unknown $media_id
@@ -292,11 +292,31 @@ class YDWXMassRequest extends YDWXRequest implements YDWXMsgBuilder{
         return $msg;
     }
 
-    public static function buildWXCardMsg($card_id){
+    public static function buildWXCardMsg($card_id, $appid){
         $cls = get_called_class();
         $msg = new $cls();
         $msg->msgtype  = "wxcard";
-        $msg->wxcard   = array("card_id" => $card_id);
+        $time = time();
+        
+        if(YDWX_WEIXIN_COMPONENT_APP_ID){
+            $card_jsapi_ticket = YDWXHook::do_hook(YDWXHook::GET_HOST_CARD_JSAPI_TICKET, $appid);
+        }else{
+            $card_jsapi_ticket = YDWXHook::do_hook(YDWXHook::GET_CARD_JSAPI_TICKET);
+        }
+        
+        $array = array($card_jsapi_ticket,$time,$card_id);
+        $array = YDWXRequest::ignoreNull($array);
+        sort($array);
+        $cardSignStr    = sha1(join("", $array));
+        
+        $msg->wxcard   = array(
+                "card_id" => $card_id,
+                "card_ext"=>array(
+            "code"=>"",
+            "openid"=>"",
+            "timestamp"=>$time,
+            "signature"=>$cardSignStr
+        ));
         return $msg;
     }
 
@@ -360,10 +380,10 @@ class YDWXMassCustomRequest extends YDWXMassRequest{
         return $msg;
     }
     
-    public static function buildWXCardMsg($card_id){
+    public static function buildWXCardMsg($card_id, $appid){
         $msg = new YDWXMassCustomRequest();
         $msg->msgtype  = "wxcard";
-        $msg->wxcard   = array("card_id" => $media_id);
+        $msg->wxcard   = array("card_id" => $card_id);
         return $msg;
     }
     
@@ -396,7 +416,7 @@ class YDWXMassPreviewRequest extends YDWXMassRequest{
      */
     public $towxname;
     public function valid(){
-        if( $this->to || $this->towxname ) throw new YDWXException("客服消息缺少接受者");
+        if( !$this->to && !$this->towxname ) throw new YDWXException("客服消息缺少接受者");
     }
     protected function formatArgs(){
         $args = parent::formatArgs();
@@ -435,6 +455,13 @@ class YDWXMassByGroupRequest extends YDWXMassRequest{
         $msg = new YDWXMassByGroupRequest();
         $msg->msgtype  = "mpvideo";
         $msg->video    = $arg->toArray();
+        return $msg;
+    }
+    public static function buildWXCardMsg($card_id, $appid){
+        $msg = new YDWXMassByGroupRequest();
+        $msg->msgtype  = "wxcard";
+    
+        $msg->wxcard   = array("card_id" => $card_id);
         return $msg;
     }
 }
@@ -586,7 +613,7 @@ class YDWXAnswerMsg extends YDWXRequest implements YDWXMsgBuilder{
         return $msg;
     }
 
-    public static function buildWXCardMsg($card_id, YDWXEvent $source=null){
+    public static function buildWXCardMsg($card_id, $appid){
         throw new YDWXException("公众号不支持回复卡券");
     }
 
@@ -668,8 +695,8 @@ class YDWXQyMsgRequest extends YDWXMassRequest implements YDWXMsgBuilder{
         throw new YDWXException("企业号不支持发送音乐消息");
     }
 
-    public static function buildWXCardMsg($card_id){
-        throw new YDWXException("企业号不支持发送音乐消息");
+    public static function buildWXCardMsg($card_id, $appid){
+        throw new YDWXException("企业号不支持发送卡券消息");
     }
 
     public static function buildMPNewsMsgByID($media_id){

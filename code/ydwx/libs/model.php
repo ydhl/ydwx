@@ -271,14 +271,20 @@ abstract class YDWXRequest{
     /**
      * 根据微信的要求进行签名并设置sign属性
      * 缺省实现是微信支付的sign实现，见https://pay.weixin.qq.com/wiki/doc/api/native.php?chapter=4_3
-     * 其实sign规则需要重载该方法
+     * 其它sign规则需要重载该方法
      */
     public function sign(){
         
     }
 }
 
-class YDWXException extends \Exception{}
+class YDWXException extends \Exception{
+    public function YDWXException($message, $code, $previous){
+        $zhMsg = ErrorCodeZH::common($code);
+        YDWXHook::do_hook(YDWXHook::YDWX_LOG, $message.$code);
+        parent::__construct($zhMsg ? $zhMsg."($message)" : $message, $code, $previous);
+    }
+}
 
 /**
  * 微信消息封装基类,便于知道每种消息有什么内容
@@ -321,7 +327,7 @@ class YDWXResponse{
             }
         }else{
             $this->errcode = -1;
-            $this->errmsg  = "响应字符串格式不对";
+            $this->errmsg  = "响应字符串格式不对（{$msg}）";
         }
     }
 }

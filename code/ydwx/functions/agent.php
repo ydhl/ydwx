@@ -2,21 +2,23 @@
 
 /**
  * 公众号第三方平台生成授权连接
+ * @param $queryString 参数，如a=b&c=d，授权后返回，在AUTH_AGENT_SUCCESS回调中可通过YDWXAgentAuthInfo->query获取
  */
-function ydwx_agent_create_preauthcode(){
+function ydwx_agent_create_preauthcode($queryString=""){
     $accessToken = YDWXHook::do_hook(YDWXHook::GET_AGENT_ACCESS_TOKEN);
     $http = new YDHttp();
     $info = $http->post(YDWX_WEIXIN_BASE_URL."component/api_create_preauthcode?component_access_token={$accessToken}",
         ydwx_json_encode(array("component_appid"=>YDWX_WEIXIN_COMPONENT_APP_ID)));
     $msg  = new YDWXResponse($info);
     if( ! $msg->isSuccess()){
-        return "#".$msg->errmsg;
+        throw new YDWXException($msg->errmsg.$msg->errcode, $msg->errcode);
     }
-    
+    $queryString = trim($queryString,"?");
     return "https://mp.weixin.qq.com/cgi-bin/componentloginpage?component_appid="
             .YDWX_WEIXIN_COMPONENT_APP_ID."&pre_auth_code=".$msg->pre_auth_code
-            ."&redirect_uri=".YDWX_SITE_URL."ydwx/agentauth.php";
+            ."&redirect_uri=".urlencode(YDWX_SITE_URL."ydwx/agentauth.php".($queryString ? "?{$queryString}" :""));
 }
+
 
 /**
  * 得到授权码后，第三方平台方可以使用授权码换取授权公众号的授权信息，再通过公众号授权信息调用公众号相关API

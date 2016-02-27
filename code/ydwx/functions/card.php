@@ -24,7 +24,7 @@ function ydwx_card_uploadlogo($accessToken, $buffer){
     if($msg->isSuccess()){
         return $msg->url;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg,$msg->errcode);
 }
 
 /**
@@ -47,7 +47,7 @@ function ydwx_card_create($accessToken, YDWXCardBase $create){
     if($msg->isSuccess()){
         return $msg->card_id;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg,$msg->errcode);
 }
 
 /**
@@ -68,7 +68,7 @@ function ydwx_card_code_decrypt($accessToken, $code){
     if($msg->isSuccess()){
         return $msg->code;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg,$msg->errcode);
 }
 
 /**
@@ -112,7 +112,7 @@ function ydwx_card_paycell_open($accessToken, $cardid){
     if($msg->isSuccess()){
         return true;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg,$msg->errcode);
 }
 
 /**
@@ -131,7 +131,7 @@ function ydwx_card_qrcode_create($accessToken, YDWXCardQrcodeRequest $request){
     if($msg->isSuccess()){
         return $msg;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg,$msg->errcode);
 }
 
 /**
@@ -150,7 +150,7 @@ function ydwx_multicard_qrcode_create($accessToken, YDWXMultiCardQrcodeRequest $
     if($msg->isSuccess()){
         return $msg;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg,$msg->errcode);
 }
 
 
@@ -290,7 +290,7 @@ function ydwx_card_code_deposit($accessToken, $cardid, array $codes){
     if($msg->isSuccess()){
         return $msg;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg,$msg->errcode);
 }
 
 /**
@@ -308,7 +308,7 @@ function ydwx_card_code_getdepositcount($accessToken, $cardid){
     if($msg->isSuccess()){
         return $msg->count;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg,$msg->errcode);
 }
 
 /**
@@ -330,7 +330,7 @@ function ydwx_card_code_checkcode($accessToken, $cardid, array $codes){
     if($msg->isSuccess()){
         return $msg;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg,$msg->errcode);
 }
 
 /**
@@ -350,7 +350,7 @@ function ydwx_card_mpnews_gethtml($accessToken, $cardid){
     if($msg->isSuccess()){
         return $msg->content;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg,$msg->errcode);
 }
 
 
@@ -377,7 +377,7 @@ function ydwx_card_testwhitelist_set($accessToken, $openids, $usernames){
     if($msg->isSuccess()){
         return true;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg,$msg->errcode);
 }
 
 /**
@@ -398,7 +398,7 @@ function ydwx_card_landingpage_create($accessToken, YDWXCardLandingPageRequest $
     if($msg->isSuccess()){
         return $msg;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg,$msg->errcode);
 }
 
 /**
@@ -420,7 +420,7 @@ function ydwx_card_code_get($accessToken, YDWXCard $request, $check_consume){
     if($msg->isSuccess()){
         return $msg;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg,$msg->errcode);
 }
 /**
  * 
@@ -442,7 +442,7 @@ function ydwx_card_code_consume($accessToken, YDWXCard $request){
     if($msg->isSuccess()){
         return $msg;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg,$msg->errcode);
 }
 
 /**
@@ -470,7 +470,7 @@ function ydwx_card_user_getcardlist($accessToken, $openid, $cardid){
         }
         return $array;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg,$msg->errcode);
 }
 
 /**
@@ -493,7 +493,7 @@ function ydwx_card_get($accessToken, $cardid){
     if($msg->isSuccess()){
         return $msg;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg,$msg->errcode);
 }
 
 /**
@@ -513,7 +513,7 @@ function ydwx_card_batchget($accessToken, $offset, $count, $status){
     if($msg->isSuccess()){
         return $msg;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg,$msg->errcode);
 }
 
 /**
@@ -542,7 +542,7 @@ function ydwx_card_update($accessToken, $cardid, YDWXCardBase $card){
     if($msg->isSuccess()){
         return $msg->send_check;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg,$msg->errcode);
 }
 
 /**
@@ -565,7 +565,7 @@ function ydwx_card_modifystock($accessToken, $cardid, $increase_stock_value, $re
     if($msg->isSuccess()){
         return true;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg,$msg->errcode);
 }
 
 /**
@@ -589,7 +589,7 @@ function ydwx_card_code_update($accessToken, $cardid, $code, $newcode){
     if($msg->isSuccess()){
         return true;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg,$msg->errcode);
 }
 
 /**
@@ -610,7 +610,7 @@ function ydwx_card_delete($accessToken, $cardid){
     if($msg->isSuccess()){
         return true;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg,$msg->errcode);
 }
 
 /**
@@ -631,7 +631,7 @@ function ydwx_card_code_unavailable($accessToken, YDWXCard $card){
     if($msg->isSuccess()){
         return true;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg,$msg->errcode);
 }
 
 /**
@@ -664,7 +664,7 @@ function ydwx_card_datacube_getcardbizuininfo($accessToken, $begindate, $enddate
         }
         return $array;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg,$msg->errcode);
 }
 
 /**
@@ -698,7 +698,7 @@ function ydwx_card_datacube_getcardinfo($accessToken, $begindate, $enddate, $con
         }
         return $array;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg,$msg->errcode);
 }
 
 /**
@@ -733,5 +733,122 @@ function ydwx_card_datacube_getmembercardinfo($accessToken, $begindate, $enddate
         }
         return $array;
     }
-    throw new YDWXException($msg->errmsg);
+    throw new YDWXException($msg->errmsg,$msg->errcode);
+}
+
+/**
+ * 更新会议门票
+ * 支持调用“更新会议门票”接口update 入场时间、区域、座位等信息。
+ * 
+ * @param unknown $accessToken
+ * @param YDWXCardMeetingTicketUpdate $request
+ * @throws YDWXException
+ * @return boolean
+ */
+function ydwx_card_meetingticket_updateuser($accessToken, YDWXCardMeetingTicketUpdate $request){
+    $http  = new YDHttp();
+    $info = $http->post(YDWX_WEIXIN_BASE_URL2."card/meetingticket/updateuser?access_token={$accessToken}",
+    $request->toJsonString());
+    $msg  = new YDWXResponse($info);
+    if($msg->isSuccess()){
+        return true;
+    }
+    throw new YDWXException($msg->errmsg,$msg->errcode);
+}
+
+/**
+ * 更新电影票
+ * 领取电影票后通过调用“更新电影票”接口update电影信息及用户选座信息。
+ * 
+ * @param unknown $accessToken
+ * @param YDWXCardMovieTicketUpdate $request
+ * @throws YDWXException
+ * @return boolean
+ */
+function ydwx_card_moviceticket_updateuser($accessToken, YDWXCardMovieTicketUpdate $request){
+    $http  = new YDHttp();
+    $info = $http->post(YDWX_WEIXIN_BASE_URL2."card/moviceticket/updateuser?access_token={$accessToken}",
+    $request->toJsonString());
+    $msg  = new YDWXResponse($info);
+    if($msg->isSuccess()){
+        return true;
+    }
+    throw new YDWXException($msg->errmsg,$msg->errcode);
+}
+
+/**
+ * 更新飞机票信息接口
+ * 
+ * @param unknown $accessToken
+ * @param YDWXCardBoardingPassUpdate $request
+ * @throws YDWXException
+ * @return boolean
+ */
+function ydwx_card_boardingpass_checkin($accessToken, YDWXCardBoardingPassUpdate $request){
+    $http  = new YDHttp();
+    $info = $http->post(YDWX_WEIXIN_BASE_URL2."card/boardingpass/checkin?access_token={$accessToken}",
+    $request->toJsonString());
+    $msg  = new YDWXResponse($info);
+    if($msg->isSuccess()){
+        return true;
+    }
+    throw new YDWXException($msg->errmsg,$msg->errcode);
+}
+
+/**
+ * 会员卡激活接口
+ * @param unknown $accessToken
+ * @param YDWXCardMemberActivate $request
+ * @throws YDWXException
+ * @return boolean
+ */
+function ydwx_card_membercard_activate($accessToken, YDWXCardMemberActivate $request){
+    $http  = new YDHttp();
+    $info = $http->post(YDWX_WEIXIN_BASE_URL2."card/membercard/activate?access_token={$accessToken}",
+    $request->toJsonString());
+    $msg  = new YDWXResponse($info);
+    if($msg->isSuccess()){
+        return true;
+    }
+    throw new YDWXException($msg->errmsg,$msg->errcode);
+}
+
+/**
+ * 设置开卡字段接口
+ * 支持开发者自定义开卡字段
+ * 
+ * @param unknown $accessToken
+ * @param YDWXCardMemberActivateForm $request
+ * @throws YDWXException
+ * @return boolean
+ */
+function ydwx_card_membercard_activate_from_set($accessToken, YDWXCardMemberActivateForm $request){
+    $http  = new YDHttp();
+    $info = $http->post(YDWX_WEIXIN_BASE_URL2."card/membercard/activateuserform/set?access_token={$accessToken}",
+    $request->toJsonString());
+    $msg  = new YDWXResponse($info);
+    if($msg->isSuccess()){
+        return true;
+    }
+    throw new YDWXException($msg->errmsg,$msg->errcode);
+}
+
+/**
+ * 支持开发者根据CardID和Code查询会员信息。
+ * 
+ * @param unknown $accessToken
+ * @param unknown $card_id
+ * @param unknown $code
+ * @throws YDWXException
+ * @return YDWXCardMemberUserInfo
+ */
+function ydwx_card_membercard_userinfo($accessToken, $card_id, $code){
+    $http  = new YDHttp();
+    $info = $http->post(YDWX_WEIXIN_BASE_URL2."card/membercard/userinfo/get?access_token={$accessToken}",
+    ydwx_json_encode(array("card_id"=>$card_id,"code"=>$code)));
+    $msg  = new YDWXCardMemberUserInfo($info);
+    if($msg->isSuccess()){
+        return $msg;
+    }
+    throw new YDWXException($msg->errmsg,$msg->errcode);
 }

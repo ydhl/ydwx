@@ -39,15 +39,7 @@ class YDWXEvent extends YDWXResponse{
     public static function CreateEventMsg($msg){
         $obj =  new YDWXEvent($msg);
         if($obj->Event){
-            if($obj->Event=="user_consume_card"){//同一个事件的两种作用
-                if($obj->TransId){
-                    $clsname = "YDWXEventUserPaidByCard";
-                }else{
-                    $clsname = "YDWXEventUserConsumeCard";
-                }
-            }else{
-                $clsname  = "YDWX".ucfirst((strtolower($obj->MsgType))).ucfirst(strtolower($obj->Event));
-            }
+            $clsname  = "YDWX".ucfirst((strtolower($obj->MsgType))).ucfirst(strtolower($obj->Event));
         }else if($obj->MsgType){
             $clsname = "YDWXEventMsg".ucfirst(strtolower($obj->MsgType));
         }else if($obj->InfoType){
@@ -194,12 +186,12 @@ class YDWXEventPoi_check_notify extends YDWXEvent{
      * 审核结果，成功succ 或失败fail
      * @var unknown
      */
-    public $Result;
+    public $result;
     /**
      * 成功的通知信息，或审核失败的驳回理由
      * @var unknown
      */
-    public $Msg;
+    public $msg;
 }
 /**
  * 用户在卡券里点击查看公众号进入会话时（需要用户已经关注公众号），微信推送事件。
@@ -251,7 +243,7 @@ class YDWXEventConsumeCardBase extends YDWXEvent{
  * @author leeboo
  *
  */
-class YDWXEventUserConsumeCard extends YDWXEventConsumeCardBase{
+class YDWXEventUser_consume_card extends YDWXEventConsumeCardBase{
     /**
      * 门店名称，当前卡券核销的门店名称（只有通过卡券商户助手和买单核销时才会出现）
      * @var unknown
@@ -262,13 +254,6 @@ class YDWXEventUserConsumeCard extends YDWXEventConsumeCardBase{
      * @var unknown
      */
     public $StaffOpenId;
-}
-/**
- * 微信卡券买单事件通知
- * @author leeboo
- *
- */
-class YDWXEventUserPaidByCard extends YDWXEventConsumeCardBase{
     /**
      * 微信支付交易订单号
      * @var unknown
@@ -279,6 +264,44 @@ class YDWXEventUserPaidByCard extends YDWXEventConsumeCardBase{
      * @var unknown
      */
     public $TransId;
+}
+
+/**
+ * 微信买单完成时推送
+ * @author leeboo
+ *
+ */
+class YDWXEventUser_pay_from_pay_cell extends YDWXEvent{
+    /**
+     * 卡券ID。
+     * @var unknown
+     */
+    public $CardId;
+    /**
+     * 卡券Code码。
+     * @var unknown
+     */
+    public $UserCardCode;
+    /**
+     * 微信支付交易订单号（只有使用买单功能核销的卡券才会出现）
+     * @var unknown
+     */
+    public $TransId;
+    /**
+     * 门店名称，当前卡券核销的门店名称（只有通过卡券商户助手和买单核销时才会出现）
+     * @var unknown
+     */
+    public $LocationId;
+    /**
+     * 实付金额，单位为分
+     * @var unknown
+     */
+    public $Fee;
+    /**
+     * 应付金额，单位为分
+     * @var unknown
+     */
+    public $OriginalFee;
 }
 /**
  * 第三方平台的ticket刷新通知
@@ -324,12 +347,12 @@ class YDWXEventUnknow extends YDWXEvent{
  */
 class YDWXEventShakearoundusershake extends YDWXEvent{
     /**
-     * YDWXZBChooseDevice
-     * @var YDWXZBChooseDevice
+     * YDWXZBChosenBeacon
+     * @var YDWXZBChosenBeacon
      */
     public $ChosenBeacon;
     /**
-     * YDWXZBChooseDevice 组成的数组
+     * YDWXZBChosenBeacon 组成的数组
      * @var array
      */
     public $AroundBeacons = array();
@@ -766,3 +789,216 @@ class YDWXEventTEMPLATESENDJOBFINISH extends YDWXEvent{
      */
     public $Status;
 } 
+
+/**
+ * 接收会员信息事件通知
+ * 用户填写、提交资料后，会有事件推送给商家，开发者可以在接收到事件通知后调用激活接口，
+ * 传入会员卡号、初始积分等信息或者调用拉取会员信息接口获取会员信息，进行会员管理。
+ * @author leeboo
+ *
+ */
+class YDWXEventSubmit_membercard_user_info extends YDWXEvent{
+    /**
+     * 卡券ID
+     * @var unknown
+     */
+    public $CardId;
+    /**
+     * 卡券Code码
+     * @var unknown
+     */
+    public $UserCardCode;
+}
+/**
+ * 子商户审核结果通知
+ * 开发者所代理的子商户审核通过后，会收到微信服务器发送的事件推送。
+ * @author leeboo
+ *
+ */
+class YDWXEventCard_merchant_check_result extends YDWXEvent{
+    public $MerchantId;
+    public $IsPass;
+    public $Reason;
+}
+
+/**
+ * 授权子商户审核事件推送
+ * 当子商户资质审核通过时，开发者将收到微信服务器推送的事件。
+ * 
+ * @author leeboo
+ *
+ */
+class YDWXEventCard_merchant_auth_check_result extends YDWXEvent{
+    public $AppId;
+    public $IsPass;
+    public $Reason;
+}
+/**
+ * 当最后一个用户领券时，会发送事件给商户，事件每隔5min发送一次。
+ * @author leeboo
+ *
+ */
+class YDWXEventCard_sku_remind extends YDWXEvent{
+    /**
+     * 卡券ID
+     * @var unknown
+     */
+    public $CardId;
+    /**
+     * 报警详细信息
+     * @var unknown
+     */
+    public $Detail;
+}
+
+/**
+ * 资质认证成功（此时立即获得接口权限）
+ * @author leeboo
+ *
+ */
+class YDWXEventQualification_verify_success extends YDWXEvent{
+    /**
+     * 有效期 (整形)，指的是时间戳，将于该时间戳认证过期
+     * @var int
+     */
+    public $ExpiredTime;
+}
+
+/**
+ * 资质认证失败
+ * @author leeboo
+ *
+ */
+class YDWXEventQualification_verify_fail extends YDWXEvent{
+    /**
+     * 失败发生时间 (整形)，时间戳
+     * @var int
+     */
+    public $FailTime;
+    /**
+     * 认证失败的原因
+     * @var unknown
+     */
+    public $FailReason;
+}
+
+/**
+ * 名称认证成功（即命名成功）
+ * @author leeboo
+ *
+ */
+class YDWXEventNaming_verify_success extends YDWXEvent{
+    /**
+     * 有效期 (整形)，指的是时间戳，将于该时间戳认证过期
+     * @var int
+     */
+    public $ExpiredTime;
+}
+
+/**
+ * 名称认证失败（这时虽然客户端不打勾，但仍有接口权限）
+ * @author leeboo
+ *
+ */
+class YDWXEventNaming_verify_fail extends YDWXEvent{
+    /**
+     * 失败发生时间 (整形)，时间戳
+     * @var int
+     */
+    public $FailTime;
+    /**
+     * 认证失败的原因
+     * @var unknown
+     */
+    public $FailReason;
+}
+
+
+/**
+ * 年审通知
+ * @author leeboo
+ *
+ */
+class YDWXEventAnnual_renew extends YDWXEvent{
+    /**
+     * 有效期 (整形)，指的是时间戳，将于该时间戳认证过期，需尽快年审
+     * @var int
+     */
+    public $ExpiredTime;
+}
+
+
+/**
+ * 认证过期失效通知
+ * @author leeboo
+ *
+ */
+class YDWXEventVerify_expired extends YDWXEvent{
+    /**
+     * 有效期 (整形)，指的是时间戳，表示已于该时间戳认证过期，需要重新发起微信认证
+     * @var int
+     */
+    public $ExpiredTime;
+}
+
+/**
+ * 当用户的会员卡积分余额发生变动时，微信会推送事件告知开发者
+ * @author leeboo
+ *
+ */
+class YDWXEventUpdate_member_card extends YDWXEvent{
+    /**
+     * 卡券ID。
+     * @var unknown
+     */
+    public $CardId;
+    /**
+     * Code码。
+     * @var unknown
+     */
+    public $UserCardCode;
+    /**
+     * 变动的积分值。
+     * @var unknown
+     */
+    public $ModifyBonus;
+    /**
+     * 变动的余额值。
+     * @var unknown
+     */
+    public $ModifyBalance;
+}
+
+/**
+ * 通过微信连Wi-Fi连网成功后会触发事件推送，该事件将发送至开发者填写的URL（登录公众平台进入开发者中心设置）。 
+ * 开发者可通过事件推送获取连网相关信息、数据统计等操作。
+ * @author leeboo
+ *
+ */
+class YDWXEventWificonnected extends YDWXEvent{
+    /**
+     * 连网时间（整型）
+     * @var unknown
+     */
+    public $ConnectTime;
+    /**
+     * 系统保留字段，固定值
+     * @var unknown
+     */
+    public $ExpireTime;
+    /**
+     * 系统保留字段，固定值
+     * @var unknown
+     */
+    public $VendorId;
+    /**
+     * 门店ID，即shop_id
+     * @var unknown
+     */
+    public $ShopId;
+    /**
+     * 连网的设备无线mac地址，对应bssid
+     * @var unknown
+     */
+    public $DeviceNo;
+}
