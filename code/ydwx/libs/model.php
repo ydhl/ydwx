@@ -279,7 +279,7 @@ abstract class YDWXRequest{
 }
 
 class YDWXException extends \Exception{
-    public function YDWXException($message, $code, $previous){
+    public function YDWXException($message=null, $code=null, $previous=null){
         $zhMsg = ErrorCodeZH::common($code);
         YDWXHook::do_hook(YDWXHook::YDWX_LOG, $message.$code);
         parent::__construct($zhMsg ? $zhMsg."($message)" : $message, $code, $previous);

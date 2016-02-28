@@ -396,11 +396,9 @@ class YDWXMassCustomRequest extends YDWXMassRequest{
     }
     protected function formatArgs(){
         $args = parent::formatArgs();
-        $args['touser'] = $this->to;
         if($this->kf_account){
             $args['customservice']['kf_account'] = $this->kf_account;
         }
-        unset($args['to']);
         return $args;
     }
 }
@@ -420,8 +418,8 @@ class YDWXMassPreviewRequest extends YDWXMassRequest{
     }
     protected function formatArgs(){
         $args = parent::formatArgs();
-        if( ! $args['towxname']){
-            $args['touser'] = $args['to'];            
+        if( $args['towxname']){
+            unset($args['touser']);            
         }
         unset($args['to']);
         return $args;
@@ -449,6 +447,7 @@ class YDWXMassByGroupRequest extends YDWXMassRequest{
         );
         unset($args['is_to_all']);
         unset($args['to']);
+        unset($args['touser']);
         return $args;
     }
     public static function buildVideoMsg(YDWXVideoMsg $arg){
@@ -662,6 +661,7 @@ class YDWXQyMsgRequest extends YDWXMassRequest implements YDWXMsgBuilder{
             $arg = $vars[$i];
             $msg->news['articles'][]      = $arg->toArray();
         }
+        
         return $msg;
     }
 
@@ -710,7 +710,6 @@ class YDWXQyMsgRequest extends YDWXMassRequest implements YDWXMsgBuilder{
     }
     protected function formatArgs(){
         $args = parent::formatArgs();
-        $args['touser'] = $args['to'];
         if($args['touser'] && is_array($args['touser'])){
             $args['touser'] =  join("|", $args['touser']);
         }
