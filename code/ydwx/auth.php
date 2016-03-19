@@ -21,10 +21,6 @@ if( ! @$_GET['back'] ){
     $state = $_GET['back'];
 }
 
-if($_GET['realappid']){//第三方平台代替无oauth权限的公众号进行oauth登录时使用，其值为公众号的appid，这时的$_GET['appid']为第三方平台appid
-    $state .= ">".$_GET['realappid'];
-}
-
 $state = urlencode(base64_encode($state));
 
 $redirect = YDWX_SITE_URL.'ydwx/auth.php';
@@ -52,26 +48,20 @@ if( ! @$_GET['code'] && @$_GET['state']){
 
 //第二步，用户授权后返回，获取授权用户信息
 $http = new YDHttp();
+$accesstoken = $http->get(sprintf($access_token_url, $_GET['code']));
+$info = json_decode($accesstoken, true);
     
-$info = json_decode($http->get(sprintf($access_token_url, $_GET['code'])), true);
+if( !@$info['openid']){
+    YDWXHook::do_hook(YDWXHook::AUTH_FAIL, YDWXAuthFailResponse::errMsg($info['errmsg'].$accesstoken, $info['errcode']));
+    die;
+}
     
-    if( !@$info['openid']){
-        YDWXHook::do_hook(YDWXHook::AUTH_FAIL, YDWXAuthFailResponse::errMsg($info['errmsg'], $info['errcode']));
-        die;
-    }
-    
-    try{
-        $state = base64_decode($_GET['state']);
-        $rst = preg_match('/>(?P<realappid>.+)$/', $state, $matches);
-        if($rst){
-            $state = preg_replace('/>.+$/', "", $state);
-            $appid = $matches['realappid'];
-        }
-        $user = ydwx_sns_userinfo($info['access_token'], $info['openid']);
-        $user->state = $state;
-        $user->appid = $appid;
-        YDWXHook::do_hook(YDWXHook::AUTH_INAPP_SUCCESS, $user);
-    }catch (\Exception $e){
-        YDWXHook::do_hook(YDWXHook::AUTH_FAIL, YDWXAuthFailResponse::errMsg($e->getMessage(), $e->getCode()));
-    }
-    die();
+try{
+    $state = base64_decode($_GET['state']);
+    $user = ydwx_sns_userinfo($info['access_token'], $info['openid']);
+    $user->state = $state;
+    YDWXHook::do_hook(YDWXHook::AUTH_INAPP_SUCCESS, $user);
+}catch (\Exception $e){
+    YDWXHook::do_hook(YDWXHook::AUTH_FAIL, YDWXAuthFailResponse::errMsg($e->getMessage(), $e->getCode()));
+}
+die();

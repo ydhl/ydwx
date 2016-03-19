@@ -20,10 +20,6 @@ if( ! @$_GET['back'] ){
     $state = $_GET['back'];
 }
 
-if($_GET['realappid']){//第三方平台代替无oauth权限的公众号进行oauth登录时使用，其值为公众号的appid，这时的$_GET['appid']为第三方平台appid
-    $state .= ">".$_GET['realappid'];
-}
-
 $state = urlencode(base64_encode($state));
 
 $redirect = YDWX_SITE_URL.'ydwx/auth-crop.php';

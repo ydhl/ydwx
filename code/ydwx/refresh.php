@@ -28,7 +28,7 @@ include_once dirname(__FILE__).'/__config__.php';
         $ticket = ydwx_refresh_card_jsapi_ticket($accessToken->access_token);
         YDWXHook::do_hook(YDWXHook::REFRESH_CARD_JSAPI_TICKET, $ticket);
     }catch (\Exception $e){
-        echo " accessToken: ".$e->errmsg."<br/>";
+        echo " accessToken: ".$e->getMessage()."<br/>";
     }
 
 die("success");

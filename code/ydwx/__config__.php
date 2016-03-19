@@ -27,8 +27,8 @@ define("YDWX_WEIXIN_COMPONENT_ENCODING_AES_KEY","");
 define("YDWX_WEIXIN_COMPONENT_TOKEN",          "");
 
 //微信公众号定义
-define("YDWX_WEIXIN_APP_ID",             "");//
-define("YDWX_WEIXIN_APP_SECRET",         " ");//
+define("YDWX_WEIXIN_APP_ID",             "");// 
+define("YDWX_WEIXIN_APP_SECRET",         "");//
 define("YDWX_WEIXIN_ENCODING_AES_KEY",   "");//
 define("YDWX_WEIXIN_TOKEN",              "");//
 
