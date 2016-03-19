@@ -8,20 +8,31 @@ chdir(dirname(__FILE__));//把工作目录切换到文件所在目录
 include_once dirname(__FILE__).'/__config__.php';
 //Token 验证，微信验证主体身份。如果是第三方平台，则不存在token验证
 if( ! $GLOBALS["HTTP_RAW_POST_DATA"]){
-	$signature  = $_GET["signature"];
+	$signature  = $_GET["msg_signature"];
     $timestamp  = $_GET["timestamp"];
     $nonce      = $_GET["nonce"];
     $echostr    = $_GET["echostr"];
         
-    $token  = YDWX_WEIXIN_TOKEN;
-    $tmpArr = array($token, $timestamp, $nonce);
-    sort($tmpArr, SORT_STRING);
-    $tmpStr = implode( $tmpArr );
-    $tmpStr = sha1( $tmpStr );
+    $pc = new Prpcrypt(YDWX_WEIXIN_ENCODING_AES_KEY);
+    $sha1 = new SHA1;
+    $array = $sha1->getSHA1(YDWX_WEIXIN_TOKEN, $timestamp, $nonce, $echostr);
+    $ret = $array[0];
         
-    if( $tmpStr == $signature ){
-        echo $echostr;
+    if ($ret != 0) {
+        die();
     }
+        
+    $signature = $array[1];
+    if ($signature != $signature) {
+        die();
+    }
+        
+    $result = $pc->decrypt($echostr, YDWX_WEIXIN_CROP_ID);
+    if ($result[0] != 0) {
+        die();
+    }
+        
+    echo $result[1];
     die;
 }
 
@@ -32,7 +43,7 @@ $msg_sign  = $_GET["msg_signature"];
 $timeStamp = $_GET["timestamp"];
 $nonce     = $_GET["nonce"];
 
-$crypt = new WXBizMsgCrypt(YDWX_WEIXIN_TOKEN, YDWX_WEIXIN_ENCODING_AES_KEY, YDWX_WEIXIN_APP_ID);
+$crypt = new WXBizMsgCrypt(YDWX_WEIXIN_TOKEN, YDWX_WEIXIN_ENCODING_AES_KEY, YDWX_WEIXIN_CROP_ID);
 
 $msg = '';
 $errCode = $crypt->decryptMsg($msg_sign, $timeStamp, $nonce, $from_xml, $msg);

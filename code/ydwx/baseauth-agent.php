@@ -1,7 +1,9 @@
 <?php
 /**
  * 该认证流程对于未关注用户不会得到完整用户信息,是静默授权的，用户无感知，非关注用户只能获得openid
- * （订阅号、服务号）；
+ * 
+ * 
+ * 第三方平台代托管的公众号授权，这时第一次访问get参数需有apppid；这是托管的公众号appid，在公众号托管绑定后获得
  *  
  * 该页面可通过Redirect方式进行访问，或者直接在需要的地方include_once
  * 
@@ -22,16 +24,15 @@ if( ! @$_GET['back'] ){
 
 $redirect = YDWX_SITE_URL.'ydwx/auth.php';
 
+$appid  = $_GET['appid'];
+$authorize_url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid="
+            .$appid."&redirect_uri=".urlencode($redirect)."&response_type=code&scope=snsapi_base&state={$state}&component_appid="
+            .YDWX_WEIXIN_COMPONENT_APP_ID."#wechat_redirect";
 
+$access_token_url = "https://api.weixin.qq.com/sns/oauth2/component/access_token?appid="
+            .$appid."&code=%s&grant_type=authorization_code&component_appid=".YDWX_WEIXIN_COMPONENT_APP_ID
+            ."&component_access_token=".YDWXHook::do_hook(YDWXHook::GET_AGENT_ACCESS_TOKEN);
 
-    $isAgent = false;
-    $appid  = YDWX_WEIXIN_APP_ID;
-    $secret = YDWX_WEIXIN_APP_SECRET;
-    $authorize_url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid="
-            .$appid."&redirect_uri=".urlencode($redirect)."&response_type=code&scope=snsapi_base&state={$state}#wechat_redirect";
-
-    $access_token_url = "https://api.weixin.qq.com/sns/oauth2/access_token?appid="
-            .$appid."&secret=".$secret."&code=%s&grant_type=authorization_code";
 
 
 //第一步，引导用户到微信页面授权
@@ -42,6 +43,7 @@ if( ! @$_GET['code'] &&  ! @$_GET['state']){
 }
 
 //第二步，用户授权后返回，获取授权用户信息
+
 $http = new YDHttp();
 $info = json_decode($http->get(sprintf($access_token_url, $_GET['code'])), true);
     
@@ -50,19 +52,21 @@ if( !@$info['openid']){
     die;
 }
     
-$access_token = YDWXHook::do_hook(YDWXHook::GET_ACCESS_TOKEN);
-
+$access_token = YDWXHook::do_hook(YDWXHook::GET_HOST_ACCESS_TOKEN, $appid);
+   
+    
 if($access_token){
-    try{
-       $user = ydwx_user_info($access_token,     $info['openid']);
-    }catch (\Exception $e){
-       $user = new YDWXSubscribeUser();
-       $user->openid  = $info['openid'];
-    }
+	try{
+		$user = ydwx_user_info($access_token,     $info['openid']);
+	}catch (\Exception $e){
+		$user = new YDWXSubscribeUser();
+		$user->openid  = $info['openid'];
+	}
 }else{
 	$user = new YDWXSubscribeUser();
-    $user->openid  = $info['openid'];
+	$user->openid  = $info['openid'];
 }
+
 $user->appid  = $appid;
 $user->state  = $_GET['state'];
 YDWXHook::do_hook(YDWXHook::AUTH_INAPP_SUCCESS, $user);

@@ -12,7 +12,6 @@
  * @see http://mp.weixin.qq.com/wiki/15/5380a4e6f02f2ffdc7981a8ed7a40753.html#.E9.A2.84.E8.A7.88.E6.8E.A5.E5.8F.A3.E3.80.90.E8.AE.A2.E9.98.85.E5.8F.B7.E4.B8.8E.E6.9C.8D.E5.8A.A1.E5.8F.B7.E8.AE.A4.E8.AF.81.E5.90.8E.E5.9D.87.E5.8F.AF.E7.94.A8.E3.80.91
  */
 function ydwx_message_status($accessToken, $msg_id){
-    if( ! YDWX_WEIXIN_IS_AUTHED) throw new YDWXException("认证后才查询群发消息发送状态");
 
     $http = new YDHttp();
     $info = $http->post(YDWX_WEIXIN_BASE_URL."message/mass/get?access_token={$accessToken}",  
@@ -34,8 +33,7 @@ function ydwx_message_status($accessToken, $msg_id){
  * @see http://mp.weixin.qq.com/wiki/15/5380a4e6f02f2ffdc7981a8ed7a40753.html#.E9.A2.84.E8.A7.88.E6.8E.A5.E5.8F.A3.E3.80.90.E8.AE.A2.E9.98.85.E5.8F.B7.E4.B8.8E.E6.9C.8D.E5.8A.A1.E5.8F.B7.E8.AE.A4.E8.AF.81.E5.90.8E.E5.9D.87.E5.8F.AF.E7.94.A8.E3.80.91
  */
 function ydwx_message_preview($accessToken, YDWXMassPreviewRequest $arg){
-    if( ! YDWX_WEIXIN_IS_AUTHED) throw new YDWXException("认证后才可用预览群发");
-    
+
     $http = new YDHttp();
     $info = $http->post(YDWX_WEIXIN_BASE_URL."message/mass/preview?access_token={$accessToken}",  $arg->toJSONString());
     $rst = new YDWXMassResponse($info);
@@ -56,7 +54,6 @@ function ydwx_message_preview($accessToken, YDWXMassPreviewRequest $arg){
  * @see http://mp.weixin.qq.com/wiki/15/5380a4e6f02f2ffdc7981a8ed7a40753.html#.E5.88.A0.E9.99.A4.E7.BE.A4.E5.8F.91.E3.80.90.E8.AE.A2.E9.98.85.E5.8F.B7.E4.B8.8E.E6.9C.8D.E5.8A.A1.E5.8F.B7.E8.AE.A4.E8.AF.81.E5.90.8E.E5.9D.87.E5.8F.AF.E7.94.A8.E3.80.91
  */
 function ydwx_message_delete($accessToken, $messageid){
-    if( ! YDWX_WEIXIN_IS_AUTHED) throw new YDWXException("认证后才可用删除群发");
     $http = new YDHttp();
     $info = $http->post(YDWX_WEIXIN_BASE_URL."message/mass/delete?access_token={$accessToken}", 
         ydwx_json_encode(array("msg_id"=>$messageid)));
@@ -71,11 +68,6 @@ function ydwx_message_delete($accessToken, $messageid){
  * @see http://qydev.weixin.qq.com/wiki/index.php?title=%E6%B6%88%E6%81%AF%E7%B1%BB%E5%9E%8B%E5%8F%8A%E6%95%B0%E6%8D%AE%E6%A0%BC%E5%BC%8F
  */
 function ydwx_qy_message_send($accessToken, YDWXQyMsgRequest $arg){
-
-    if( YDWX_WEIXIN_ACCOUNT_TYPE != YDWX_WEIXIN_ACCOUNT_TYPE_CROP){
-        throw new YDWXException("不是企业号");
-    }
-
     $http = new YDHttp();
     $info = $http->post(YDWX_WEIXIN_QY_BASE_URL."message/send?access_token={$accessToken}", $arg->toJSONString());
     $info = new YDWXResponse($info);
@@ -87,10 +79,11 @@ function ydwx_qy_message_send($accessToken, YDWXQyMsgRequest $arg){
  * 向微信回复消息
  *
  * @param YDWXAnswerMsg $msg
+ * @param boolean isComponent
  */
-function ydwx_answer_msg(YDWXAnswerMsg $msg){
+function ydwx_answer_msg(YDWXAnswerMsg $msg, $isComponent=false){
     ob_start();
-    if(YDWX_WEIXIN_COMPONENT_APP_ID){//第三方平台要加密
+    if($isComponent){//第三方平台要加密
         $crypt = new WXBizMsgCrypt(YDWX_WEIXIN_COMPONENT_TOKEN, YDWX_WEIXIN_COMPONENT_ENCODING_AES_KEY, YDWX_WEIXIN_COMPONENT_APP_ID);
         $encryptMsg = "";
         $crypt->encryptMsg($msg->toXMLString(), time(), uniqid(), $encryptMsg);
@@ -99,6 +92,15 @@ function ydwx_answer_msg(YDWXAnswerMsg $msg){
         echo $msg->toXMLString();
     }
     ob_end_flush();
+}
+
+function ydwx_qy_answer_msg(YDWXAnswerMsg $msg){
+	ob_start();
+	$crypt = new WXBizMsgCrypt(YDWX_WEIXIN_TOKEN, YDWX_WEIXIN_ENCODING_AES_KEY, YDWX_WEIXIN_CROP_ID);
+	$encryptMsg = "";
+	$crypt->encryptMsg($msg->toXMLString(), time(), uniqid(), $encryptMsg);
+	echo $encryptMsg;
+	ob_end_flush();
 }
 /**
  * 从行业模板库选择模板到账号后台，获得模板ID
@@ -127,10 +129,7 @@ function ydwx_message_template_add($accessToken,  $template_id){
  * @return void
  */
 function ydwx_message_template_set_industry($accessToken,  $id1, $id2){
-    if( ! YDWX_WEIXIN_IS_AUTHED || YDWX_WEIXIN_ACCOUNT_TYPE != YDWX_WEIXIN_ACCOUNT_TYPE_SERVICE){
-        throw new YDWXException("发送模板消息, 要求是认证的服务号");
-    }
-    
+
     $http = new YDHttp();
     $info = $http->post(YDWX_WEIXIN_BASE_URL."template/api_set_industry?access_token={$accessToken}",
     ydwx_json_encode(array("industry_id1"=>$id1, "industry_id2"=>$id2)));
@@ -146,10 +145,7 @@ function ydwx_message_template_set_industry($accessToken,  $id1, $id2){
  * @return YDWXTemplateResponse
  */
 function ydwx_message_template_send($accessToken,  YDWXTemplateRequest $tpl){
-    if( ! YDWX_WEIXIN_IS_AUTHED || YDWX_WEIXIN_ACCOUNT_TYPE != YDWX_WEIXIN_ACCOUNT_TYPE_SERVICE){
-        throw new YDWXException("发送模板消息, 要求是认证的服务号");
-    }
-    
+
     $http = new YDHttp();
     $info = $http->post(YDWX_WEIXIN_BASE_URL."message/template/send?access_token={$accessToken}",
     $tpl->toJSONString());

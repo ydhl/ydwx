@@ -197,7 +197,8 @@ interface YDWXMsgBuilder{
 
     /**
      * 构建卡券消息
-     * @param unknown $text
+     * @param string $card_id
+     * @param string appid 第三方平台替授权的公众号操作时传入
      * @return YDWXMsgBuilder
     */
     public static function buildWXCardMsg($card_id, $appid);
@@ -298,7 +299,7 @@ class YDWXMassRequest extends YDWXRequest implements YDWXMsgBuilder{
         $msg->msgtype  = "wxcard";
         $time = time();
         
-        if(YDWX_WEIXIN_COMPONENT_APP_ID){
+        if($appid){
             $card_jsapi_ticket = YDWXHook::do_hook(YDWXHook::GET_HOST_CARD_JSAPI_TICKET, $appid);
         }else{
             $card_jsapi_ticket = YDWXHook::do_hook(YDWXHook::GET_CARD_JSAPI_TICKET);

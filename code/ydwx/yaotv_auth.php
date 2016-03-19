@@ -8,7 +8,7 @@ include_once dirname(__FILE__).'/__config__.php';
 $appid = $_GET['appid'];
 $code = $_GET['code'];
 $type = $_GET['type'];
-if(YDWX_WEIXIN_COMPONENT_APP_ID){
+if($appid){
     $access_token = YDWXHook::do_hook(YDWXHook::GET_ACCESS_TOKEN);
 }else{
     $access_token = YDWXHook::do_hook(YDWXHook::GET_HOST_ACCESS_TOKEN, $appid);

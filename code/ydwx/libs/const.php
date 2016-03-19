@@ -1,24 +1,40 @@
 <?php
 /**
- * 订阅号
+ * 公众号账号类型：订阅号
  * @var unknown
  */
 define("YDWX_WEIXIN_ACCOUNT_TYPE_SUBSCRIBE",  0);
 /**
- * 历史老帐号升级后的订阅号
+ * 公众号账号类型：历史老帐号升级后的订阅号
  * @var unknown
 */
 define("YDWX_WEIXIN_ACCOUNT_TYPE_UPGRADE_SUBSCRIBE",    1);
 /**
- * 服务号
+ * 公众号账号类型：服务号
  * @var unknown
 */
 define("YDWX_WEIXIN_ACCOUNT_TYPE_SERVICE",    2);
 /**
+ * 公众号账号类型：企业号
+ * @var unknown
+ */
+define("YDWX_WEIXIN_ACCOUNT_TYPE_CROP",    3);
+
+/**
  * 企业号
  * @var unknown
-*/
-define("YDWX_WEIXIN_ACCOUNT_TYPE_CROP",    3);
+ */
+define("YDWX_WEIXIN_TYPE_CROP",    5);
+/**
+ * 普通公众号
+ * @var unknown
+ */
+define("YDWX_WEIXIN_TYPE_NORMAL",    6);
+/**
+ * 第三方代理平台
+ * @var unknown
+ */
+define("YDWX_WEIXIN_TYPE_AGENT",    7);
 
 /**
  * 代表未认证

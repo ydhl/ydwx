@@ -20,6 +20,11 @@ final class YDWXHook {
      */
     const GET_ACCESS_TOKEN = "GET_ACCESS_TOKEN";
     /**
+     * 无参数，返回企业号access token
+     * @var unknown
+     */
+    const GET_QY_ACCESS_TOKEN = "GET_QY_ACCESS_TOKEN";
+    /**
      * 无参数，返回第三方平台的access token
      * @var unknown
      */
@@ -70,25 +75,51 @@ final class YDWXHook {
      */
     const GET_JSAPI_TICKET = "GET_JSAPI_TICKET";
     /**
+     * 无参数，返回企业号jsapi ticket
+     * @var unknown
+     */
+    const GET_QY_JSAPI_TICKET = "GET_QY_JSAPI_TICKET";
+    /**
      * 刷新公众号的token 参数YDWXAccessTokenResponse
      * @var unknown
      */
     const REFRESH_ACCESS_TOKEN = "REFRESH_ACCESS_TOKEN";
+    /**
+     * 刷新企业号的token 参数YDWXAccessTokenResponse
+     * @var unknown
+     */
+    const REFRESH_QY_ACCESS_TOKEN = "REFRESH_QY_ACCESS_TOKEN";
     /**
      * 刷新公众号的js ticket 参数 YDWXJsapiTicketResponse
      * @var unknown
      */
     const REFRESH_JSAPI_TICKET = "REFRESH_JSAPI_TICKET";
     /**
+     * 刷新企业号的js ticket 参数 YDWXJsapiTicketResponse
+     * @var unknown
+     */
+    const REFRESH_QY_JSAPI_TICKET = "REFRESH_QY_JSAPI_TICKET";
+    /**
      * 刷新公众号微信卡券 js ticket 参数 YDWXJsapiTicketResponse
      * @var unknown
      */
     const REFRESH_CARD_JSAPI_TICKET = "REFRESH_CARD_JSAPI_TICKET";
     /**
+     * 刷新企业号微信卡券 js ticket 参数 YDWXJsapiTicketResponse
+     * @var unknown
+     */
+    const REFRESH_QY_CARD_JSAPI_TICKET = "REFRESH_QY_CARD_JSAPI_TICKET";
+    /**
      * 无参数，返回微信卡券用的jsapi ticket
      * @var unknown
      */
     const GET_CARD_JSAPI_TICKET = "GET_CARD_JSAPI_TICKET";
+    
+    /**
+     * 无参数，返回企业号微信卡券用的jsapi ticket
+     * @var unknown
+     */
+    const GET_QY_CARD_JSAPI_TICKET = "GET_QY_CARD_JSAPI_TICKET";
 
     /**
      * 刷新托管平台的token 参数 YDWXAccessTokenResponse

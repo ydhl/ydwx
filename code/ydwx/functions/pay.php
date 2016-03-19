@@ -169,14 +169,24 @@ function ydwx_pay_unifiedorder(YDWXPayUnifiedOrderRequest $arg){
  * 可以把返回结果再次调用ydwx_pay_short_qrcode()得到更精简的二维码内容，减少二维码复杂度
  * 
  * @param unknown $product_id 你系统的产品id
- * @param unknown $appid 当前公众号appid，如果不是第三方平台，则传入YDWX_WEIXIN_APP_ID
+ * @param string type 见YDWX_WEIXIN_TYPE_XX常量
+ * @param unknown $appid 当前公众号appid，如果不是第三方平台，则传入（普通账号）YDWX_WEIXIN_APP_ID或（企业号）YDWX_WEIXIN_CROP_ID
  */
-function ydwx_pay_product_qrcode($product_id, $appid){
+function ydwx_pay_product_qrcode($product_id, $appid, $type=YDWX_WEIXIN_TYPE_NORMAL){
     $nonceStr   = uniqid();
     $time_stamp = time();
     
-    $mchkey = YDWX_WEIXIN_COMPONENT_APP_ID ? YDWXHook::do_hook(YDWXHook::GET_HOST_MCH_KEY, $appid) : YDWX_WEIXIN_MCH_KEY;
-    $mchid  = YDWX_WEIXIN_COMPONENT_APP_ID ? YDWXHook::do_hook(YDWXHook::GET_HOST_MCH_ID, $appid) : YDWX_WEIXIN_MCH_ID;
+    if($type==YDWX_WEIXIN_TYPE_CROP){
+    	$mchkey = YDWX_WEIXIN_QY_MCH_KEY;
+    	$mchid  = YDWX_WEIXIN_QY_MCH_ID;
+    }else if($type==YDWX_WEIXIN_TYPE_AGENT){
+    	$mchkey = YDWXHook::do_hook(YDWXHook::GET_HOST_MCH_KEY, $appid);
+    	$mchid  = YDWXHook::do_hook(YDWXHook::GET_HOST_MCH_ID, $appid);
+    	
+    }else{
+    	$mchkey = YDWX_WEIXIN_MCH_KEY;
+    	$mchid  = YDWX_WEIXIN_MCH_ID;
+    }
     
     $str = "appid=".$appid
     ."&mch_id=".$mchid

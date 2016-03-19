@@ -175,6 +175,11 @@ class YDHttp{
  *
  */
 class YDHttps extends YDHttp{
+	/**
+	 * 当前微信公众号的类型（公众号，企业号或者第三方平台），见YDWX_WEIXIN_TYPE_XX
+	 * @var boolean
+	 */
+	public $type = YDWX_WEIXIN_TYPE_NORMAL;
     /**
      * Make an HTTP request
      *
@@ -184,13 +189,15 @@ class YDHttps extends YDHttp{
         curl_setopt($this->ci, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($this->ci, CURLOPT_SSL_VERIFYHOST, 1);
         
-        if(YDWX_WEIXIN_COMPONENT_APP_ID){
+        if($this->type==YDWX_WEIXIN_TYPE_AGENT){
             $cert_file = YDWXHook::do_hook(YDWXHook::GET_HOST_APICLIENT_CERT_PATH, $this->appid);
-            if(SAE_TMP_PATH){
+            if(defined("SAE_TMP_PATH")){
                 if(copy($cert_file, SAE_TMP_PATH."cert.pem")){
                     $cert_file = SAE_TMP_PATH."cert.pem";
                 }
             }
+        }else if($this->type==YDWX_WEIXIN_TYPE_CROP){
+        	$cert_file = YDWX_WEIXIN_QY_APICLIENT_CERT;
         }else{
             $cert_file = YDWX_WEIXIN_APICLIENT_CERT;
         }
@@ -198,13 +205,15 @@ class YDHttps extends YDHttp{
         curl_setopt($this->ci,CURLOPT_SSLCERT, $cert_file);
         
         
-        if(YDWX_WEIXIN_COMPONENT_APP_ID){
+        if($this->type==YDWX_WEIXIN_TYPE_AGENT){
             $key_file = YDWXHook::do_hook(YDWXHook::GET_HOST_APICLIENT_KEY_PATH, $this->appid);
-            if(SAE_TMP_PATH){
+            if(defined("SAE_TMP_PATH")){
                 if(copy($key_file, SAE_TMP_PATH."key.pem")){
                     $key_file = SAE_TMP_PATH."key.pem";
                 }
             }
+        }else if($this->type==YDWX_WEIXIN_TYPE_CROP){
+        	$key_file = YDWX_WEIXIN_QY_APICLIENT_KEY;
         }else{
             $key_file = YDWX_WEIXIN_APICLIENT_KEY;
         }
@@ -212,9 +221,14 @@ class YDHttps extends YDHttp{
         curl_setopt($this->ci,CURLOPT_SSLKEYTYPE,'PEM');
         curl_setopt($this->ci,CURLOPT_SSLKEY,  $key_file);
         
-        curl_setopt($this->ci,CURLOPT_SSLKEYPASSWD,  YDWX_WEIXIN_COMPONENT_APP_ID ?
-        YDWXHook::do_hook(YDWXHook::GET_HOST_MCH_KEY, $this->appid) :
-        YDWX_WEIXIN_MCH_KEY);
+        if($this->type==YDWX_WEIXIN_TYPE_AGENT){
+        	curl_setopt($this->ci,CURLOPT_SSLKEYPASSWD,  YDWXHook::do_hook(YDWXHook::GET_HOST_MCH_KEY, $this->appid));
+        }else if($this->type==YDWX_WEIXIN_TYPE_CROP){
+        	curl_setopt($this->ci,CURLOPT_SSLKEYPASSWD,  YDWX_WEIXIN_QY_MCH_KEY);
+        }else{
+            curl_setopt($this->ci,CURLOPT_SSLKEYPASSWD,  YDWX_WEIXIN_MCH_KEY);
+        } 
+        
         return parent::http($url, $method, $postfields, $multi);
     }
 }

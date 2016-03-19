@@ -8,13 +8,17 @@ function ydwx_jsapi_include(){
  * 所有微信 jsapi调用前都需要先调用该方法
  * @param array $jsApiList 见YDWX_JSAPI_XX常量
  * @param $appid 作为第三方平台，配置某个授权公众号
+ * @param $type 见YDWX_WEIXIN_TYPE_XX
  */
-function ydwx_jsapi_config(array $jsApiList, $appid=null){
+function ydwx_jsapi_config(array $jsApiList, $appid=null, $type=YDWX_WEIXIN_TYPE_NORMAL){
     $curr_page_uri= YDWX_SITE_URL.ltrim($_SERVER['REQUEST_URI'], "/");
-    if(YDWX_WEIXIN_COMPONENT_APP_ID){
+    if($type==YDWX_WEIXIN_TYPE_AGENT){
         $jsapi_ticket = YDWXHook::do_hook(YDWXHook::GET_HOST_JSAPI_TICKET, $appid);
+    }else if($type==YDWX_WEIXIN_TYPE_CROP){
+    	$appid = YDWX_WEIXIN_CROP_ID;
+    	$jsapi_ticket = YDWXHook::do_hook(YDWXHook::GET_JSAPI_TICKET);
     }else{
-        $appid = YDWX_WEIXIN_APP_ID;//TODO 企业号
+        $appid = YDWX_WEIXIN_APP_ID;
         $jsapi_ticket = YDWXHook::do_hook(YDWXHook::GET_JSAPI_TICKET);
     }
     

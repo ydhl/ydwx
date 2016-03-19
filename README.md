@@ -13,6 +13,15 @@
 
 ## 版本特性
 
+### 160319
+1. 把企业号，服务号，第三方平台的各种处理都分开
+	1. 事件通知，token认证：index.php index-crop.php index-agent.php
+	2. 显式认证：auth.php auth-crop.php auth-agent.php
+	3. 隐式认证：baseauth.php baseauth-crop.php baseauth-agent.php
+	4. 令牌刷新：refresh.php refresh-crop.php refresh-agent.php
+2. 去掉账号类型的配置和是否认证的配置
+3. token,ticket等的刷新，获取hook分开定义
+
 ### 151023更新
 1. 增加第三方平台支持，使用ydwx便可轻松开发微信第三方平台
 2. 微信卡券：发卡，作为母商户代替子商户发卡，母商户子商户申请（子商户可没有公众号）

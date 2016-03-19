@@ -677,15 +677,6 @@ class YDWXPayBaseRequest extends YDWXRequest{
     private $device_info ="WEB";
 
     public function formatArgs(){
-        if( ! YDWX_WEIXIN_COMPONENT_APP_ID){
-            if(YDWX_WEIXIN_ACCOUNT_TYPE==YDWX_WEIXIN_ACCOUNT_TYPE_CROP){
-                $this->appid = YDWX_WEIXIN_CROP_ID;
-            }else{
-                $this->appid = YDWX_WEIXIN_APP_ID;
-            }
-            $this->mch_id  = YDWX_WEIXIN_MCH_ID;
-            $this->mch_key = YDWX_WEIXIN_MCH_KEY;
-        }
         if( ! $this->nonce_str) $this->nonce_str = uniqid();
         
         $args = parent::formatArgs();

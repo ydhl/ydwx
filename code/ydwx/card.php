@@ -19,7 +19,7 @@ if($action == "chooseCard"){
     $nonceStr   = uniqid();
     $time       = time();
     
-    if(YDWX_WEIXIN_COMPONENT_APP_ID){
+    if($appid){
         $card_jsapi_ticket = YDWXHook::do_hook(YDWXHook::GET_HOST_CARD_JSAPI_TICKET, $appid);
     }else{
         $card_jsapi_ticket = YDWXHook::do_hook(YDWXHook::GET_CARD_JSAPI_TICKET);
@@ -44,7 +44,7 @@ if($action == "chooseCard"){
 if($action == "addCard"){
     $exts     = $_POST['exts'];
     $appid    = $_POST['appid'];
-    if(YDWX_WEIXIN_COMPONENT_APP_ID){
+    if($appid){
         $card_jsapi_ticket = YDWXHook::do_hook(YDWXHook::GET_HOST_CARD_JSAPI_TICKET, $appid);
     }else{
         $card_jsapi_ticket = YDWXHook::do_hook(YDWXHook::GET_CARD_JSAPI_TICKET);

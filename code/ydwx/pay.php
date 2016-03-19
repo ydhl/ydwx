@@ -12,7 +12,7 @@ $arg->total_fee     = intval($_POST['price']*100);
 $arg->attach        = $_POST['attach'];
 $arg->body          = $_POST['pay_desc'];
 try{
-    $mchkey = YDWX_WEIXIN_COMPONENT_APP_ID ? YDWXHook::do_hook(YDWXHook::GET_HOST_MCH_KEY, $appid) : YDWX_WEIXIN_MCH_KEY;
+    $mchkey = $appid ? YDWXHook::do_hook(YDWXHook::GET_HOST_MCH_KEY, $appid) : YDWX_WEIXIN_MCH_KEY;
     $msg = ydwx_pay_unifiedorder($arg);
     $str = "appId=".$appid."&nonceStr=".$_POST['noncestr']
         ."&package=prepay_id=".$msg->prepay_id."&signType=MD5&timeStamp=".$_POST['timestamp'];
