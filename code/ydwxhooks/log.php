@@ -1,6 +1,5 @@
 <?php
-use app\common\Option_Model;
-use yangzie\YZE_DBAImpl;
+
 $oldcwd = getcwd();
 chdir ( dirname ( __FILE__ ) . '/../' );
 require_once 'init.php';
@@ -11,8 +10,5 @@ chdir ( $oldcwd );
  * 由于是你自己处理log，所以msg你任意传入，你自己处理
  */
 YDWXHook::add_hook(YDWXHook::YDWX_LOG, function($msg){
-    $db = YZE_DBAImpl::getDBA();
-    $sql = "insert into logs(content) VALUES(".$db->quote($msg).")";
-    $db->exec($sql);
-    $db->commit();
+
 });

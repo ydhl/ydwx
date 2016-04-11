@@ -11,7 +11,7 @@ function ydwx_pay_short_qrcode(YDWXPayShorturlRequest $arg){
     $args = $arg->toXMLString();
     
     $http = new YDHttp();
-    $info = $http->post(YDWX_WEIXIN_PAY_URL."pay/downloadbill", $args);
+    $info = $http->post(YDWX_WEIXIN_PAY_URL."tools/shorturl", $args);
     
     $msg  = new YDWXPayShorturlResponse($info);
     if( ! $msg->isSuccess()){
@@ -208,7 +208,7 @@ function ydwx_pay_product_qrcode($product_id, $appid, $type=YDWX_WEIXIN_TYPE_NOR
  * 
  *  在准备支付是调用jsPayApi即可
  * 
- * 需要先引入<script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+ * 需要先调用dwx_jsapi_include()
  * 
  * @param unknown $jsapi_ticket
  * @param unknown $curr_page_uri
