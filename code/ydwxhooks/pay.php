@@ -17,11 +17,12 @@
  * 			先生成订单了，所以需要用户在2小时内必须扫码进行支付，否则订单作废；
  * 			
  * 			预下单接口ydwx_pay_unifiedorder
+ * 		进入微信支付流程，支付的成果失败会调用hook：YDWXHook::PAY_NOTIFY_ERROR 或者YDWXHook::PAY_NOTIFY_SUCCESS
  * 
  * 		一种是先把自己的商品按照微信的二维码格式生成二维码，用户扫码后再生成订单；这种方式是用户随时扫码，在产生订单
  * 			生成二维码接口：ydwx_pay_product_qrcode
- * 
- * 		两种方式都会进入微信支付流程，支付的成果失败会调用hook：YDWXHook::PAY_NOTIFY_ERROR 或者YDWXHook::PAY_NOTIFY_SUCCESS
+ * 	
+ * 		扫码成功后会触发hook QRCODE_PAY_NOTIFY_SUCCESS
  * 1. 
  */
 
@@ -50,5 +51,9 @@ YDWXHook::add_hook ( YDWXHook::PAY_NOTIFY_ERROR, function ($error) {
 } );
 
 YDWXHook::add_hook ( YDWXHook::PAY_NOTIFY_SUCCESS, function (YDWXPaiedNotifyResponse $msg) {
-    // 支付成功
+    // 支付成功，模式2
+} );
+
+YDWXHook::add_hook ( YDWXHook::QRCODE_PAY_NOTIFY_SUCCESS, function (YDWXPaiedNotifyResponse $msg) {
+	// 用户扫码成功，模式1
 } );

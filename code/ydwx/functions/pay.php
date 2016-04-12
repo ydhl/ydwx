@@ -11,11 +11,11 @@ function ydwx_pay_short_qrcode(YDWXPayShorturlRequest $arg){
     $args = $arg->toXMLString();
     
     $http = new YDHttp();
-    $info = $http->post(YDWX_WEIXIN_PAY_URL."tools/shorturl", $args);
-    
+    $info = $http->get(YDWX_WEIXIN_PAY_URL."tools/shorturl", $args);
+
     $msg  = new YDWXPayShorturlResponse($info);
     if( ! $msg->isSuccess()){
-        throw new YDWXException($msg->errmsg);
+        throw new YDWXException($msg->errmsg, $msg->errcode);
     }
     return $msg;
 }

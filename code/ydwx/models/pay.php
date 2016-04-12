@@ -703,6 +703,7 @@ class YDWXPayShorturlRequest extends YDWXPayBaseRequest{
     public $long_url;
     public function formatArgs(){
         $this->long_url = urlencode($this->long_url);
+        return parent::formatArgs();
     }
     public function sign(){
         //$long_url 签名用原串，传输需URLencode
