@@ -83,11 +83,11 @@ class YDWXPayBaseResponse extends YDWXResponse{
     }
 
     protected function isPrepaySuccess(){
-        return strcasecmp($this->return_code, "success")==0;
+        return !$this->return_code || strcasecmp($this->return_code, "success")==0;
     }
 
     protected function isPrepayResultSuccess(){
-        return strcasecmp($this->result_code, "success")==0;
+        return !$this->result_code || strcasecmp($this->result_code, "success")==0;
     }
     public function build($msg){
         $arr = simplexml_load_string($msg, 'SimpleXMLElement', LIBXML_NOCDATA);
@@ -100,7 +100,7 @@ class YDWXPayBaseResponse extends YDWXResponse{
         }
         if( ! $this->isPrepayResultSuccess() && $this->result_code){
             $this->errcode = -1;
-            $this->errmsg  = $this->err_code_des;
+            $this->errmsg  .= $this->err_code_des;
         }
     }
 }

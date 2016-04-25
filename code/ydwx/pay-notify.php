@@ -15,22 +15,30 @@ if($msg->isSuccess()){
     if($msg->product_id){
         $PayingMsg  = new YDWXPayingNotifyResponse($data);
         $result     = new YDWXPayNotifyRequest();
-        
+        YDWXHook::do_hook(YDWXHook::YDWX_LOG, "QRCODE_PAY_NOTIFY_SUCCESS");
         try{
             $arg = YDWXHook::do_hook(YDWXHook::QRCODE_PAY_NOTIFY_SUCCESS, $PayingMsg);
             $arg->openid        = $PayingMsg->openid;
-            $msg = ydwx_pay_unifiedorder($arg);
+            $order = ydwx_pay_unifiedorder($arg);
             $result_code = "SUCCESS";
             $err_code_des = "OK";
-            $result->prepay_id = $msg->prepay_id;
+            $result->prepay_id = $order->prepay_id;
         }catch(YDWXException $e){
             $result_code = "FAIL";
             $err_code_des = $e->getMessage();
         }
         
+        // TODO 这里要考虑YDWX_WEIXIN_MCH_KEY的来源（企业号，第三方平台等）
+        
+	    $result->appid  = $PayingMsg->appid;
+	    $result->mch_id = $PayingMsg->mch_id;
+	    $result->mch_key = YDWX_WEIXIN_MCH_KEY;
+	    $result->return_code = $result_code;
         $result->result_code = $result_code;
         $result->err_code_des = $err_code_des;
+        
         $result->sign();
+        YDWXHook::do_hook(YDWXHook::YDWX_LOG, $result->toXMLString());
         echo $result->toXMLString();
     }else{
         if(YDWXHook::do_hook(YDWXHook::PAY_NOTIFY_SUCCESS, $msg)){

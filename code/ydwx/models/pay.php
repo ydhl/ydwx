@@ -701,17 +701,29 @@ class YDWXPayShorturlRequest extends YDWXPayBaseRequest{
      * @var unknown
      */
     public $long_url;
+    public $encode_long_url;
     public function formatArgs(){
-        $this->long_url = urlencode($this->long_url);
-        return parent::formatArgs();
+        $this->encode_long_url = urlencode($this->long_url);
+        $args = parent::formatArgs();
+        $args['long_url'] = $args['encode_long_url'];
+        unset($args['encode_long_url']);
+        return $args;
     }
     public function sign(){
+    	
         //$long_url 签名用原串，传输需URLencode
         $this->valid();
         $args = YDWXRequest::ignoreNull($this->sortArg());
-        $args['long_url'] = urldecode($args['long_url']);
-        $str  = http_build_query($args);
-        $this->sign = strtoupper(md5(urldecode($str)."&key=".$this->mch_key));
+        
+
+        $str = "appid=".$this->appid
+        ."&long_url=".$this->long_url
+        ."&mch_id=".$this->mch_id
+        ."&nonce_str=".$this->nonce_str;
+        $signStr = strtoupper(md5($str."&key=".$this->mch_key));
+         
+        
+        $this->sign = $signStr;
     }
 }
 /**
@@ -832,10 +844,10 @@ class YDWXPayUnifiedOrderRequest extends YDWXPayNotifyRequest{
     protected $spbill_create_ip;
 
     /**
-     * 取值如下：JSAPI，NATIVE，APP，WAP,详细说明见参数规定
+     * 取值如下：JSAPI(微信内浏览器h5支付)，NATIVE（扫码支付），APP，WAP（微信外浏览器h5支付）,详细说明见参数规定
      * @var unknown
      */
-    protected $trade_type="JSAPI";
+    public $trade_type="JSAPI";
 
     /**
      * 

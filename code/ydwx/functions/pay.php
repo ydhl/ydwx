@@ -1,4 +1,37 @@
 <?php
+
+/**
+ * 生成微信外H5
+ * 调起微信支付的deeplink
+ *
+ * @param  $appid 公众账号ID
+ * @param  $package 订单详情扩展字符串
+ * @param  $prepayid 预支付交易会话标识
+ * @param  $mch_key 支付秘钥
+ * @return string
+ * @link https://pay.weixin.qq.com/wiki/doc/api/wap.php?chapter=15_4
+ */
+function ydwx_pay_deeplink($appid, $package, $prepayid, $mch_key){
+	$timestamp = time();
+	$noncestr = uniqid();
+	$sign = strtoupper(md5("appid=".$appid
+	."&noncestr=".$noncestr
+	."&package=".$package
+	."&prepayid=".$prepayid
+	."&timestamp=".$timestamp
+	."&key=".$mch_key));
+	
+	
+	$string1 = "appid=".urlencode($appid)
+	."&noncestr=".urlencode($noncestr)
+	."&package=".urlencode($package)
+	."&prepayid=".urlencode($prepayid)
+	."&sign=".urlencode($sign)
+	."&timestamp=".urlencode($timestamp);
+	
+	return "weixin://wap/pay?".urlencoce($string1);
+	
+}
 /**
  * 该接口主要用于扫码原生支付模式一中的二维码链接转成短链接(weixin://wxpay/s/XX)，
  * 减小二维码数据量，提升扫描速度和精确度。
@@ -9,9 +42,9 @@
 function ydwx_pay_short_qrcode(YDWXPayShorturlRequest $arg){
     $arg->sign();
     $args = $arg->toXMLString();
-    
+    YDWXHook::do_hook(YDWXHook::YDWX_LOG, "ydwx_pay_short_qrcode:".$args);
     $http = new YDHttp();
-    $info = $http->get(YDWX_WEIXIN_PAY_URL."tools/shorturl", $args);
+    $info = $http->post(YDWX_WEIXIN_PAY_URL."tools/shorturl", $args);
 
     $msg  = new YDWXPayShorturlResponse($info);
     if( ! $msg->isSuccess()){
