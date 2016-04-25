@@ -1,4 +1,39 @@
 <?php
+/**
+ * 用于商户的企业付款操作进行结果查询，返回付款操作详细结果。
+ * 
+ * @param YDWXCropTransferQueryRequest $request
+ * @throws YDWXException
+ */
+function ydwx_crop_transfer_query(YDWXCropTransferQueryRequest $request){
+	$http = new YDHttps($request->appid);
+	$request->sign();
+	$info = $http->post(YDWX_WEIXIN_PAY_URL."mmpaymkttransfers/gettransferinfo",
+			$request->toXMLString());
+	$rst = new YDWXCropTransferQueryResponse($info);
+	if( ! $rst->isSuccess()) throw new YDWXException($rst->errmsg, $rst->errcode);
+
+	return $rst;
+}
+
+/**
+ * 用于企业向微信用户个人付款 
+ * 目前支持向指定微信用户的openid付款。
+ * 
+ * @param YDWXCropTransferRequest $request
+ * @throws YDWXException
+ * @return YDWXCropTransferResponse
+ */
+function ydwx_crop_transfer(YDWXCropTransferRequest $request){
+    $http = new YDHttps($request->mch_appid);
+    $request->sign();
+    $info = $http->post(YDWX_WEIXIN_PAY_URL."mmpaymkttransfers/promotion/transfers",
+            $request->toXMLString());
+    $rst = new YDWXCropTransferResponse($info);
+    if( ! $rst->isSuccess()) throw new YDWXException($rst->errmsg, $rst->errcode);
+
+    return $rst;
+}
 
 /**
  * 生成微信外H5

@@ -1,4 +1,14 @@
-# ydwx 开发框架 V0.1
+# ydwx 开发框架 
+V0.1.2
+
+1. 增加企业付款及查询
+
+V0.1.1
+
+1. 增加ydwx_pay_deeplink
+2. 修复相关pay respone的isPrepaySuccess判断错误
+3. 修复获取支付二维码短地址时签名错误 YDWXPayShorturlRequest
+4. 优化模式1支付通知的流程
 
 ## 如何使用
 

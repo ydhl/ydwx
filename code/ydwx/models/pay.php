@@ -1049,3 +1049,273 @@ class YDWXPayDownloadbillRequest extends YDWXPayBaseRequest
         }
     }
 }
+
+/**
+ * 用于企业向微信用户个人付款 目前支持向指定微信用户的openid付款。（获取openid参见微信公众平台开发者文
+ * @author leeboo
+ *
+ */
+class YDWXCropTransferRequest extends YDWXRequest{
+	const CHECK_NAME_NO_CHECK = "NO_CHECK";
+	const CHECK_NAME_FORCE_CHECK = "FORCE_CHECK";
+	const CHECK_NAME_OPTION_CHECK = "OPTION_CHECK";
+	/**
+	 * 微信分配的公众账号ID（企业号corpid即为此appId）
+	 * @var unknown
+	 */
+	public $mch_appid;
+	/**
+	 * 微信支付分配的商户号
+	 * @var string
+	 */
+	public $mchid;
+	/**
+	 * 
+	 * @var unknown
+	 */
+	public $mch_key;
+    /**
+     * 终端设备号(门店号或收银设备ID)，注意：PC网页或公众号内支付请传"WEB"
+     * @var unknown
+     */
+	public $device_info;
+	protected $nonce_str;
+	/**
+	 * 商户订单号，需保持唯一性
+	 * @var unknown
+	 */
+	public $partner_trade_no;
+	/**
+	 * 商户appid下，某用户的openid
+	 * @var string
+	 */
+	public $openid;
+	/**
+	 * NO_CHECK：不校验真实姓名 
+	 * FORCE_CHECK：强校验真实姓名（未实名认证的用户会校验失败，无法转账） 
+	 * OPTION_CHECK：针对已实名认证的用户才校验真实姓名（未实名认证用户不校验，可以转账成功）
+	 * @var string
+	 */
+	public $check_name;
+	/**
+	 * 收款用户真实姓名。 如果check_name设置为FORCE_CHECK或OPTION_CHECK，则必填用户真实姓名
+	 * @var string
+	 */
+	public $re_user_name;
+	/**
+	 * 企业付款金额，单位为分
+	 * @var int
+	 */
+	public $amount;
+	/**
+	 * 企业付款操作说明信息。必填。
+	 * @var string
+	 */
+	public $desc;
+	/**
+	 * 调用接口的机器Ip地址
+	 * @var string
+	 */
+	protected $spbill_create_ip;
+	
+	public function formatArgs(){
+        if( ! $this->nonce_str) $this->nonce_str = uniqid();
+        if( ! $this->spbill_create_ip) $this->spbill_create_ip = $_SERVER['SERVER_ADDR'];
+        
+        $args = parent::formatArgs();
+        unset($args['mch_key']);
+        return $args;
+    }
+    
+    public function valid(){
+        if( ! $this->mch_appid)   throw new YDWXException("mch_appid missing");
+        if( ! $this->mchid)  throw new YDWXException("mchid missing");
+        if( ! $this->mch_key)  throw new YDWXException("mch_key missing");
+        if( ! $this->partner_trade_no) throw new YDWXException("partner_trade_no missing");
+        if( ! $this->openid) throw new YDWXException("openid missing");
+        if( ! $this->check_name) throw new YDWXException("check_name missing");
+        if( ! $this->amount) throw new YDWXException("amount missing");
+        if( ! $this->desc) throw new YDWXException("desc missing");
+        if( $this->check_name != self::CHECK_NAME_NO_CHECK && ! $this->re_user_name) throw new YDWXException("re_user_name missing");
+    }
+    public function sign(){
+        $str = $this->toString();
+        $this->sign = strtoupper(md5(urldecode($str)."&key=".$this->mch_key));
+    }
+}
+
+/**
+ * 企业向个人转账返回结果
+ * @author leeboo
+ *
+ */
+class YDWXCropTransferResponse extends YDWXResponse{
+	/**
+	 * SUCCESS/FAIL
+	 * 此字段是通信标识，非交易标识，交易是否成功需要查看result_code来判断
+	 * @var string
+	 */
+	protected $return_code;
+	/**
+	 * 返回信息，如非空，为错误原因 签名失败 参数格式校验错误
+	 * @var string
+	 */
+	protected $return_msg;
+	
+	/**
+	 * 微信分配的公众账号ID（企业号corpid即为此appId）
+	 * @var string
+	 */
+	public $mch_appid;
+	/**
+	 * 微信支付分配的商户号
+	 * @var string
+	 */
+	public $mchid;
+	/**
+	 * 微信支付分配的终端设备号
+	 * @var string
+	 */
+	public $device_info;
+	/**
+	 *
+	 * @var string
+	 */
+	protected $nonce_str;
+	/**
+	 * 业务结果，SUCCESS/FAIL
+	 * @var string
+	 */
+	protected $result_code;
+	/**
+	 * 错误码信息
+	 * @var string
+	 */
+	protected $err_code;
+	/**
+	 * 结果信息描述
+	 * @var string
+	 */
+	protected $err_code_des;
+	/**
+	 * 商户订单号，需保持唯一性
+	 * @var string
+	 */
+	public $partner_trade_no;
+	/**
+	 * 企业付款成功，返回的微信订单号
+	 * @var string
+	 */
+	public $payment_no;
+	/**
+	 * 企业付款成功时间
+	 * @var string
+	 */
+	public $payment_time;
+	
+	
+	public function isSuccess(){
+		return $this->isPrepaySuccess() &&  $this->isPrepayResultSuccess();
+	}
+	
+	protected function isPrepaySuccess(){
+		return !$this->return_code || strcasecmp($this->return_code, "success")==0;
+	}
+	
+	protected function isPrepayResultSuccess(){
+		return !$this->result_code || strcasecmp($this->result_code, "success")==0;
+	}
+	public function build($msg){
+		$arr = simplexml_load_string($msg, 'SimpleXMLElement', LIBXML_NOCDATA);
+		foreach ((array)$arr as $name=>$value){
+			$this->$name = $value;
+		}
+		if( ! $this->isPrepaySuccess() && $this->return_code){
+			$this->errcode = -1;
+			$this->errmsg  = $this->return_msg;
+		}
+		if( ! $this->isPrepayResultSuccess() && $this->result_code){
+			$this->errcode = -1;
+			$this->errmsg  .= $this->err_code_des;
+		}
+	}
+}
+
+/**
+ * 用于商户的企业付款操作进行结果查询，返回付款操作详细结果。
+ * @author leeboo
+ *
+ */
+class YDWXCropTransferQueryRequest extends YDWXPayBaseRequest{
+	/**
+	 * 商户调用企业付款API时使用的商户订单号
+	 * @var unknown
+	 */
+	public $partner_trade_no;
+	public function formatArgs(){
+		$args = parent::formatArgs();
+		unset($args['device_info']);
+		return $args;
+	}
+}
+/**
+ * 用于商户的企业付款操作进行结果查询，返回付款操作详细结果。
+ * @author leeboo
+ *
+ */
+class YDWXCropTransferQueryResponse extends YDWXPayBaseResponse{
+	const STATUS_SUCCESS = 'SUCCESS';
+	const STATUS_FAILED = 'FAILED';
+	const STATUS_PROCESSING = 'PROCESSING';
+	/**
+	 * 商户使用查询API填写的单号的原路返回. 
+	 * @var unknown
+	 */
+	public $partner_trade_no;
+	/**
+	 * 调用企业付款API时，微信系统内部产生的单号
+	 * @var unknown
+	 */
+	public $detail_id;
+	/**
+	 * SUCCESS:转账成功
+	 * FAILED:转账失败
+	 * PROCESSING:处理中
+	 * @var unknown
+	 */
+	public $status;
+	/**
+	 * 如果失败则有失败原因
+	 * @var unknown
+	 */
+	public $reason;
+	/**
+	 * 转账的openid
+	 * @var unknown
+	 */
+	public $openid;
+	/**
+	 * 收款用户姓名
+	 * @var unknown
+	 */
+	public $transfer_name;
+	/**
+	 * 付款金额单位分
+	 * @var int
+	 */
+	public $payment_amount;
+	/**
+	 * 发起转账的时间
+	 * @var unknown
+	 */
+	public $transfer_time;
+	/**
+	 * 付款时候的描述
+	 * @var unknown
+	 */
+	public $desc;
+	/**
+	 * 无返回
+	 */
+	public $appid;
+}
