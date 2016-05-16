@@ -44,6 +44,42 @@ function ydwx_qy_refresh_jsapi_ticket($token){
     throw new YDWXException($ticket->errmsg, $ticket->errcode);
 }
 
+/**
+ * 微信oauth登录通过code获取access token
+ * 
+ * @param unknown $appid
+ * @param unknown $appsecret
+ * @param unknown $code
+ * @throws YDWXException
+ */
+function ydwx_get_oauth_accesstoken($appid, $appsecret, $code){
+    $access_token_url = YDWX_WEIXIN_WEB_BASE_URL."oauth2/access_token?appid={$appid}&secret={$appsecret}&code={$code}&grant_type=authorization_code";
+
+    $http = new YDHttp();
+    $accessToken = new YDWXGetAccessTokenResponse($http->get($access_token_url));
+     if($accessToken->isSuccess()) {
+        return $accessToken;
+    }
+    throw new YDWXException($accessToken->errmsg, $accessToken->errcode);
+}
+
+/**
+ * 微信oauth登录accesstoken刷新
+ * @param unknown $appid
+ * @param unknown $refresh_token
+ * @throws YDWXException
+ */
+function ydwx_refresh_oauth_accesstoken($appid, $refresh_token){
+	$access_token_url = YDWX_WEIXIN_WEB_BASE_URL."oauth2/refresh_token?appid={$appid}&refresh_token={$refresh_token}&code={$code}&grant_type=refresh_token";
+
+	$http = new YDHttp();
+	$accessToken = new YDWXGetAccessTokenResponse($http->get($access_token_url));
+	if($accessToken->isSuccess()) {
+		return $accessToken;
+	}
+	throw new YDWXException($accessToken->errmsg, $accessToken->errcode);
+}
+
 function ydwx_refresh_access_token($appid, $appsecret){
     $http = new YDHttp();
     $msg = $http->get(YDWX_WEIXIN_BASE_URL."token?grant_type=client_credential&appid=".$appid."&secret=".$appsecret);

@@ -104,3 +104,17 @@ class YDWXPayBaseResponse extends YDWXResponse{
         }
     }
 }
+
+/**
+ * 通过code获取access token 响应
+ * @author ydhlleeboo
+ *
+ */
+class YDWXGetAccessTokenResponse extends YDWXResponse{
+	public $access_token;
+	public $expires_in;
+	public $refresh_token;
+	public $openid;
+	public $scope;
+	public $unionid;
+}

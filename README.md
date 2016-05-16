@@ -2,6 +2,8 @@
 V0.1.2
 
 1. 增加企业付款及查询
+2. 增加oauth获取access token和refresh token的方法[20160512]
+
 
 V0.1.1
 
