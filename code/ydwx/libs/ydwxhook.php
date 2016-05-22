@@ -323,11 +323,7 @@ final class YDWXHook {
      * @var unknown
      */
     const EVENT_COMPONENT_VERIFY_TICKET  = "event_component_verify_ticket";
-    /**
-     * 公众后取消对第三方平台的授权通知 YDWXEventUnauthorized
-     * @var unknown
-     */
-    const EVENT_UNAUTHORIZED  = "event_unauthorized";
+
     /**
      * 未知事件 YDWXEventUnknow
      * @var unknown
@@ -467,6 +463,24 @@ final class YDWXHook {
      * @var YDWXEventWificonnected
      */
     const EVENT_WIFICONNECTED = "EVENT_WIFICONNECTED";
+    
+    /**
+     * 公众号对第三方平台取消授权通知
+     * @var YDWXEventUnauthorized
+     */
+    const EVENT_UNAUTHORIZED = "EVENT_UNAUTHORIZED";
+    
+    /**
+     * 公众号对第三方平台授权成功通知
+     * @var YDWXEventAuthorized
+     */
+    const EVENT_AUTHORIZED = "EVENT_AUTHORIZED";
+    
+    /**
+     * 公众号对第三方平台授权更新通知
+     * @var YDWXEventUpdateauthorized
+     */
+    const EVENT_UPDATEAUTHORIZED = "EVENT_UPDATEAUTHORIZED";
     
     private static $listeners = array ();
     /**

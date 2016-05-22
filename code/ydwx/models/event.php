@@ -316,21 +316,6 @@ class YDWXEventComponent_verify_ticket extends YDWXEvent{
 }
 
 /**
- * 微信公众号取消第三方授权的通知
- * @author leeboo
- *
- */
-class YDWXEventUnauthorized extends YDWXEvent{
-    public $AppId;
-    public $CreateTime;
-    public $InfoType;
-    /**
-     * 取消授权的公众号
-     */
-    public $AuthorizerAppid;
-}
-
-/**
  * 未知微信消息
  * @author leeboo
  *
@@ -1001,4 +986,68 @@ class YDWXEventWificonnected extends YDWXEvent{
      * @var unknown
      */
     public $DeviceNo;
+}
+
+/**
+ * 公众号对第三方平台取消授权通知
+ * @author ydhlleeboo
+ *
+ */
+class YDWXEventUnauthorized extends YDWXEvent{
+	/**
+	 * 第三方平台appid
+	 * @var unknown
+	 */
+	public $AppId;
+	/**
+	 * unauthorized
+	 * @var unknown
+	 */
+	public $InfoType;
+	/**
+	 * 公众号appid
+	 */
+	public $AuthorizerAppid;
+}
+
+/**
+ * 公众号对第三方平台授权成功通知
+ * @author ydhlleeboo
+ *
+ */
+class YDWXEventAuthorized extends YDWXEvent{
+	/**
+	 * 第三方平台appid
+	 * @var unknown
+	 */
+	public $AppId;
+	/**
+	 * authorized
+	 * @var unknown
+	 */
+	public $InfoType;
+	/**
+	 * 公众号appid
+	 */
+	public $AuthorizerAppid;
+	
+	/**
+	 * 授权码（code）
+	 * @var unknown
+	 */
+	public $AuthorizationCode;
+	
+	/**
+	 * 过期时间
+	 * @var unknown
+	 */
+	public $AuthorizationCodeExpiredTime;
+}
+
+/**
+ * 公众号对第三方平台授权更新通知
+ * @author ydhlleeboo
+ *
+ */
+class YDWXEventUpdateauthorized extends YDWXEventAuthorized{
 }
