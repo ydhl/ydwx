@@ -902,6 +902,11 @@ class YDWXOrderQueryRequest extends YDWXPayBaseRequest{
      * @var unknown
      */
     public $transaction_id;
+    /**
+     * 内部订单号
+     * @var unknown
+     */
+    public $out_trade_no;
     public function valid(){
         parent::valid();
         if(!$this->transaction_id && !$this->out_trade_no){
