@@ -11,8 +11,19 @@ $arg->out_trade_no  = $_POST['trace_no'];
 $arg->total_fee     = intval($_POST['price']*100);
 $arg->attach        = $_POST['attach'];
 $arg->body          = $_POST['pay_desc'];
+
 try{
-    $mchkey = $appid ? YDWXHook::do_hook(YDWXHook::GET_HOST_MCH_KEY, $appid) : YDWX_WEIXIN_MCH_KEY;
+	$mchkey = $appid ? YDWXHook::do_hook(YDWXHook::GET_HOST_MCH_KEY, $appid) : YDWX_WEIXIN_MCH_KEY;
+	$mchid  = $appid ? YDWXHook::do_hook(YDWXHook::GET_HOST_MCH_ID, $appid) : YDWX_WEIXIN_MCH_ID;
+	if( ! $appid){
+    	$appid = YDWX_WEIXIN_APP_ID;
+	}
+	
+	$arg->appid     	= $appid;
+	$arg->mch_id    	= $mchid;
+	$arg->mch_key   	= $mchkey;
+	
+	
     $msg = ydwx_pay_unifiedorder($arg);
     $str = "appId=".$appid."&nonceStr=".$_POST['noncestr']
         ."&package=prepay_id=".$msg->prepay_id."&signType=MD5&timeStamp=".$_POST['timestamp'];

@@ -278,37 +278,29 @@ function ydwx_pay_product_qrcode($product_id, $appid, $type=YDWX_WEIXIN_TYPE_NOR
  * 
  * 需要先调用dwx_jsapi_include()
  * 
- * @param unknown $jsapi_ticket
- * @param unknown $curr_page_uri
- * @param unknown $appid
+ * @param unknown $appid 如果是托管平台，则传所托管对appid，其他情况不传
  * @return string
  */
-function ydwx_jspay_script($jsapi_ticket, $curr_page_uri, $appid){
+function ydwx_jspay_script($appid=""){
     ob_start();
 ?>
 <script type="text/javascript">
+
 <?php 
     $time       = time();
     $nonceStr   = uniqid();
-    $signStr    = sha1("jsapi_ticket={$jsapi_ticket}&noncestr={$nonceStr}&timestamp={$time}&url=".$curr_page_uri);
 ?>
-
-wx.config({
-    debug: false,
-    appId: '<?php echo $appid?>',
-    timestamp:'<?php echo $time?>' ,
-    nonceStr: '<?php echo $nonceStr?>',
-    signature: '<?php echo $signStr?>',
-    jsApiList: ['chooseWXPay']
-});
-
-wx.error(function(res){
-    //alert(JSON.stringify(res));
-});
-
 function jsPayApi(openid, trace_no, totalPrice, attach, pay_desc, success, fail, cancel){
-    $.post("<?php echo YDWX_SITE_URL."pay.php"?>", {
-        appid:<?php echo $appid?>,price:totalPrice, trace_no:trace_no, action:"prepay", "attach":attach, "payDesc":pay_desc, "timestamp":"<?php echo $time?>", "noncestr":"<?php echo $nonceStr?>"
+    $.post("<?php echo YDWX_SITE_URL."ydwx/pay.php"?>", {
+        appid:"<?php echo $appid?>",
+        price:totalPrice, 
+        openid:openid, 
+        trace_no:trace_no, 
+        action:"prepay", 
+        "attach":attach, 
+        "pay_desc":pay_desc, 
+        "timestamp":"<?php echo $time?>", 
+        "noncestr":"<?php echo $nonceStr?>"
         }, function(data){
             if( ! data.success){
                 fail(data.msg);
@@ -324,10 +316,10 @@ function jsPayApi(openid, trace_no, totalPrice, attach, pay_desc, success, fail,
                     success();
                 },
                 fail:   function(res){
-                    fail("");
+                    fail(res.errMsg);
                 },
                 cancel: function(res){
-                    cancel(res);
+                    cancel();
                 }
             });
     },"json");

@@ -32,9 +32,15 @@ define("YDWX_WEIXIN_APP_SECRET",         "");//
 define("YDWX_WEIXIN_ENCODING_AES_KEY",   "");//
 define("YDWX_WEIXIN_TOKEN",              "");//
 
-//微信支付商户定义
-define("YDWX_WEIXIN_MCH_ID",             "");
-define("YDWX_WEIXIN_MCH_KEY",            "");
+//微信移动应用信息
+define("YDWX_WEIXIN_MOBILE_APP_ID",      "");//
+define("YDWX_WEIXIN_MOBILE_APP_SECRET",  "");//
+
+
+
+//微信移动app申请的支付信息
+define("YDWX_WEIXIN_MOBILE_MCH_ID",      "");
+define("YDWX_WEIXIN_MOBILE_MCH_KEY",     "");
 /**
  * 证书pem格式（apiclient_cert.pem）路径，建议放在非web访问路径中
  * @var unknown
@@ -48,6 +54,24 @@ define("YDWX_WEIXIN_APICLIENT_KEY",      "");
  * CA证书（rootca.pem），建议放在非web访问路径中
  */
 define("YDWX_WEIXIN_ROOTCA",      "");
+
+//微信移动app申请的支付信息
+//微信支付商户定义
+define("YDWX_WEIXIN_MCH_ID",             "");
+define("YDWX_WEIXIN_MCH_KEY",            "");
+/**
+ * 证书pem格式（apiclient_cert.pem）路径，建议放在非web访问路径中
+ * @var unknown
+ */
+define("YDWX_WEIXIN_MOBILE_APICLIENT_CERT",     "");
+/**
+ * 证书密钥pem格式（apiclient_key.pem），建议放在非web访问路径中
+ */
+define("YDWX_WEIXIN_MOBILE_APICLIENT_KEY",      "");
+/**
+ * CA证书（rootca.pem），建议放在非web访问路径中
+ */
+define("YDWX_WEIXIN_MOBILE_ROOTCA",      "");
 
 //企业号的cropid
 define("YDWX_WEIXIN_CROP_ID",     "");
