@@ -306,6 +306,7 @@ function jsPayApi(openid, trace_no, totalPrice, attach, pay_desc, success, fail,
                 fail(data.msg);
                 return;
             }
+            data = data.data;
             wx.chooseWXPay({
                 timestamp:  <?php echo $time?>, // 支付签名时间戳，注意微信jssdk中的所有使用timestamp字段均为小写。但最新版的支付后台生成签名使用的timeStamp字段名需大写其中的S字符
                 nonceStr:  '<?php echo $nonceStr?>', // 支付签名随机串，不长于 32 位
@@ -313,12 +314,15 @@ function jsPayApi(openid, trace_no, totalPrice, attach, pay_desc, success, fail,
                 signType:  'MD5', // 签名方式，默认为'SHA1'，使用新版支付需传入'MD5'
                 paySign:   data.paySign, // 支付签名
                 success: function(res){
+                    alert(JSON.stringify(res));
                     success();
                 },
                 fail:   function(res){
+                	alert(JSON.stringify(res));
                     fail(res.errMsg);
                 },
                 cancel: function(res){
+                	alert(JSON.stringify(res));
                     cancel();
                 }
             });
