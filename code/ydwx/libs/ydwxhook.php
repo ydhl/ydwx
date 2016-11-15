@@ -492,10 +492,16 @@ final class YDWXHook {
                 "object" => $object 
         );
     }
-    
+    /**
+     * 如果没有hook注册，则返回null，如果有hook注册，则返回hook处理后的data，注意每个hook的处理将会进入下一个hook中
+     *
+     * @param unknown $filter_name
+     * @param array $data
+     * @return NULL|mixed
+     */
     public static function do_hook($filter_name, $data=array()) {
         if (! self::has_hook ( $filter_name ))
-            return $data;
+        	return null;
         foreach ( self::$listeners [$filter_name] as $listeners ) {
             if (is_object ( $listeners ['object'] )) {
                 $data = call_user_func ( array($listeners ['object'], $listeners ['function']), $data);

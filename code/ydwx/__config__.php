@@ -37,10 +37,10 @@ define("YDWX_WEIXIN_MOBILE_APP_ID",      "");//
 define("YDWX_WEIXIN_MOBILE_APP_SECRET",  "");//
 
 
+//微信支付商户定义
+define("YDWX_WEIXIN_MCH_ID",             "");
+define("YDWX_WEIXIN_MCH_KEY",            "");
 
-//微信移动app申请的支付信息
-define("YDWX_WEIXIN_MOBILE_MCH_ID",      "");
-define("YDWX_WEIXIN_MOBILE_MCH_KEY",     "");
 /**
  * 证书pem格式（apiclient_cert.pem）路径，建议放在非web访问路径中
  * @var unknown
@@ -56,9 +56,8 @@ define("YDWX_WEIXIN_APICLIENT_KEY",      "");
 define("YDWX_WEIXIN_ROOTCA",      "");
 
 //微信移动app申请的支付信息
-//微信支付商户定义
-define("YDWX_WEIXIN_MCH_ID",             "");
-define("YDWX_WEIXIN_MCH_KEY",            "");
+define("YDWX_WEIXIN_MOBILE_MCH_ID",      "");
+define("YDWX_WEIXIN_MOBILE_MCH_KEY",     "");
 /**
  * 证书pem格式（apiclient_cert.pem）路径，建议放在非web访问路径中
  * @var unknown

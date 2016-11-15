@@ -300,7 +300,7 @@ class YDWXResponse{
     
     
     public function __construct($msg=null){
-        $obj->rawData = $msg;
+        $this->rawData = $msg;
         if($msg){
             $this->build($msg);
         }
