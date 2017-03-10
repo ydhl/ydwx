@@ -145,9 +145,9 @@ class YDWXPaiedNotifyResponse extends YDWXPayBaseResponse{
         $arr = simplexml_load_string($msg, 'SimpleXMLElement', LIBXML_NOCDATA);
         foreach ((array)$arr as $name=>$value){
             if(preg_match("/^coupon_id_(?P<id>\d+)$/", $name, $match)){
-                $this->coupon_id[] = $match['id'];
-            }else if(preg_match("/^coupon_fee_(?P<fee>\d+)$/", $name, $match)){
-                $this->coupon_fee[] = $match['fee'];
+                $this->coupon_id[ $match['id'] ] = $value;
+            }else if(preg_match("/^coupon_fee_(?P<id>\d+)$/", $name, $match)){
+                $this->coupon_fees[ $match['id'] ] = $value;
             }else{
                 $this->$name = $value;
             }
