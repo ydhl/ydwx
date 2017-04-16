@@ -8,7 +8,7 @@
 chdir(dirname(__FILE__));//把工作目录切换到文件所在目录
 include_once dirname(__FILE__).'/__config__.php';
 
-$data = @$GLOBALS["HTTP_RAW_POST_DATA"];
+$data = file_get_contents('php://input');
 YDWXHook::do_hook(YDWXHook::YDWX_LOG, $data);
 $msg = new YDWXPaiedNotifyResponse($data);
 if($msg->isSuccess()){

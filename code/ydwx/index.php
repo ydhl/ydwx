@@ -7,7 +7,8 @@
 chdir(dirname(__FILE__));//把工作目录切换到文件所在目录
 include_once dirname(__FILE__).'/__config__.php';
 //Token 验证，微信验证主体身份。如果是第三方平台，则不存在token验证
-if( ! $GLOBALS["HTTP_RAW_POST_DATA"]){
+$raw = file_get_contents('php://input');
+if( ! $raw){
 	$signature  = $_GET["signature"];
     $timestamp  = $_GET["timestamp"];
     $nonce      = $_GET["nonce"];
@@ -27,7 +28,7 @@ if( ! $GLOBALS["HTTP_RAW_POST_DATA"]){
 
 
 //微信通知处理
-$from_xml  = @$GLOBALS["HTTP_RAW_POST_DATA"];
+$from_xml  = @$raw;
 $msg_sign  = $_GET["msg_signature"];
 $timeStamp = $_GET["timestamp"];
 $nonce     = $_GET["nonce"];

@@ -11,12 +11,14 @@ function ydwx_jsapi_include(){
  * @param $type 见YDWX_WEIXIN_TYPE_XX
  */
 function ydwx_jsapi_config(array $jsApiList, $appid=null, $type=YDWX_WEIXIN_TYPE_NORMAL){
-    $curr_page_uri= YDWX_SITE_URL.ltrim($_SERVER['REQUEST_URI'], "/");
+    $curr_page_uri= ($_SERVER['REQUEST_SCHEME'] ? $_SERVER['REQUEST_SCHEME'] : "http")."://".$_SERVER['SERVER_NAME']
+        .($_SERVER['SERVER_PORT']==80 ? "" : ":".$_SERVER['SERVER_PORT'])
+        .preg_replace("/#.+$/", "", $_SERVER['REQUEST_URI']);
     if($type==YDWX_WEIXIN_TYPE_AGENT){
         $jsapi_ticket = YDWXHook::do_hook(YDWXHook::GET_HOST_JSAPI_TICKET, $appid);
     }else if($type==YDWX_WEIXIN_TYPE_CROP){
-    	$appid = YDWX_WEIXIN_CROP_ID;
-    	$jsapi_ticket = YDWXHook::do_hook(YDWXHook::GET_JSAPI_TICKET);
+        $appid = YDWX_WEIXIN_CROP_ID;
+        $jsapi_ticket = YDWXHook::do_hook(YDWXHook::GET_JSAPI_TICKET);
     }else{
         $appid = YDWX_WEIXIN_APP_ID;
         $jsapi_ticket = YDWXHook::do_hook(YDWXHook::GET_JSAPI_TICKET);
