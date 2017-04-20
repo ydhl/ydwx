@@ -19,7 +19,11 @@ class YDWXMenu{
     public $type;
     public $url;
     public $sub_button = array();
-    
+    /**
+     * 
+     * @param array $msg [name=>"标题名称","type"=>YDWXMenu::TYPEXXX,"key"=>"菜单标识key","url"=跳转url,"sub_button"=[二级菜单]]
+     * @return YDWXMenu
+     */
     public static function build(array $msg){
         $obj = new YDWXMenu();
        
