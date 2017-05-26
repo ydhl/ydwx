@@ -676,7 +676,7 @@ class YDWXPayBaseRequest extends YDWXRequest{
      */
     private $device_info ="WEB";
 
-    public function formatArgs(){
+    protected function formatArgs(){
         if( ! $this->nonce_str) $this->nonce_str = uniqid();
         
         $args = parent::formatArgs();
@@ -858,6 +858,11 @@ class YDWXPayUnifiedOrderRequest extends YDWXPayNotifyRequest{
         if($return_code_url){
             $this->trade_type = "NATIVE";
         }
+    }
+    protected function formatArgs(){
+        $args = parent::formatArgs();
+        $args['detail'] = preg_replace("/\s*/", '', $args['detail']);
+        return $args;
     }
     public function valid(){
         parent::valid();
