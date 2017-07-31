@@ -1,20 +1,5 @@
 <?php
-use yangzie\YZE_Hook;
-use app\sp\Consumer_Model;
-use app\common\User_Model;
-use yangzie\YZE_SQL;
-use yangzie\YZE_DBAImpl;
-use yangzie\YZE_Redirect;
-use app\sp\Service_Provider_Model;
-use app\card\Merchants_Model;
-use yangzie\YZE_Request;
-use app\admin\Admin_Model;
-use yangzie\YZE_FatalException;
-use app\robot\Robot_Model;
-$oldcwd = getcwd();
-chdir ( dirname ( __FILE__ ) . '/../' );
-require_once 'init.php';
-chdir ( $oldcwd );
+//引用你项目的文件及库
 
 YDWXHook::add_hook(YDWXHook::AUTH_CANCEL, function(){
     //用户取消登录了做什么，如

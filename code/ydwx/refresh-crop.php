@@ -15,7 +15,7 @@
  * 这里只负责刷新平台方的微信公众号数据
  */
 chdir(dirname(__FILE__));//把工作目录切换到文件所在目录
-include_once dirname(__FILE__).'/__config__.php';
+include_once dirname(__FILE__).'/../__config__.php';
 
 //作为第三方平台刷新平台的access token,这时所托管的公众号token的刷新要开发者自己负责
 //

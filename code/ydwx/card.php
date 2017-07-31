@@ -3,7 +3,7 @@
  * 卡券相关js处理的后端
  */
 chdir(dirname(__FILE__));//把工作目录切换到文件所在目录
-include_once dirname(__FILE__).'/__config__.php';
+include_once dirname(__FILE__).'/../__config__.php';
 
 $action = $_POST['action'];
 if( ! $action) {

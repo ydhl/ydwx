@@ -11,7 +11,7 @@
 
 chdir(dirname(__FILE__));//把工作目录切换到文件所在目录
 
-include_once dirname(__FILE__).'/__config__.php';
+include_once dirname(__FILE__).'/../__config__.php';
 
 // state为交互时双方都会带着的get参数，用于做一些逻辑判断，如果没指定，则默认一个
 if( ! @$_GET['back'] ){

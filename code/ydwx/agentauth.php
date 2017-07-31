@@ -4,7 +4,7 @@
  */
 chdir(dirname(__FILE__));
 
-include_once dirname(__FILE__).'/__config__.php';
+include_once dirname(__FILE__).'/../__config__.php';
 
 $auth_code = @$_GET["auth_code"];
 

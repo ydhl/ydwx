@@ -1,8 +1,8 @@
 <?php
 
 $cwd = dirname ( __FILE__ );
-require_once $cwd.'/libs/ydwxhook.php';
-YDWXHook::include_files($cwd."/libs");
+require_once $cwd.'/ydwx/libs/ydwxhook.php';
+YDWXHook::include_files($cwd."/ydwx/libs");
 
 #
 #
@@ -11,10 +11,10 @@ YDWXHook::include_files($cwd."/libs");
 #
 
 //你hook钩子函数文件放置的目录
-define("YDWX_HOOK_DIR",             $cwd."/../ydwxhooks");
+define("YDWX_HOOK_DIR",             $cwd."/ydwxhooks");
 
 //你网站的地址,以/结尾，通过YDWX_SITE_URL."ydwx/index.php"；需要能正确访问
-define("YDWX_SITE_URL",             "");
+define("YDWX_SITE_URL",             "http://dcseller.applinzi.com/ydwx");
 
 //微信网站定义，用于微信登录网站
 define("YDWX_WEIXIN_WEB_APP_ID",         "");
@@ -89,8 +89,8 @@ define("YDWX_WEIXIN_QY_ROOTCA",     		YDWX_WEIXIN_ROOTCA);
 #
 
 
-YDWXHook::include_files($cwd."/models");
-YDWXHook::include_files($cwd."/functions");//包含功能函数库
+YDWXHook::include_files($cwd."/ydwx/models");
+YDWXHook::include_files($cwd."/ydwx/functions");//包含功能函数库
 
 #加载你自己的hook目录
 YDWXHook::include_files(YDWX_HOOK_DIR);

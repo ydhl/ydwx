@@ -1,9 +1,6 @@
 <?php
 
-$oldcwd = getcwd ();
-chdir ( dirname ( __FILE__ ) . '/../' );
-require_once 'init.php';
-chdir ( $oldcwd );
+//引用你项目的文件及库
 
 YDWXHook::add_hook ( YDWXHook::EVENT_CARD_NOT_PASS_CHECK, function (YDWXEventCard_not_pass_check $msg) {
 } );

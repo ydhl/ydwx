@@ -1,9 +1,6 @@
 <?php
 
-$oldcwd = getcwd();
-chdir ( dirname ( __FILE__ ) . '/../' );
-require_once 'init.php';
-chdir ( $oldcwd );
+//引用你项目的文件及库
 /**
  * log 处理，比如想再某个地方加log进行调试则调用
  * YDWXHook::do_hook(YDWXHook::YDWX_LOG, $msg)

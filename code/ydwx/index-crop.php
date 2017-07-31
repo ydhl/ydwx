@@ -5,7 +5,7 @@
  * 2. 微信事件通知，POST提交
  */
 chdir(dirname(__FILE__));//把工作目录切换到文件所在目录
-include_once dirname(__FILE__).'/__config__.php';
+include_once dirname(__FILE__).'/../__config__.php';
 //Token 验证，微信验证主体身份。如果是第三方平台，则不存在token验证
 $raw = file_get_contents('php://input');
 if( ! $raw){

@@ -3,7 +3,7 @@
  * 微信支付统一下单接口,生成预支付id，由ydwx的jsPayApi负责调起，与其配合完成微信内H5js调起支付
  */
 chdir(dirname(__FILE__));//把工作目录切换到文件所在目录
-include_once dirname(__FILE__).'/__config__.php';
+include_once dirname(__FILE__).'/../__config__.php';
 $appid = $_POST['appid'];
 $arg = new YDWXPayUnifiedOrderRequest();
 $arg->openid        = $_POST['openid'];

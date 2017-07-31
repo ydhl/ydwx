@@ -6,7 +6,7 @@
  * 2. 模式2，这是通知的内容是用户是否成功扫码了，会传入product_id,openid
  */
 chdir(dirname(__FILE__));//把工作目录切换到文件所在目录
-include_once dirname(__FILE__).'/__config__.php';
+include_once dirname(__FILE__).'/../__config__.php';
 
 $data = file_get_contents('php://input');
 YDWXHook::do_hook(YDWXHook::YDWX_LOG, $data);
