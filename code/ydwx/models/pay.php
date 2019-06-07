@@ -861,7 +861,8 @@ class YDWXPayUnifiedOrderRequest extends YDWXPayNotifyRequest{
     }
     protected function formatArgs(){
         $args = parent::formatArgs();
-        $args['detail'] = preg_replace("/\s*/", '', $args['detail']);
+        $detail = preg_replace("/\s*/", '', $args['detail']);
+        if($detail) $args['detail'] = $detail;
         return $args;
     }
     public function valid(){

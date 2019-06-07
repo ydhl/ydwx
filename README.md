@@ -15,3 +15,4 @@
 
 ## 进一步了解 https://github.com/ydhl/ydwx/wiki
 
+欢迎大家把遇到的问题在issue提出来

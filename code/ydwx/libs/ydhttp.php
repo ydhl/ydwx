@@ -135,6 +135,8 @@ class YDHttp{
 		curl_setopt($ci, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($ci, CURLOPT_HTTPHEADER, array('Expect:'));
 		curl_setopt($ci, CURLOPT_HEADER, FALSE);
+        curl_setopt($ci, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ci, CURLOPT_SSL_VERIFYHOST, 1);
 
 		switch ($method) {
 			case 'POST':
@@ -201,8 +203,10 @@ class YDHttps extends YDHttp{
         }else{
             $cert_file = YDWX_WEIXIN_APICLIENT_CERT;
         }
-        curl_setopt($this->ci,CURLOPT_SSLCERTTYPE,'PEM');
-        curl_setopt($this->ci,CURLOPT_SSLCERT, $cert_file);
+        if($cert_file){
+            curl_setopt($this->ci,CURLOPT_SSLCERTTYPE,'PEM');
+            curl_setopt($this->ci,CURLOPT_SSLCERT, $cert_file);
+        }
         
         
         if($this->type==YDWX_WEIXIN_TYPE_AGENT){
@@ -217,17 +221,22 @@ class YDHttps extends YDHttp{
         }else{
             $key_file = YDWX_WEIXIN_APICLIENT_KEY;
         }
-
-        curl_setopt($this->ci,CURLOPT_SSLKEYTYPE,'PEM');
-        curl_setopt($this->ci,CURLOPT_SSLKEY,  $key_file);
+		if($key_file){
+            curl_setopt($this->ci,CURLOPT_SSLKEYTYPE,'PEM');
+            curl_setopt($this->ci,CURLOPT_SSLKEY,  $key_file);
+        }
+        
         
         if($this->type==YDWX_WEIXIN_TYPE_AGENT){
-        	curl_setopt($this->ci,CURLOPT_SSLKEYPASSWD,  YDWXHook::do_hook(YDWXHook::GET_HOST_MCH_KEY, $this->appid));
+        	$mch_key = YDWXHook::do_hook(YDWXHook::GET_HOST_MCH_KEY, $this->appid);
         }else if($this->type==YDWX_WEIXIN_TYPE_CROP){
-        	curl_setopt($this->ci,CURLOPT_SSLKEYPASSWD,  YDWX_WEIXIN_QY_MCH_KEY);
+        	$mch_key = YDWX_WEIXIN_QY_MCH_KEY;
         }else{
-            curl_setopt($this->ci,CURLOPT_SSLKEYPASSWD,  YDWX_WEIXIN_MCH_KEY);
+            $mch_key = YDWX_WEIXIN_MCH_KEY;
         } 
+        if($mch_key){
+        	curl_setopt($this->ci,CURLOPT_SSLKEYPASSWD,  $mch_key);
+        }
         
         return parent::http($url, $method, $postfields, $multi);
     }
