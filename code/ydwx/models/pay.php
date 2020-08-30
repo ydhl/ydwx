@@ -11,7 +11,7 @@ class YDWXPayUnifiedOrderResponse extends YDWXPayBaseResponse{
     public $trade_type;
     public $code_url;
     public $device_info;
-     
+
 }
 
 
@@ -38,7 +38,7 @@ class YDWXPayingNotifyResponse extends YDWXResponse{
     public $product_id;
     public $sign;
 
-     
+
     public function isSuccess(){
         return true;
     }
@@ -137,7 +137,7 @@ class YDWXPaiedNotifyResponse extends YDWXPayBaseResponse{
      * 支付完成时间，格式为yyyyMMddHHmmss，如2009年12月25日9点10分10秒表示为20091225091010
      */
     public $time_end;
-     
+
     public function isSuccess(){
         return $this->isPrepaySuccess() &&  $this->isPrepayResultSuccess();
     }
@@ -678,12 +678,12 @@ class YDWXPayBaseRequest extends YDWXRequest{
 
     protected function formatArgs(){
         if( ! $this->nonce_str) $this->nonce_str = uniqid();
-        
+
         $args = parent::formatArgs();
         unset($args['mch_key']);
         return $args;
     }
-    
+
     public function valid(){
         if( ! $this->appid)   throw new YDWXException("appid missing");
         if( ! $this->mch_id)  throw new YDWXException("mch_id missing");
@@ -710,19 +710,19 @@ class YDWXPayShorturlRequest extends YDWXPayBaseRequest{
         return $args;
     }
     public function sign(){
-    	
+
         //$long_url 签名用原串，传输需URLencode
         $this->valid();
         $args = YDWXRequest::ignoreNull($this->sortArg());
-        
+
 
         $str = "appid=".$this->appid
         ."&long_url=".$this->long_url
         ."&mch_id=".$this->mch_id
         ."&nonce_str=".$this->nonce_str;
         $signStr = strtoupper(md5($str."&key=".$this->mch_key));
-         
-        
+
+
         $this->sign = $signStr;
     }
 }
@@ -759,7 +759,7 @@ class YDWXPayNotifyRequest extends YDWXPayBaseRequest{
      * @var unknown
      */
     public $err_code_des;
-    
+
 
     public function valid(){
         parent::valid();
@@ -850,7 +850,7 @@ class YDWXPayUnifiedOrderRequest extends YDWXPayNotifyRequest{
     public $trade_type="JSAPI";
 
     /**
-     * 
+     *
      * @param string $return_code_url 是否返回扫描支付二维码内容, 如果为true，则必须指定product_id；否则必须指定openid
      */
     public function __construct($return_code_url=false){
@@ -862,7 +862,10 @@ class YDWXPayUnifiedOrderRequest extends YDWXPayNotifyRequest{
     protected function formatArgs(){
         $args = parent::formatArgs();
         $detail = preg_replace("/\s*/", '', $args['detail']);
-        if($detail) $args['detail'] = $detail;
+        if($detail) {
+            $args['detail'] = $detail;
+        }
+        $args = array_filter($args);
         return $args;
     }
     public function valid(){
@@ -883,7 +886,7 @@ class YDWXPayUnifiedOrderRequest extends YDWXPayNotifyRequest{
 
 
 class YDWXCloseOrderRequest extends YDWXPayBaseRequest{
-    
+
     /**
      * 商户系统内部的订单号，当没提供transaction_id时需要传这个
      * @var unknown
@@ -929,37 +932,37 @@ class YDWXPayRefundRequest extends YDWXPayBaseRequest{
      * @var String
      */
     public $transaction_id = null;
-    
+
     /**
      * 商户系统内部的订单号,transaction_id、out_trade_no二选一，如果同时存在优先级：transaction_id> out_trade_no
      * @var String
      */
     public $out_trade_no = null;
-    
+
     /**
      * 商户系统内部的退款单号，商户系统内部唯一，同一退款单号多次请求只退一笔
      * @var String
      */
     public $out_refund_no = null;
-    
+
     /**
      * 订单总金额，单位为分，只能为整数，详见支付金额
      * @var float
      */
     public $total_fee = 0.0;
-    
+
     /**
      * 退款总金额，订单总金额，单位为分，只能为整数，详见支付金额
      * @var float
      */
     public $refund_fee = 0.0;
-    
+
     /**
      * 货币类型，符合ISO 4217标准的三位字母代码，默认人民币：CNY，其他值列表详见货币类型
      * @var String
      */
     public $refund_fee_type = null;
-    
+
     /**
      * 操作员帐号, 默认为商户号
      * @var String
@@ -992,7 +995,7 @@ class YDWXPayRefundRequest extends YDWXPayBaseRequest{
  */
 class YDWXPayRefundQueryRequest extends YDWXPayRefundRequest
 {
-   
+
     /**
      * 微信订单号
      * @var String
@@ -1032,7 +1035,7 @@ class YDWXPayRefundQueryRequest extends YDWXPayRefundRequest
  */
 class YDWXPayDownloadbillRequest extends YDWXPayBaseRequest
 {
-    
+
     /**
      * 下载对账单的日期，格式：20140603
      * @var String
@@ -1051,8 +1054,8 @@ class YDWXPayDownloadbillRequest extends YDWXPayBaseRequest
     const BILL_TYPE_SUCCESS = "SUCCESS";
     const BILL_TYPE_REFUND = "REFUND";
     const BILL_TYPE_REVOKED = "REVOKED";
-    
-    
+
+
     public function valid(){
         parent::valid();
         if(!$this->bill_date){
@@ -1081,7 +1084,7 @@ class YDWXCropTransferRequest extends YDWXRequest{
 	 */
 	public $mchid;
 	/**
-	 * 
+	 *
 	 * @var unknown
 	 */
 	public $mch_key;
@@ -1102,8 +1105,8 @@ class YDWXCropTransferRequest extends YDWXRequest{
 	 */
 	public $openid;
 	/**
-	 * NO_CHECK：不校验真实姓名 
-	 * FORCE_CHECK：强校验真实姓名（未实名认证的用户会校验失败，无法转账） 
+	 * NO_CHECK：不校验真实姓名
+	 * FORCE_CHECK：强校验真实姓名（未实名认证的用户会校验失败，无法转账）
 	 * OPTION_CHECK：针对已实名认证的用户才校验真实姓名（未实名认证用户不校验，可以转账成功）
 	 * @var string
 	 */
@@ -1128,16 +1131,16 @@ class YDWXCropTransferRequest extends YDWXRequest{
 	 * @var string
 	 */
 	protected $spbill_create_ip;
-	
+
 	public function formatArgs(){
         if( ! $this->nonce_str) $this->nonce_str = uniqid();
         if( ! $this->spbill_create_ip) $this->spbill_create_ip = $_SERVER['SERVER_ADDR'];
-        
+
         $args = parent::formatArgs();
         unset($args['mch_key']);
         return $args;
     }
-    
+
     public function valid(){
         if( ! $this->mch_appid)   throw new YDWXException("mch_appid missing");
         if( ! $this->mchid)  throw new YDWXException("mchid missing");
@@ -1172,7 +1175,7 @@ class YDWXCropTransferResponse extends YDWXResponse{
 	 * @var string
 	 */
 	protected $return_msg;
-	
+
 	/**
 	 * 微信分配的公众账号ID（企业号corpid即为此appId）
 	 * @var string
@@ -1223,16 +1226,16 @@ class YDWXCropTransferResponse extends YDWXResponse{
 	 * @var string
 	 */
 	public $payment_time;
-	
-	
+
+
 	public function isSuccess(){
 		return $this->isPrepaySuccess() &&  $this->isPrepayResultSuccess();
 	}
-	
+
 	protected function isPrepaySuccess(){
 		return !$this->return_code || strcasecmp($this->return_code, "success")==0;
 	}
-	
+
 	protected function isPrepayResultSuccess(){
 		return !$this->result_code || strcasecmp($this->result_code, "success")==0;
 	}
@@ -1279,7 +1282,7 @@ class YDWXCropTransferQueryResponse extends YDWXPayBaseResponse{
 	const STATUS_FAILED = 'FAILED';
 	const STATUS_PROCESSING = 'PROCESSING';
 	/**
-	 * 商户使用查询API填写的单号的原路返回. 
+	 * 商户使用查询API填写的单号的原路返回.
 	 * @var unknown
 	 */
 	public $partner_trade_no;
